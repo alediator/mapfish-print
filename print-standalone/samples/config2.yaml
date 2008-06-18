@@ -1,0 +1,77 @@
+#===========================================================================
+# allowed DPIs
+#===========================================================================
+dpis:
+  - 254
+  - 190
+  - 127
+  - 56
+
+#===========================================================================
+# the allowed scales
+#===========================================================================
+scales:
+  - 25000
+  - 50000
+  - 100000
+  - 200000
+  - 500000
+  - 1000000
+  - 2000000
+  - 4000000
+
+#===========================================================================
+# the list of allowed hosts
+#===========================================================================
+hosts:
+  - !dnsMatch
+    host: labs.metacarta.com
+    port: 80
+  - !dnsMatch
+    host: www.camptocamp.org
+    port: 80
+
+
+layouts:
+  #===========================================================================
+  A4 portrait:
+  #===========================================================================
+    mainPage:
+      pageSize: A4
+      backgroundPdf: '${configDir}/lameBackground.pdf'
+      items:
+        - !columns
+          # columns can have an absolute position. In that case, they need a width.
+          absoluteX: 50
+          absoluteY: 780
+          width: 500
+          items:
+            - !text
+              font: Helvetica
+              fontSize: 30
+              align: center
+              text: '${mapTitle}'
+        - !map
+          absoluteX: 75
+          absoluteY: 680
+          width: 440
+          height: 483
+        - !columns
+          absoluteX: 70
+          absoluteY: 130
+          width: 480
+          items:
+            - !text
+              text: '${comment}'
+      footer:
+        height: 30
+        items:
+          - !columns
+            items:
+              - !text
+                backgroundColor: #FF0000
+                align: left
+                text: Copyright Camptocamp SA
+              - !text
+                align: right
+                text: 'Page ${pageNum}'

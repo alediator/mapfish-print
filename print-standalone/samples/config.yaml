@@ -1,0 +1,135 @@
+#===========================================================================
+# allowed DPIs
+#===========================================================================
+dpis:
+  - 254
+  - 190
+  - 127
+  - 56
+
+#===========================================================================
+# the allowed scales
+#===========================================================================
+scales:
+  - 25000
+  - 50000
+  - 100000
+  - 200000
+  - 500000
+  - 1000000
+  - 2000000
+  - 4000000
+
+#===========================================================================
+# the list of allowed hosts
+#===========================================================================
+hosts:
+  - !localMatch
+    dummy: true
+  - !ipMatch
+    ip: www.camptocamp.org
+  - !dnsMatch
+    host: labs.metacarta.com
+    port: 80
+
+layouts:
+  #===========================================================================
+  A4 portrait:
+  #===========================================================================
+    titlePage:
+      pageSize: A4
+      items:
+        - !text
+          spacingAfter: 150
+        - !text
+          font: Helvetica
+          fontSize: 40
+          spacingAfter: 160
+          align: center
+          text: '${title}'
+        - !image
+          maxWidth: 200
+          maxHeight: 100
+          spacingAfter: 100
+          align: center
+          url: http://trac.mapfish.org/trac/mapfish/chrome/site/img/mapfish.png
+        - !text
+          font: Helvetica
+          fontSize: 14
+          align: left
+          text: |
+            Two layers are asked by the client:
+            - a base layer from Metacarta
+            - a transparent layer from Camptocamp.org (routes)
+            .
+            Some text is added over the map, just to demonstrate the absolute positionning.
+      footer: &commonFooter
+        height: 30
+        items:
+          - !columns
+            items:
+              - !text
+                backgroundColor: #FF0000
+                align: left
+                text: Copyright Camptocamp SA
+              - !text
+                align: right
+                text: 'Page ${pageNum}'
+
+    #-------------------------------------------------------------------------
+    mainPage:
+      pageSize: A4
+      header:
+        height: 50
+        items:
+          - !text
+            font: Helvetica
+            fontSize: 30
+            align: right
+            text: '${mapTitle}'
+      items:
+        - !map
+          spacingAfter: 30
+          width: 440
+          height: 483
+        - !columns
+          # columns can have an absolute position. In that case, they need a width.
+          absoluteX: 20
+          absoluteY: 500
+          width: 550
+          items:
+            - !text
+              font: Helvetica
+              fontSize: 40
+              align: center
+              text: |
+                Hello
+                How are you doing?
+        - !text
+          text: '${comment}'
+          spacingAfter: 30
+        - !attributes
+          source: data
+          columnDefs:
+            id:
+              header: !text
+                text: ID
+                backgroundColor: #A0A0A0
+              cell: !text
+                text: '${id}'
+            name:
+              header: !text
+                text: Name
+                backgroundColor: #A0A0A0
+              cell: !text
+                text: '${name}'
+            icon:
+              header: !text
+                text: Symbol
+                backgroundColor: #A0A0A0
+              cell: !image
+                align: center
+                maxWidth: 15
+                maxHeight: 15
+                url: 'http://www.mapfish.org/svn/mapfish/trunk/MapFish/client/mfbase/mapfish/img/${icon}.png'
+      footer: *commonFooter

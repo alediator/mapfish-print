@@ -1,0 +1,23 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mapfish.print</groupId>
+  <artifactId>print-root</artifactId>
+  <packaging>pom</packaging>
+  <version>0.1</version>
+  <name>print</name>
+  <url>http://maven.apache.org</url>
+  <licenses>
+    <license>
+      <name>LGPL, version 2.1</name>
+      <url>http://www.opensource.org/licenses/lgpl-license.php</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <modules>
+    <module>print-lib</module>
+    <module>print-standalone</module>
+    <module>print-servlet</module>
+  </modules>
+</project>

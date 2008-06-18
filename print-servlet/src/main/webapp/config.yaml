@@ -1,0 +1,83 @@
+#===========================================================================
+# allowed DPIs
+#===========================================================================
+dpis:
+  - 254
+  - 190
+  - 127
+  - 56
+
+#===========================================================================
+# the allowed scales
+#===========================================================================
+scales:
+  - 25000
+  - 50000
+  - 100000
+  - 200000
+  - 500000
+  - 1000000
+  - 2000000
+  - 4000000
+  - 8000000
+  - 16000000
+
+#===========================================================================
+# the list of allowed hosts
+#===========================================================================
+hosts:
+  - !localMatch
+    dummy: true
+  - !ipMatch
+    ip: www.camptocamp.org
+  - !dnsMatch
+    host: labs.metacarta.com
+    port: 80
+
+layouts:
+  #===========================================================================
+  A4 portrait:
+  #===========================================================================
+    mainPage:
+      pageSize: A4
+      header:
+        height: 50
+        items:
+          - !text
+            font: Helvetica
+            fontSize: 30
+            align: right
+            text: '${mapTitle}'
+      items:
+        - !map
+          spacingAfter: 30
+          width: 440
+          height: 483
+        - !columns
+          # columns can have an absolute position. In that case, they need a width.
+          absoluteX: 20
+          absoluteY: 500
+          width: 550
+          items:
+            - !text
+              font: Helvetica
+              fontSize: 40
+              align: center
+              text: |
+                Hello
+                How are you doing?
+        - !text
+          text: '${comment}'
+          spacingAfter: 30
+      footer:
+        height: 30
+        items:
+          - !columns
+            items:
+              - !text
+                backgroundColor: #FF0000
+                align: left
+                text: Copyright Camptocamp SA
+              - !text
+                align: right
+                text: 'Page ${pageNum}'

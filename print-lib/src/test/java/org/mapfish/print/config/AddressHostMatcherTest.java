@@ -1,0 +1,71 @@
+package org.mapfish.print.config;
+
+import org.mapfish.print.PrintTestCase;
+
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.UnknownHostException;
+
+public class AddressHostMatcherTest extends PrintTestCase {
+    public AddressHostMatcherTest(String name) {
+        super(name);
+    }
+
+    public void testSimple() throws UnknownHostException, URISyntaxException, SocketException, MalformedURLException {
+        AddressHostMatcher matcher = new AddressHostMatcher();
+        matcher.setIp("127.2.3.56");
+        matcher.setMask("255.255.255.127");
+
+        assertTrue(matcher.validate(new URI("http://127.2.3.56/cgi-bin/mapserv?toto=tutu")));
+        assertTrue(matcher.validate(new URI("http://127.2.3.184/cgi-bin/mapserv?toto=tutu")));
+        assertFalse(matcher.validate(new URI("http://127.2.3.156/cgi-bin/mapserv?toto=tutu")));
+    }
+
+    public void testDns() throws UnknownHostException, URISyntaxException, SocketException, MalformedURLException {
+        AddressHostMatcher matcher = new AddressHostMatcher();
+        matcher.setIp("localhost");
+        matcher.setPort(80);
+        matcher.setMask("255.255.255.255");
+
+        assertTrue(matcher.validate(new URI("http://127.0.0.1/cgi-bin/mapserv?toto=tutu")));
+    }
+
+    public void testPort() throws UnknownHostException, URISyntaxException, SocketException, MalformedURLException {
+        AddressHostMatcher matcher = new AddressHostMatcher();
+        matcher.setIp("localhost");
+        matcher.setPort(180);
+        matcher.setMask("255.255.255.255");
+
+        assertTrue(matcher.validate(new URI("http://127.0.0.1:180/cgi-bin/mapserv?toto=tutu")));
+        assertFalse(matcher.validate(new URI("http://127.0.0.1/cgi-bin/mapserv?toto=tutu")));
+        assertFalse(matcher.validate(new URI("http://127.0.0.1:80/cgi-bin/mapserv?toto=tutu")));
+    }
+
+    public void testPath() throws UnknownHostException, URISyntaxException, SocketException, MalformedURLException {
+        AddressHostMatcher matcher = new AddressHostMatcher();
+        matcher.setIp("127.0.0.1");
+        matcher.setPathRegex("^/cgi-bin/mapserv$");
+
+        assertTrue(matcher.validate(new URI("http://127.0.0.1/cgi-bin/mapserv?toto=tutu")));
+        assertTrue(matcher.validate(new URI("http://127.0.0.1:80/cgi-bin/mapserv")));
+        assertFalse(matcher.validate(new URI("http://127.0.0.1/cgi-bin/mapserv/titi")));
+        assertFalse(matcher.validate(new URI("http://127.0.0.2/cgi-bin/mapserv?toto=tutu")));
+    }
+
+    public void testMulti() throws UnknownHostException, URISyntaxException, SocketException, MalformedURLException {
+        AddressHostMatcher matcher = new AddressHostMatcher();
+        matcher.setIp("www.example.com");
+        matcher.setMask("255.255.255.255");
+        matcher.buildMaskedAuthorizedIPs(new InetAddress[]{
+                InetAddress.getByName("10.1.0.1"),
+                InetAddress.getByName("10.1.1.1")
+        });
+
+        assertTrue(matcher.validate(new URI("http://10.1.0.1/cgi-bin/mapserv?toto=tutu")));
+        assertTrue(matcher.validate(new URI("http://10.1.1.1/cgi-bin/mapserv?toto=tutu")));
+        assertFalse(matcher.validate(new URI("http://10.1.2.1/cgi-bin/mapserv?toto=tutu")));
+    }
+}

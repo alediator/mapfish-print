@@ -1,0 +1,117 @@
+package org.mapfish.print.config.layout;
+
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Rectangle;
+import org.mapfish.print.InvalidValueException;
+import org.mapfish.print.PDFUtils;
+import org.mapfish.print.RenderingContext;
+import org.mapfish.print.utils.PJsonObject;
+
+import java.util.ArrayList;
+
+
+/**
+ * Holds the config of a page and knows how to do it.
+ */
+public class Page {
+    protected ArrayList<? extends Block> items = new ArrayList<Block>();
+    private String pageSize = "A4";
+    private HeaderFooter header = null;
+    private HeaderFooter footer = null;
+    private int marginLeft = 40;
+    private int marginRight = 40;
+    private int marginTop = 20;
+    private int marginBottom = 20;
+    private String backgroundPdf = null;
+    private boolean landscape = false;
+
+    public void render(PJsonObject params, RenderingContext context) throws DocumentException {
+        final Document doc = context.getDocument();
+        doc.setPageSize(getPageSizeRect());
+        doc.setMargins(marginLeft, marginRight,
+                marginTop + (header != null ? header.getHeight() : 0),
+                marginBottom + (footer != null ? footer.getHeight() : 0));
+
+        context.getCustomBlocks().setBackgroundPdf(PDFUtils.evalString(context, params, backgroundPdf));
+        if (doc.isOpen()) {
+            doc.newPage();
+        } else {
+            doc.open();
+        }
+        context.getCustomBlocks().setHeader(header, params);
+        context.getCustomBlocks().setFooter(footer, params);
+
+        for (int i = 0; i < items.size(); i++) {
+            Block block = items.get(i);
+            block.render(params, new Block.PdfElement() {
+                public void add(Element element) throws DocumentException {
+                    doc.add(element);
+                }
+            }, context);
+        }
+    }
+
+    public Rectangle getPageSizeRect() {
+        try {
+            final Rectangle result = PageSize.getRectangle(pageSize);
+            if (landscape) {
+                return result.rotate();
+            } else {
+                return result;
+            }
+        } catch (RuntimeException e) {
+            throw new InvalidValueException("pageSize", pageSize);
+        }
+    }
+
+    public ArrayList<? extends Block> getItems() {
+        return items;
+    }
+
+    public void setItems(ArrayList<? extends Block> items) {
+        this.items = items;
+    }
+
+    public String getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(String pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public void setHeader(HeaderFooter header) {
+        this.header = header;
+    }
+
+    public void setFooter(HeaderFooter footer) {
+        this.footer = footer;
+    }
+
+    public void setMarginLeft(int marginLeft) {
+        this.marginLeft = marginLeft;
+    }
+
+    public void setMarginRight(int marginRight) {
+        this.marginRight = marginRight;
+    }
+
+    public void setMarginTop(int marginTop) {
+        this.marginTop = marginTop;
+    }
+
+    public void setMarginBottom(int marginBottom) {
+        this.marginBottom = marginBottom;
+    }
+
+    public void setBackgroundPdf(String backgroundPdf) {
+        this.backgroundPdf = backgroundPdf;
+    }
+
+    public void setLandscape(boolean landscape) {
+        this.landscape = landscape;
+    }
+}

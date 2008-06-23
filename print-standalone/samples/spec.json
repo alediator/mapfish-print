@@ -23,7 +23,7 @@
             scale: 4000000,
             dpi: 190,
             mapTitle: "First map",
-            comment: "The \"routes\" layer is not shown (the scale is too small)",
+            comment: "This is the first page selected by the user.",
             data: [
                 {id:1, name: 'blah', icon: 'icon_pan'},
                 {id:2, name: 'blip', icon: 'icon_zoomin'}
@@ -34,7 +34,7 @@
             scale: 500000,
             dpi: 190,
             mapTitle: "Second map",
-            comment: "This is a zoomed in version of the first map. Since the scale is more appropriate, we show the \"routes\" layer.",
+            comment: "This is a zoomed in version of the first map.",
             data: [
                 {id:1, name: 'blah', icon: 'icon_pan'},
                 {id:2, name: 'blip', icon: 'icon_zoomin'}

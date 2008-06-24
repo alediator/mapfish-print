@@ -2,6 +2,7 @@ package org.mapfish.print.map.renderers;
 
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfGState;
+import org.apache.batik.ext.awt.RenderingHintsKeyExt;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.print.PrintTranscoder;
 import org.apache.log4j.Logger;
@@ -54,7 +55,7 @@ public class SVGMapRenderer extends MapRenderer {
         try {
             transformer.setSvgTransform(dc);
 
-            if(opacity<1.0) {
+            if (opacity < 1.0) {
                 PdfGState gs = new PdfGState();
                 gs.setFillOpacity(opacity);
                 gs.setStrokeOpacity(opacity);
@@ -63,6 +64,11 @@ public class SVGMapRenderer extends MapRenderer {
             }
 
             Graphics2D g2 = dc.createGraphics(transformer.getSvgW(), transformer.getSvgH());
+
+            //avoid a warning from Batik
+            System.setProperty("org.apache.batik.warn_destination", "false");
+            g2.setRenderingHint(RenderingHintsKeyExt.KEY_TRANSCODING, RenderingHintsKeyExt.VALUE_TRANSCODING_PRINTING);
+            g2.setRenderingHint(RenderingHintsKeyExt.KEY_AVOID_TILE_PAINTING, RenderingHintsKeyExt.VALUE_AVOID_TILE_PAINTING_ON);
 
             final TranscoderInput ti = getTranscoderInput(url.toURL(), transformer, context);
             if (ti != null) {
@@ -74,8 +80,9 @@ public class SVGMapRenderer extends MapRenderer {
                 PageFormat pf = new PageFormat();
                 pf.setPaper(paper);
                 pt.print(g2, pf, 0);
-                g2.dispose();
             }
+
+            g2.dispose();
         } finally {
             dc.restoreState();
         }

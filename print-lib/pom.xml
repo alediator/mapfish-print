@@ -45,26 +45,20 @@
       <version>2.1.2</version>
     </dependency>
     <dependency>
-      <groupId>batik</groupId>
+      <groupId>org.apache.xmlgraphics</groupId>
       <artifactId>batik-transcoder</artifactId>
-      <version>1.6-1</version>
+      <version>1.7</version>
       <exclusions>
         <exclusion>
-          <groupId>fop</groupId>
+          <groupId>org.apache.xmlgraphics</groupId>
           <artifactId>fop</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>batik</groupId>
-      <artifactId>batik-ext</artifactId>
-      <version>1.6-1</version>
-      <exclusions>
-        <exclusion>
-          <groupId>xml-apis</groupId>
-          <artifactId>xmlParserAPIs</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.4.0</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>

@@ -44,15 +44,15 @@ layouts:
         - !text
           font: Helvetica
           fontSize: 40
-          spacingAfter: 160
+          spacingAfter: 100
           align: center
           text: '${title}'
         - !image
-          maxWidth: 200
-          maxHeight: 100
+          maxWidth: 160
+          maxHeight: 160
           spacingAfter: 100
           align: center
-          url: http://trac.mapfish.org/trac/mapfish/chrome/site/img/mapfish.png
+          url: http://trac.mapfish.org/trac/mapfish/attachment/ticket/3/logo_v8_sphere.svg?format=raw
         - !text
           font: Helvetica
           fontSize: 14
@@ -132,4 +132,9 @@ layouts:
                 maxWidth: 15
                 maxHeight: 15
                 url: 'http://www.mapfish.org/svn/mapfish/trunk/MapFish/client/mfbase/mapfish/img/${icon}.png'
+        - !text
+          font: Helvetica
+          fontSize: 9
+          align: right
+          text: '1:${scale} ${now MM.dd.yyyy}'
       footer: *commonFooter

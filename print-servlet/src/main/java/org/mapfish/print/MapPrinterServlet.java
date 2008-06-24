@@ -35,13 +35,12 @@ public class MapPrinterServlet extends BaseMapServlet {
 
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         final String additionalPath = httpServletRequest.getPathInfo();
-        String basePath = httpServletRequest.getRequestURL().toString().replaceFirst(additionalPath + "$", "");
-
         if (additionalPath.equals(PRINT_URL)) {
             createAndGetPDF(httpServletRequest, httpServletResponse);
         } else if (additionalPath.equals(INFO_URL)) {
-            getInfo(httpServletRequest, httpServletResponse, basePath);
-        } else if (additionalPath.startsWith("/") && additionalPath.endsWith(TEMP_FILE_SUFFIX)) {
+            getInfo(httpServletRequest, httpServletResponse, getBaseUrl(httpServletRequest));
+        } else
+        if (additionalPath.startsWith("/") && additionalPath.endsWith(TEMP_FILE_SUFFIX)) {
             getPDF(httpServletResponse, additionalPath.substring(1, additionalPath.length() - 4));
         } else {
             error(httpServletResponse, "Unknown method: " + additionalPath, 404);
@@ -50,10 +49,8 @@ public class MapPrinterServlet extends BaseMapServlet {
 
     protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         final String additionalPath = httpServletRequest.getPathInfo();
-        String basePath = httpServletRequest.getRequestURL().toString().replaceFirst(additionalPath + "$", "");
-
         if (additionalPath.equals(CREATE_URL)) {
-            createPDF(httpServletRequest, httpServletResponse, basePath);
+            createPDF(httpServletRequest, httpServletResponse, getBaseUrl(httpServletRequest));
         } else {
             error(httpServletResponse, "Unknown method: " + additionalPath, 404);
         }
@@ -279,5 +276,15 @@ public class MapPrinterServlet extends BaseMapServlet {
         return name.substring(
                 TEMP_FILE_PREFIX.length(),
                 name.length() - TEMP_FILE_SUFFIX.length());
+    }
+
+    private String getBaseUrl(HttpServletRequest httpServletRequest) {
+        final String additionalPath = httpServletRequest.getPathInfo();
+        String fullUrl = httpServletRequest.getParameter("url");
+        if (fullUrl != null) {
+            return fullUrl.replaceFirst(additionalPath + "$", "");
+        } else {
+            return httpServletRequest.getRequestURL().toString().replaceFirst(additionalPath + "$", "");
+        }
     }
 }

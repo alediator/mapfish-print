@@ -1,13 +1,17 @@
 package org.mapfish.print;
 
-import com.lowagie.text.*;
+import com.lowagie.text.BadElementException;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Element;
 import com.lowagie.text.Image;
+import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.config.layout.Block;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.awt.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -30,7 +34,7 @@ public class PDFUtils {
                 result.add(val.substring(0, matcher.start()));
                 final String value;
                 final String varName = matcher.group(1);
-                if(varName.equals("pageTot")) {
+                if (varName.equals("pageTot")) {
                     result.add(context.getCustomBlocks().getOrCreateTotalPagesBlock(font));
                 } else {
                     value = getContextValue(context, params, varName);
@@ -65,11 +69,19 @@ public class PDFUtils {
     }
 
     private static String getContextValue(RenderingContext context, PJsonObject params, String key) {
-        //TODO: add support for pageTot (tricky)
         if (key.equals("pageNum")) {
             return Integer.toString(context.getWriter().getPageNumber());
         } else if (key.equals("now")) {
             return new Date().toString();
+        } else if (key.startsWith("now ")) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat(key.substring(4));
+                return format.format(new Date());
+            } catch (IllegalArgumentException e) {
+                // gracefuly fallback to the standard format
+                context.addError(e);
+                return new Date().toString();
+            }
         } else if (key.equals("configDir")) {
             return context.getConfigDir();
         }

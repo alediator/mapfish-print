@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 /**
  * A shell version of the MapPrinter. Can be used for testing or for calling
@@ -78,7 +79,7 @@ public class ShellMapPrinter {
     public void run() throws IOException, JSONException, DocumentException {
         final OutputStream outFile = getOutputStream();
         if (clientConfig) {
-            final OutputStreamWriter writer = new OutputStreamWriter(outFile);
+            final OutputStreamWriter writer = new OutputStreamWriter(outFile, Charset.forName("UTF-8"));
             JSONWriter json = new JSONWriter(writer);
             json.object();
             {

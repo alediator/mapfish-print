@@ -48,7 +48,7 @@ public class MapServerMapReader extends HTTPMapReader {
         URIUtils.addParamOverride(result, "LAYERS", StringUtils.join(layers, " "));
         //URIUtils.addParamOverride(result, "SRS", srs);
         URIUtils.addParamOverride(result, "MAP_SIZE", String.format("%d %d", w, h));
-        URIUtils.addParamOverride(result, "MAPEXT", String.format("%f %f %f %f", transformer.minGeoX, transformer.minGeoY, transformer.maxGeoX, transformer.maxGeoY));
+        URIUtils.addParamOverride(result, "MAPEXT", String.format("%s %s %s %s", transformer.minGeoX, transformer.minGeoY, transformer.maxGeoX, transformer.maxGeoY));
         if (!first) {
             URIUtils.addParamOverride(result, "TRANSPARENT", "true");
         }

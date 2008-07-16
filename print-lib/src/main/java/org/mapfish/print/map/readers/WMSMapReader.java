@@ -44,7 +44,7 @@ public class WMSMapReader extends HTTPMapReader {
         URIUtils.addParamOverride(result, "REQUEST", "GetMap");
         //URIUtils.addParamOverride(result, "EXCEPTIONS", "application/vnd.ogc.se_inimage");
         URIUtils.addParamOverride(result, "VERSION", "1.1.1");
-        URIUtils.addParamOverride(result, "BBOX", String.format("%f,%f,%f,%f", transformer.minGeoX, transformer.minGeoY, transformer.maxGeoX, transformer.maxGeoY));
+        URIUtils.addParamOverride(result, "BBOX", String.format("%s,%s,%s,%s", transformer.minGeoX, transformer.minGeoY, transformer.maxGeoX, transformer.maxGeoY));
         if (!first) {
             URIUtils.addParamOverride(result, "TRANSPARENT", "true");
         }

@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -29,9 +29,14 @@ public class MapPrinterServlet extends BaseMapServlet {
     private static final String CREATE_URL = "/create.json";
     private static final String TEMP_FILE_PREFIX = "mapfish-print";
     private static final String TEMP_FILE_SUFFIX = ".pdf";
+    private static final int TEMP_FILE_PURGE_SECONDS = 600;
 
     private File tempDir = null;
-    private final Map<String, File> tempFiles = Collections.synchronizedMap(new HashMap<String, File>());
+
+    /**
+     * Map of temporary files.
+     */
+    private final Map<String, TempFile> tempFiles = new HashMap<String, TempFile>();
 
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         final String additionalPath = httpServletRequest.getPathInfo();
@@ -56,9 +61,26 @@ public class MapPrinterServlet extends BaseMapServlet {
         }
     }
 
+    public void init() throws ServletException {
+        //get rid of the temporary files that where present before the applet was started.
+        File dir = getTempDir();
+        File[] files = dir.listFiles();
+        for (int i = 0; i < files.length; ++i) {
+            File file = files[i];
+            final String name = file.getName();
+            if (name.startsWith(TEMP_FILE_PREFIX) &&
+                    name.endsWith(TEMP_FILE_SUFFIX)) {
+                deleteFile(file);
+            }
+        }
+    }
+
     public void destroy() {
-        for (File file : tempFiles.values()) {
-            deleteFile(file);
+        synchronized (tempFiles) {
+            for (File file : tempFiles.values()) {
+                deleteFile(file);
+            }
+            tempFiles.clear();
         }
         super.destroy();
     }
@@ -94,8 +116,10 @@ public class MapPrinterServlet extends BaseMapServlet {
      * Create the PDF and returns to the client (in JSON) the URL to get the PDF.
      */
     private void createPDF(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, String basePath) throws ServletException {
-        File tempFile = null;
+        TempFile tempFile = null;
         try {
+            purgeOldTemporaryFiles();
+
             BufferedReader data = httpServletRequest.getReader();
             StringBuilder spec = new StringBuilder();
             String cur;
@@ -130,24 +154,25 @@ public class MapPrinterServlet extends BaseMapServlet {
             deleteFile(tempFile);
             throw new ServletException(e);
         }
-        tempFiles.put(id, tempFile);
+        synchronized (tempFiles) {
+            tempFiles.put(id, tempFile);
+        }
     }
 
     /**
      * To get the PDF created previously.
      */
     private void getPDF(HttpServletResponse httpServletResponse, String id) throws IOException {
-        File file = tempFiles.remove(id);
+        final File file;
+        synchronized (tempFiles) {
+            file = tempFiles.get(id);
+        }
         if (file == null) {
-            error(httpServletResponse, "File already requested once", 404);
+            error(httpServletResponse, "File with id=" + id + " unknown", 404);
             return;
         }
 
-        try {
-            sendPdfFile(httpServletResponse, file);
-        } finally {
-            deleteFile(file);
-        }
+        sendPdfFile(httpServletResponse, file);
     }
 
     /**
@@ -185,13 +210,13 @@ public class MapPrinterServlet extends BaseMapServlet {
     /**
      * Do the actual work of creating the PDF temporary file.
      */
-    private File doCreatePDFFile(String spec) throws IOException, DocumentException, ServletException {
+    private TempFile doCreatePDFFile(String spec) throws IOException, DocumentException, ServletException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Generating PDF for spec=" + spec);
         }
 
         //create a temporary file that will contain the PDF
-        File tempFile = File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX, getTempDir());
+        TempFile tempFile = new TempFile(File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX, getTempDir()));
         try {
             FileOutputStream out = new FileOutputStream(tempFile);
 
@@ -216,7 +241,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     private void sendPdfFile(HttpServletResponse httpServletResponse, File tempFile) throws IOException {
         FileInputStream pdf = new FileInputStream(tempFile);
         final OutputStream response = httpServletResponse.getOutputStream();
-        httpServletResponse.setContentType("application/x-pdf");
+        httpServletResponse.setContentType("application/pdf");
         FileUtilities.copyStream(pdf, response);
         pdf.close();
         response.close();
@@ -260,6 +285,9 @@ public class MapPrinterServlet extends BaseMapServlet {
         return tempDir;
     }
 
+    /**
+     * If the file is defined, delete it.
+     */
     private void deleteFile(File file) {
         if (file != null) {
             if (LOGGER.isDebugEnabled()) {
@@ -285,6 +313,32 @@ public class MapPrinterServlet extends BaseMapServlet {
             return fullUrl.replaceFirst(additionalPath + "$", "");
         } else {
             return httpServletRequest.getRequestURL().toString().replaceFirst(additionalPath + "$", "");
+        }
+    }
+
+    /**
+     * Will purge all the known temporary files older than TEMP_FILE_PURGE_SECONDS.
+     */
+    private void purgeOldTemporaryFiles() {
+        final long minTime = System.currentTimeMillis() - TEMP_FILE_PURGE_SECONDS * 1000L;
+        synchronized (tempFiles) {
+            Iterator<Map.Entry<String, TempFile>> it = tempFiles.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, TempFile> entry = it.next();
+                if (entry.getValue().creationTime < minTime) {
+                    deleteFile(entry.getValue());
+                    it.remove();
+                }
+            }
+        }
+    }
+
+    private static class TempFile extends File {
+        private final long creationTime;
+
+        public TempFile(File tempFile) {
+            super(tempFile.getAbsolutePath());
+            creationTime = System.currentTimeMillis();
         }
     }
 }

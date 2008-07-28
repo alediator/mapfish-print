@@ -26,7 +26,7 @@ public abstract class HTTPMapReader extends MapReader {
     private static final Set<String> OVERRIDE_ALL = new MatchAllSet<String>();
 
     protected HTTPMapReader(RenderingContext context, PJsonObject params) {
-        super(context, params);
+        super(params);
         this.context = context;
         this.params = params;
         try {

@@ -1,28 +1,27 @@
 package org.mapfish.print.config.layout;
 
 import com.lowagie.text.DocumentException;
-import com.lowagie.text.Paragraph;
-import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.utils.PJsonObject;
+
+import java.awt.*;
 
 /**
  * Base class for blocks that can be found in "items" arrays.
  */
 public abstract class Block {
-    private String align = "left";
-    private String vertAlign = "middle";
-    private String backgroundColor = null;
+    private HorizontalAlign align = HorizontalAlign.LEFT;
+    private VerticalAlign vertAlign = VerticalAlign.MIDDLE;
+    private Color backgroundColor = null;
 
     public Block() {
 
     }
 
+    /**
+     * Called when the block is rendered.
+     */
     public abstract void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException;
-
-    public String getBackgroundColor() {
-        return backgroundColor;
-    }
 
     public MapBlock getMap() {
         return null;
@@ -32,39 +31,28 @@ public abstract class Block {
         void add(com.lowagie.text.Element element) throws DocumentException;
     }
 
-    public void setAlign(String align) {
+    public void setAlign(HorizontalAlign align) {
         this.align = align;
     }
 
-    public void setVertAlign(String vAlign) {
-        this.vertAlign = vAlign;
+    public void setVertAlign(VerticalAlign vertAlign) {
+        this.vertAlign = vertAlign;
     }
 
-    public int getAlignInt() {
-        if ("center".equalsIgnoreCase(align)) {
-            return Paragraph.ALIGN_CENTER;
-        } else if ("justified".equalsIgnoreCase(align)) {
-            return Paragraph.ALIGN_JUSTIFIED;
-        } else if ("left".equalsIgnoreCase(align)) {
-            return Paragraph.ALIGN_LEFT;
-        } else if ("right".equalsIgnoreCase(align)) {
-            return Paragraph.ALIGN_RIGHT;
-        }
-        throw new InvalidValueException("align", align);
+    public Color getBackgroundColor() {
+        return backgroundColor;
     }
 
-    public int getVAlignInt() {
-        if ("top".equalsIgnoreCase(vertAlign)) {
-            return Paragraph.ALIGN_TOP;
-        } else if ("middle".equalsIgnoreCase(vertAlign)) {
-            return Paragraph.ALIGN_MIDDLE;
-        } else if ("bottom".equalsIgnoreCase(vertAlign)) {
-            return Paragraph.ALIGN_BOTTOM;
-        }
-        throw new InvalidValueException("valign", vertAlign);
-    }
-
-    public void setBackgroundColor(String backgroundColor) {
+    public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
+
+    public HorizontalAlign getAlign() {
+        return align;
+    }
+
+    public VerticalAlign getVertAlign() {
+        return vertAlign;
+    }
+
 }

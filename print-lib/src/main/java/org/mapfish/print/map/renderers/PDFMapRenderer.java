@@ -1,9 +1,9 @@
 package org.mapfish.print.map.renderers;
 
 import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfGState;
 import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfGState;
 import org.apache.log4j.Logger;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
@@ -19,7 +19,7 @@ public class PDFMapRenderer extends MapRenderer {
         PdfImportedPage pdfMap = context.getWriter().getImportedPage(reader, 1);
 
         if (opacity < 1.0) {
-            PdfGState gs=new PdfGState();
+            PdfGState gs = new PdfGState();
             gs.setFillOpacity(opacity);
             gs.setStrokeOpacity(opacity);
             //gs.setBlendMode(PdfGState.BM_SOFTLIGHT);

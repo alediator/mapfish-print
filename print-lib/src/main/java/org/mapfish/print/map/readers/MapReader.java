@@ -9,10 +9,10 @@ import org.mapfish.print.utils.PJsonObject;
 import java.util.List;
 
 public abstract class MapReader {
-    protected float opacity;
+    protected final float opacity;
 
-    public MapReader(RenderingContext context, PJsonObject params) {
-        opacity=params.optFloat("opacity", 1.0F);
+    public MapReader(PJsonObject params) {
+        opacity = params.optFloat("opacity", 1.0F);
     }
 
     public abstract void render(Transformer transformer, PdfContentByte dc, String srs, boolean first);
@@ -30,6 +30,6 @@ public abstract class MapReader {
     public abstract boolean testMerge(MapReader other);
 
     public boolean canMerge(MapReader other) {
-        return opacity==other.opacity;
+        return opacity == other.opacity;
     }
 }

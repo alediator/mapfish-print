@@ -93,18 +93,17 @@ layouts:
           width: 440
           height: 483
         - !columns
-          # columns can have an absolute position. In that case, they need a width.
-          absoluteX: 20
-          absoluteY: 500
-          width: 550
+          # columns can have an absolute position. In that case, they need the 3 following fields:
+          absoluteX: 410
+          absoluteY: 310
+          width: 100
           items:
-            - !text
-              font: Helvetica
-              fontSize: 40
-              align: center
-              text: |
-                Hello
-                How are you doing?
+            - !scalebar
+              type: bar
+              maxSize: 100
+              barBgColor: white
+              fontSize: 8
+              align: right
         - !text
           text: '${comment}'
           spacingAfter: 30

@@ -12,14 +12,18 @@ public abstract class ParagraphBlock extends Block {
         Paragraph paragraph = new Paragraph();
 
         fillParagraph(context, params, paragraph);
-        paragraph.setAlignment(getAlignInt());
+        paragraph.setAlignment(getAlign().getCode());
         paragraph.setSpacingAfter(spacingAfter);
         target.add(paragraph);
     }
 
+    /**
+     * Virtual method that will fill the paragraph.
+     */
     protected abstract void fillParagraph(RenderingContext context, PJsonObject params, Paragraph paragraph) throws DocumentException;
 
     public void setSpacingAfter(int spacingAfter) {
         this.spacingAfter = spacingAfter;
     }
+
 }

@@ -1,6 +1,7 @@
 package org.mapfish.print;
 
 import com.lowagie.text.pdf.PdfContentByte;
+import org.mapfish.print.utils.DistanceUnit;
 
 import java.awt.geom.AffineTransform;
 
@@ -17,19 +18,12 @@ public class Transformer implements Cloneable {
     private float paperPosX;
     private float paperPosY;
 
-    public Transformer(float centerX, float centerY, int paperWidth, int paperHeight, int scale, int dpi, String units) {
-        if ("meters".equalsIgnoreCase(units) || "m".equalsIgnoreCase(units)) {
-            pixelPerGeoUnit = dpi / (25.4f / 1000f) / scale;
-        } else if ("kilometers".equalsIgnoreCase(units)) {
-            pixelPerGeoUnit = dpi / (25.4f / 1000f) / scale * 1000f;
-        } else if ("inches".equalsIgnoreCase(units)) {
-            pixelPerGeoUnit = dpi / scale;
-        } else
-        if ("dd".equalsIgnoreCase(units) || "degrees".equalsIgnoreCase(units)) {
-            pixelPerGeoUnit = dpi / (25.4f / 1000f) / scale * 40041470.0f / 360.0f;
-        } else {
-            throw new RuntimeException("Unknown units: '" + units + "'");
+    public Transformer(float centerX, float centerY, int paperWidth, int paperHeight, int scale, int dpi, String unit) {
+        final DistanceUnit unitEnum = DistanceUnit.fromString(unit);
+        if (unitEnum == null) {
+            throw new RuntimeException("Unknown unit: '" + unit + "'");
         }
+        pixelPerGeoUnit = (float) (unitEnum.convertTo(dpi, DistanceUnit.IN) / scale);
 
         float geoWidth = paperWidth * dpi / 72.0f / pixelPerGeoUnit;
         float geoHeight = paperHeight * dpi / 72.0f / pixelPerGeoUnit;

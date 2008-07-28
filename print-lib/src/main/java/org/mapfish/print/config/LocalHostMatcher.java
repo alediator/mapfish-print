@@ -46,6 +46,7 @@ public class LocalHostMatcher extends InetHostMatcher {
         return null;
     }
 
+    @SuppressWarnings({"EmptyMethod"})
     public void setDummy(boolean dummy) {
         //YAML parser always need some content
     }

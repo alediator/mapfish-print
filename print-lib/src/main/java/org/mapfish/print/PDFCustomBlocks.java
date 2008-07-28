@@ -3,6 +3,7 @@ package org.mapfish.print;
 import com.lowagie.text.BadElementException;
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfAnnotation;
@@ -45,6 +46,10 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
      * cache of background PDF pages
      */
     private final Map<String, PdfImportedPage> backgroundPdfs = new HashMap<String, PdfImportedPage>();
+
+    /**
+     * block for rendering the totalpage number.
+     */
     private TotalPageNum totalPageNum = null;
 
     public PDFCustomBlocks(PdfWriter writer, RenderingContext context) {
@@ -64,7 +69,11 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
             holder.chunkDrawer.render(rectangle, dc);
             for (int i = 0; i < holder.others.size(); i++) {
                 AbsoluteDrawer absoluteDrawer = holder.others.get(i);
-                absoluteDrawer.render(dc);
+                try {
+                    absoluteDrawer.render(dc);
+                } catch (DocumentException e) {
+                    addError(e);
+                }
             }
             if (holder == last) {
                 last = null;
@@ -163,10 +172,14 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
         last = holder;
     }
 
-    public void addAbsoluteDrawer(AbsoluteDrawer chunkDrawer) {
+    /**
+     * Schedule a absolute block.
+     */
+    public void addAbsoluteDrawer(AbsoluteDrawer chunkDrawer) throws DocumentException {
         if (last != null) {
             last.others.add(chunkDrawer);
         } else {
+            //no chunk drawer is scheduled. We can draw it right away.
             chunkDrawer.render(writer.getDirectContent());
         }
     }
@@ -209,7 +222,7 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
      * Base class for the absolute drawers
      */
     public static interface AbsoluteDrawer {
-        void render(PdfContentByte dc);
+        void render(PdfContentByte dc) throws DocumentException;
     }
 
     private static class DrawerHolder {

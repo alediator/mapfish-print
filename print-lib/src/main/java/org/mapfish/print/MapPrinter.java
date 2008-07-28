@@ -50,7 +50,7 @@ public class MapPrinter {
         writer.close();
     }
 
-    private PJsonObject parseSpec(String spec) {
+    public static PJsonObject parseSpec(String spec) {
         final JSONObject jsonSpec;
         try {
             jsonSpec = new JSONObject(spec);

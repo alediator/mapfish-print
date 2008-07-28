@@ -16,9 +16,9 @@ public class BitmapMapRenderer extends MapRenderer {
             map.scaleAbsolute(transformer.getPaperW(), transformer.getPaperH());
             map.setAbsolutePosition(transformer.getPaperPosX(), transformer.getPaperPosY());
 
-            if(opacity<1.0) {
+            if (opacity < 1.0) {
                 final byte byteOpacity = (byte) (Math.round(opacity * 256.0F));
-                byte gradient[] = new byte[] {byteOpacity};
+                byte gradient[] = new byte[]{byteOpacity};
                 Image smask = Image.getInstance(1, 1, 1, 8, gradient);
                 smask.makeMask();
                 map.setImageMask(smask);

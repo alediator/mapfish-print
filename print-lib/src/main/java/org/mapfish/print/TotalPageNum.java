@@ -1,9 +1,9 @@
 package org.mapfish.print;
 
+import com.lowagie.text.BadElementException;
 import com.lowagie.text.Chunk;
 import com.lowagie.text.Font;
 import com.lowagie.text.Rectangle;
-import com.lowagie.text.BadElementException;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfTemplate;
@@ -16,9 +16,9 @@ import com.lowagie.text.pdf.PdfWriter;
 public class TotalPageNum {
     private static final String SAMPLE_VALUE = "999";
 
-    private PdfTemplate totalPageNum;
-    private BaseFont totalPageNumFont;
-    private float totalPageNumFontSize;
+    private final PdfTemplate totalPageNum;
+    private final BaseFont totalPageNumFont;
+    private final float totalPageNumFontSize;
 
     public TotalPageNum(PdfWriter writer, Font font) {
         PdfContentByte dc = writer.getDirectContent();

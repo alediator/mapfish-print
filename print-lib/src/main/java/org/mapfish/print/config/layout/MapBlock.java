@@ -55,8 +55,8 @@ public class MapBlock extends Block {
 
     public Transformer createTransformer(RenderingContext context, PJsonObject params) {
         Integer dpi = params.optInt("dpi");
-        if(dpi==null) {
-            dpi=context.getGlobalParams().getInt("dpi");
+        if (dpi == null) {
+            dpi = context.getGlobalParams().getInt("dpi");
         }
         if (!context.getConfig().getDpis().contains(dpi)) {
             throw new InvalidJsonValueException(params, "dpi", dpi);

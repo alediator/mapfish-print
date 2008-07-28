@@ -17,23 +17,31 @@ public class ColumnsBlock extends Block {
     private int absoluteX = Integer.MIN_VALUE;
     private int absoluteY = Integer.MIN_VALUE;
     private int width = Integer.MIN_VALUE;
+    private int nbColumns = Integer.MIN_VALUE;
 
-    public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
-
-        final PdfPTable table = PDFUtils.buildTable(items, params, context);
-
-        if (widths != null) {
-            table.setWidths(widths);
-        }
+    public void render(final PJsonObject params, PdfElement target, final RenderingContext context) throws DocumentException {
 
         if (isAbsolute()) {
-            table.setTotalWidth(width);
             context.getCustomBlocks().addAbsoluteDrawer(new PDFCustomBlocks.AbsoluteDrawer() {
-                public void render(PdfContentByte dc) {
+                public void render(PdfContentByte dc) throws DocumentException {
+                    final PdfPTable table = PDFUtils.buildTable(items, params, context, nbColumns);
+
+                    table.setTotalWidth(width);
+
+                    if (widths != null) {
+                        table.setWidths(widths);
+                    }
+
                     table.writeSelectedRows(0, -1, absoluteX, absoluteY, dc);
                 }
             });
         } else {
+            final PdfPTable table = PDFUtils.buildTable(items, params, context, nbColumns);
+
+            if (widths != null) {
+                table.setWidths(widths);
+            }
+
             table.setSpacingAfter(spacingAfter);
             target.add(table);
         }
@@ -61,6 +69,10 @@ public class ColumnsBlock extends Block {
 
     public void setWidth(int width) {
         this.width = width;
+    }
+
+    public void setNbColumns(int nbColumns) {
+        this.nbColumns = nbColumns;
     }
 
     protected boolean isAbsolute() {

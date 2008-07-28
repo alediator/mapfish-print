@@ -4,7 +4,6 @@ import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
 import org.mapfish.print.InvalidJsonValueException;
 import org.mapfish.print.PDFCustomBlocks;
-import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
 import org.mapfish.print.map.readers.MapReader;
@@ -25,10 +24,10 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
     private final double overviewMap;
     private final PJsonObject params;
     private final RenderingContext context;
-    private final String backgroundColor;
+    private final Color backgroundColor;
 
 
-    public MapChunkDrawer(Transformer transformer, double overviewMap, PJsonObject params, RenderingContext context, String backgroundColor) {
+    public MapChunkDrawer(Transformer transformer, double overviewMap, PJsonObject params, RenderingContext context, Color backgroundColor) {
         this.transformer = transformer;
         this.overviewMap = overviewMap;
         this.params = params;
@@ -83,7 +82,7 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
         //draw some background
         if (backgroundColor != null) {
             dc.saveState();
-            dc.setColorFill(PDFUtils.convertColor("backgroundColor", backgroundColor));
+            dc.setColorFill(backgroundColor);
             dc.rectangle(rectangle.getLeft(), rectangle.getBottom(), rectangle.getWidth(), rectangle.getHeight());
             dc.fill();
             dc.restoreState();

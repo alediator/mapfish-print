@@ -10,7 +10,6 @@ import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.config.layout.Block;
 import org.mapfish.print.utils.PJsonObject;
 
-import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -93,8 +92,8 @@ public class PDFUtils {
         return result;
     }
 
-    public static PdfPTable buildTable(ArrayList<Block> items, PJsonObject params, RenderingContext context) throws DocumentException {
-        final PdfPTable table = new PdfPTable(items.size());
+    public static PdfPTable buildTable(ArrayList<Block> items, PJsonObject params, RenderingContext context, int nbColumns) throws DocumentException {
+        final PdfPTable table = new PdfPTable(nbColumns>0?nbColumns:items.size());
         table.setWidthPercentage(100f);
 
         for (int i = 0; i < items.size(); i++) {
@@ -117,27 +116,13 @@ public class PDFUtils {
                     cell[0] = new PdfPCell(phrase);
                 }
                 cell[0].setBorder(PdfPCell.NO_BORDER);
-                cell[0].setHorizontalAlignment(block.getAlignInt());
-                cell[0].setVerticalAlignment(block.getVAlignInt());
+                cell[0].setHorizontalAlignment(block.getAlign().getCode());
+                cell[0].setVerticalAlignment(block.getVertAlign().getCode());
                 if (block.getBackgroundColor() != null) {
-                    cell[0].setBackgroundColor(convertColor("backgroundColor", block.getBackgroundColor()));
+                    cell[0].setBackgroundColor(block.getBackgroundColor());
                 }
             }
         }, context);
         return cell[0];
-    }
-
-
-    private static final Pattern COLOR_RGB = Pattern.compile("#([\\dABCDEF]{2})([\\dABCDEF]{2})([\\dABCDEF]{2})", Pattern.CASE_INSENSITIVE);
-
-    public static Color convertColor(String name, String color) {
-        Matcher rgb = COLOR_RGB.matcher(color);
-        if (rgb.matches()) {
-            return new Color(Integer.valueOf(rgb.group(1), 16),
-                    Integer.valueOf(rgb.group(2), 16),
-                    Integer.valueOf(rgb.group(3), 16));
-        }
-
-        throw new InvalidValueException(name, color);
     }
 }

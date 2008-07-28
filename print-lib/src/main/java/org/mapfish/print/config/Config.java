@@ -67,7 +67,7 @@ public class Config {
         json.array();
         for (Integer scale : scales) {
             json.object();
-            json.key("name").value("1:"+NumberFormat.getIntegerInstance().format(scale));
+            json.key("name").value("1:" + NumberFormat.getIntegerInstance().format(scale));
             json.key("value").value(scale.toString());
             json.endObject();
         }

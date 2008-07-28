@@ -8,16 +8,25 @@ import org.ho.yaml.wrapper.DefaultSimpleTypeWrapper;
 import org.ho.yaml.wrapper.EnumWrapper;
 import org.ho.yaml.wrapper.ObjectWrapper;
 import org.mapfish.print.config.AddressHostMatcher;
+import org.mapfish.print.config.ColorWrapper;
+import org.mapfish.print.config.CustomEnumWrapper;
 import org.mapfish.print.config.DnsHostMatcher;
 import org.mapfish.print.config.LocalHostMatcher;
 import org.mapfish.print.config.layout.AttributesBlock;
 import org.mapfish.print.config.layout.ColumnDefs;
 import org.mapfish.print.config.layout.ColumnsBlock;
+import org.mapfish.print.config.layout.HorizontalAlign;
 import org.mapfish.print.config.layout.ImageBlock;
 import org.mapfish.print.config.layout.Layouts;
 import org.mapfish.print.config.layout.MapBlock;
+import org.mapfish.print.config.layout.ScalebarBlock;
 import org.mapfish.print.config.layout.TextBlock;
+import org.mapfish.print.config.layout.VerticalAlign;
+import org.mapfish.print.scalebar.Direction;
+import org.mapfish.print.scalebar.Type;
+import org.mapfish.print.utils.DistanceUnit;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +36,15 @@ public class CustomYamlConfig extends YamlConfig {
         Map<String, Object> handlers = new HashMap<String, Object>();
         handlers.put(Layouts.class.getName(), Layouts.Wrapper.class.getName());
         handlers.put(ColumnDefs.class.getName(), ColumnDefs.Wrapper.class.getName());
+        handlers.put(Color.class.getName(), ColorWrapper.class.getName());
+
+        //special enum parser
+        handlers.put(HorizontalAlign.class.getName(), CustomEnumWrapper.class.getName());
+        handlers.put(VerticalAlign.class.getName(), CustomEnumWrapper.class.getName());
+        handlers.put(Direction.class.getName(), CustomEnumWrapper.class.getName());
+        handlers.put(Type.class.getName(), CustomEnumWrapper.class.getName());
+        handlers.put(DistanceUnit.class.getName(), DistanceUnit.Wrapper.class.getName());
+
         setHandlers(handlers);
 
         BiDirectionalMap<String, String> transfers = new BiDirectionalMap<String, String>();
@@ -35,8 +53,10 @@ public class CustomYamlConfig extends YamlConfig {
         transfers.put("text", TextBlock.class.getName());
         transfers.put("image", ImageBlock.class.getName());
         transfers.put("columns", ColumnsBlock.class.getName());
+        transfers.put("table", ColumnsBlock.class.getName());
         transfers.put("map", MapBlock.class.getName());
         transfers.put("attributes", AttributesBlock.class.getName());
+        transfers.put("scalebar", ScalebarBlock.class.getName());
 
         //hosts matchers
         transfers.put("localMatch", LocalHostMatcher.class.getName());

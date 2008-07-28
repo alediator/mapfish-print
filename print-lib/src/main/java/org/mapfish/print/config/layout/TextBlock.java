@@ -20,7 +20,7 @@ public class TextBlock extends ParagraphBlock {
     protected void fillParagraph(RenderingContext context, PJsonObject params, Paragraph paragraph) throws DocumentException {
         final Font pdfFont;
         try {
-            pdfFont = new Font(BaseFont.createFont("Helvetica", BaseFont.CP1252, BaseFont.EMBEDDED), fontSize);
+            pdfFont = new Font(BaseFont.createFont(font, BaseFont.CP1252, BaseFont.EMBEDDED), fontSize);
             paragraph.setFont(pdfFont);
         } catch (IOException e) {
             throw new InvalidValueException("font", font, e);

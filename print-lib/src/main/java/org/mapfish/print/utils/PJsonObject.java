@@ -129,4 +129,11 @@ public class PJsonObject extends PJsonElement {
             return false;
         }
     }
+
+    /**
+     * @deprecated Only for tests!
+     */
+    public JSONObject getObj() {
+        return obj;
+    }
 }

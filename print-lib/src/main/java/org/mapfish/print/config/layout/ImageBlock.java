@@ -29,8 +29,8 @@ import java.net.URISyntaxException;
  */
 public class ImageBlock extends ParagraphBlock {
     private String url = "";
-    private int maxWidth = 0;
-    private int maxHeight = 0;
+    private float maxWidth = 0.0f;
+    private float maxHeight = 0.0f;
 
     protected void fillParagraph(RenderingContext context, PJsonObject params, Paragraph paragraph) throws DocumentException {
         final URI url;
@@ -54,8 +54,8 @@ public class ImageBlock extends ParagraphBlock {
             throw new InvalidValueException("url", url.toString(), e);
         }
 
-        if (maxWidth != 0.0 && maxHeight != 0.0) {
-            image.scaleToFit(maxWidth, maxHeight);
+        if (maxWidth != 0.0f || maxHeight != 0.0f) {
+            image.scaleToFit(maxWidth != 0.0f ? maxWidth : Integer.MAX_VALUE, maxHeight != 0.0f ? maxHeight : Integer.MAX_VALUE);
         }
 
         Chunk chunk = new Chunk(image, 0f, 0f, true);

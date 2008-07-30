@@ -32,6 +32,8 @@ public class Config {
 
     private TreeSet<Integer> scales;
 
+    private TreeSet<String> fonts =null;
+
     private List<HostMatcher> hosts = new ArrayList<HostMatcher>();
 
     public Config() {
@@ -108,6 +110,14 @@ public class Config {
 
     public void setHosts(List<HostMatcher> hosts) {
         this.hosts = hosts;
+    }
+
+    public void setFonts(TreeSet<String> fonts) {
+        this.fonts = fonts;
+    }
+
+    public TreeSet<String> getFonts() {
+        return fonts;
     }
 
     public boolean validateUri(URI uri) throws UnknownHostException, SocketException, MalformedURLException {

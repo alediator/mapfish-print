@@ -26,10 +26,13 @@ public class PDFMapRenderer extends MapRenderer {
             pdfMap.setGState(gs);
         }
 
-        dc.addTemplate(pdfMap,
-                transformer.getPaperW() / transformer.getBitmapW(), 0,
-                0, transformer.getPaperW() / transformer.getBitmapW(),
-                transformer.getPaperPosX(), transformer.getPaperPosY());
-
+        dc.saveState();
+        try {
+            transformer.setClipping(dc);
+            dc.transform(transformer.getPdfTransform());
+            dc.addTemplate(pdfMap, 0, 0);
+        } finally {
+            dc.restoreState();
+        }
     }
 }

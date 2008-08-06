@@ -71,7 +71,7 @@ layouts:
               - !text
                 backgroundColor: #FF0000
                 align: left
-                text: Copyright Camptocamp SA
+                text: ©Camptocamp SA
               - !text
                 align: right
                 text: 'Page ${pageNum}'
@@ -79,6 +79,7 @@ layouts:
     #-------------------------------------------------------------------------
     mainPage:
       pageSize: A4
+      rotation: true
       header:
         height: 50
         items:

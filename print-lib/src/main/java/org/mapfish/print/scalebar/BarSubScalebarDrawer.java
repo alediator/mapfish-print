@@ -22,14 +22,12 @@ public class BarSubScalebarDrawer extends BarScalebarDrawer {
     protected void drawBar(PdfContentByte dc) {
         super.drawBar(dc);
 
-        if (subIntervals > 1) {
-            for (int i = 0; i <= block.getIntervals(); ++i) {
-                if (labels.get(i).label != null) {
-                    float pos = i * intervalWidth;
-                    dc.moveTo(pos, 0);
-                    dc.lineTo(pos, -block.getLineWidth() * 1.5f);
-                    dc.stroke();
-                }
+        for (int i = 0; i <= block.getIntervals(); ++i) {
+            if (labels.get(i).label != null) {
+                float pos = i * intervalWidth;
+                dc.moveTo(pos, 0);
+                dc.lineTo(pos, -block.getLineWidth() * 1.5f);
+                dc.stroke();
             }
         }
     }

@@ -24,17 +24,19 @@
             dpi: 190,
             mapTitle: "First map",
             comment: "This is the first page selected by the user.",
+            rotation: 0,
             data: [
                 {id:1, name: 'blah', icon: 'icon_pan'},
                 {id:2, name: 'blip', icon: 'icon_zoomin'}
             ]
         },
         {
-            center: [6.9, 46.2],
-            scale: 500000,
+            center: [6, 45.5],
+            scale: 4000000,
             dpi: 190,
             mapTitle: "Second map",
-            comment: "This is a zoomed in version of the first map.",
+            comment: "This is the same position, but rotated by 30°.",
+            rotation: 30,
             data: [
                 {id:1, name: 'blah', icon: 'icon_pan'},
                 {id:2, name: 'blip', icon: 'icon_zoomin'}

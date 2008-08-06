@@ -23,7 +23,11 @@ public class PJsonObject extends PJsonElement {
     }
 
     public String optString(String key) {
-        return obj.optString(key, null);
+        return optString(key, null);
+    }
+
+    public String optString(String key, String defaultValue) {
+        return obj.optString(key, defaultValue);
     }
 
     public String getString(String key) {
@@ -45,6 +49,10 @@ public class PJsonObject extends PJsonElement {
     public Integer optInt(String key) {
         final int result = obj.optInt(key, Integer.MIN_VALUE);
         return result == Integer.MIN_VALUE ? null : result;
+    }
+
+    public int optInt(String key, int defaultValue) {
+        return obj.optInt(key, defaultValue);
     }
 
     public double getDouble(String key) {

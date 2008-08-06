@@ -32,7 +32,7 @@ public class Config {
 
     private TreeSet<Integer> scales;
 
-    private TreeSet<String> fonts =null;
+    private TreeSet<String> fonts = null;
 
     private List<HostMatcher> hosts = new ArrayList<HostMatcher>();
 

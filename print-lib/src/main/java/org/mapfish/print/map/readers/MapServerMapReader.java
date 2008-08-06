@@ -25,30 +25,30 @@ public class MapServerMapReader extends HTTPMapReader {
 
     protected MapRenderer.Format addQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first) {
         final MapRenderer.Format type;
-        final int w;
-        final int h;
+        final long w;
+        final long h;
         if (format.equals("image/svg+xml")) {
             URIUtils.addParamOverride(result, "map_imagetype", "svg");
-            w = transformer.getSvgW();
-            h = transformer.getSvgH();
+            w = transformer.getRotatedSvgW();
+            h = transformer.getRotatedSvgH();
             type = MapRenderer.Format.SVG;
         } else if (format.equals("application/x-pdf")) {
             URIUtils.addParamOverride(result, "MAP_IMAGETYPE", "pdf");
-            w = transformer.getBitmapW();
-            h = transformer.getBitmapH();
+            w = transformer.getRotatedBitmapW();
+            h = transformer.getRotatedBitmapH();
             type = MapRenderer.Format.PDF;
 
         } else {
             URIUtils.addParamOverride(result, "MAP_IMAGETYPE", "png");
-            w = transformer.getBitmapW();
-            h = transformer.getBitmapH();
+            w = transformer.getRotatedBitmapW();
+            h = transformer.getRotatedBitmapH();
             type = MapRenderer.Format.BITMAP;
         }
         URIUtils.addParamOverride(result, "MODE", "map");
         URIUtils.addParamOverride(result, "LAYERS", StringUtils.join(layers, " "));
         //URIUtils.addParamOverride(result, "SRS", srs);
         URIUtils.addParamOverride(result, "MAP_SIZE", String.format("%d %d", w, h));
-        URIUtils.addParamOverride(result, "MAPEXT", String.format("%s %s %s %s", transformer.minGeoX, transformer.minGeoY, transformer.maxGeoX, transformer.maxGeoY));
+        URIUtils.addParamOverride(result, "MAPEXT", String.format("%s %s %s %s", transformer.getRotatedMinGeoX(), transformer.getRotatedMinGeoY(), transformer.getRotatedMaxGeoX(), transformer.getRotatedMaxGeoY()));
         if (!first) {
             URIUtils.addParamOverride(result, "TRANSPARENT", "true");
         }

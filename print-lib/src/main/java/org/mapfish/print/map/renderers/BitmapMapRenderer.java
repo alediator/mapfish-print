@@ -11,10 +11,28 @@ import java.net.URI;
 
 public class BitmapMapRenderer extends MapRenderer {
     public void render(Transformer transformer, URI url, PdfContentByte dc, RenderingContext context, float opacity) throws IOException {
+        dc.saveState();
         try {
             final Image map = Image.getInstance(url.toURL());
-            map.scaleAbsolute(transformer.getPaperW(), transformer.getPaperH());
-            map.setAbsolutePosition(transformer.getPaperPosX(), transformer.getPaperPosY());
+
+            float rotation = (float) transformer.getRotation();
+            final float h = transformer.getPaperH();
+            final float w = transformer.getPaperW();
+            final float x = transformer.getPaperPosX();
+            final float y = transformer.getPaperPosY();
+            if (rotation != 0.0) {
+                map.setRotation(rotation);
+                float dx = (float) Math.abs(h * Math.sin(rotation) * Math.cos(rotation));
+                float dy = (float) Math.abs(w * Math.sin(rotation) * Math.cos(rotation));
+                float rw = (float) (Math.abs(w * Math.cos(rotation)) + Math.abs(h * Math.sin(rotation)));
+                float rh = (float) (Math.abs(h * Math.cos(rotation)) + Math.abs(w * Math.sin(rotation)));
+                map.scaleAbsolute(rw, rh);
+                map.setAbsolutePosition(x - dx, y - dy);
+                transformer.setClipping(dc);
+            } else {
+                map.scaleAbsolute(w, h);
+                map.setAbsolutePosition(x, y);
+            }
 
             if (opacity < 1.0) {
                 final byte byteOpacity = (byte) (Math.round(opacity * 256.0F));
@@ -26,6 +44,8 @@ public class BitmapMapRenderer extends MapRenderer {
             dc.addImage(map);
         } catch (DocumentException e) {
             context.addError(e);
+        } finally {
+            dc.restoreState();
         }
     }
 }

@@ -37,6 +37,9 @@ public class SVGMapRenderer extends MapRenderer {
         DOMParser parser = new DOMParser();
         try {
             final InputStream stream = SVGMapRenderer.class.getResourceAsStream("/org/mapfish/print/map/renderers/svgZoomOut.xsl");
+            if (stream == null) {
+                throw new RuntimeException("Cannot find the SVG transformation XSLT");
+            }
             final InputSource inputSource = new InputSource(stream);
             inputSource.setSystemId(".");
             parser.parse(inputSource);
@@ -53,7 +56,8 @@ public class SVGMapRenderer extends MapRenderer {
     public void render(Transformer transformer, URI url, PdfContentByte dc, RenderingContext context, float opacity) throws IOException {
         dc.saveState();
         try {
-            transformer.setSvgTransform(dc);
+            transformer.setClipping(dc);
+            dc.transform(transformer.getSvgTransform());
 
             if (opacity < 1.0) {
                 PdfGState gs = new PdfGState();
@@ -63,7 +67,7 @@ public class SVGMapRenderer extends MapRenderer {
                 dc.setGState(gs);
             }
 
-            Graphics2D g2 = dc.createGraphics(transformer.getSvgW(), transformer.getSvgH());
+            Graphics2D g2 = dc.createGraphics(transformer.getRotatedSvgW(), transformer.getRotatedSvgH());
 
             //avoid a warning from Batik
             System.setProperty("org.apache.batik.warn_destination", "false");
@@ -75,8 +79,8 @@ public class SVGMapRenderer extends MapRenderer {
                 PrintTranscoder pt = new PrintTranscoder();
                 pt.transcode(ti, null);
                 Paper paper = new Paper();
-                paper.setSize(transformer.getSvgW(), transformer.getSvgH());
-                paper.setImageableArea(0, 0, transformer.getSvgW(), transformer.getSvgH());
+                paper.setSize(transformer.getRotatedSvgW(), transformer.getRotatedSvgH());
+                paper.setImageableArea(0, 0, transformer.getRotatedSvgW(), transformer.getRotatedSvgH());
                 PageFormat pf = new PageFormat();
                 pf.setPaper(paper);
                 pt.print(g2, pf, 0);
@@ -91,7 +95,6 @@ public class SVGMapRenderer extends MapRenderer {
 
     private TranscoderInput getTranscoderInput(URL url, Transformer transformer, RenderingContext context) {
         if (svgZoomOut != null) {
-            final Document doc;
             try {
                 DOMResult transformedSvg = new DOMResult();
                 final TransformerFactory factory = TransformerFactory.newInstance();
@@ -100,7 +103,7 @@ public class SVGMapRenderer extends MapRenderer {
                 xslt.setParameter("zoomFactor", transformer.getSvgFactor());
                 final InputStream inputStream = url.openStream();
                 xslt.transform(new StreamSource(inputStream), transformedSvg);
-                doc = (Document) transformedSvg.getNode();
+                Document doc = (Document) transformedSvg.getNode();
 
                 if (LOGGER.isDebugEnabled()) {
                     printDom(doc);

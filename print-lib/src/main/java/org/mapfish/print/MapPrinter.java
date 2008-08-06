@@ -47,13 +47,13 @@ public class MapPrinter {
         //the python controller:
         //FontFactory.registerDirectories();
 
-        FontFactory.defaultEmbedding=true;
-        
+        FontFactory.defaultEmbedding = true;
+
         final TreeSet<String> fontPaths = config.getFonts();
         if (fontPaths != null) {
             for (String fontPath : fontPaths) {
-                File fontFile=new File(fontPath);
-                if(fontFile.isDirectory()) {
+                File fontFile = new File(fontPath);
+                if (fontFile.isDirectory()) {
                     FontFactory.registerDirectory(fontPath, true);
                 } else {
                     FontFactory.register(fontPath);

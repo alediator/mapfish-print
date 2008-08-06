@@ -18,7 +18,12 @@ public class Transformer implements Cloneable {
     private float paperPosX;
     private float paperPosY;
 
-    public Transformer(float centerX, float centerY, int paperWidth, int paperHeight, int scale, int dpi, String unit) {
+    /**
+     * angle in radian
+     */
+    private double rotation;
+
+    public Transformer(float centerX, float centerY, int paperWidth, int paperHeight, int scale, int dpi, String unit, double rotation) {
         final DistanceUnit unitEnum = DistanceUnit.fromString(unit);
         if (unitEnum == null) {
             throw new RuntimeException("Unknown unit: '" + unit + "'");
@@ -38,6 +43,7 @@ public class Transformer implements Cloneable {
         this.paperWidth = paperWidth;
         this.paperHeight = paperHeight;
         this.scale = scale;
+        this.rotation = rotation;
     }
 
     public float getGeoW() {
@@ -48,20 +54,98 @@ public class Transformer implements Cloneable {
         return (maxGeoY - minGeoY);
     }
 
-    public int getBitmapW() {
-        return Math.round(getGeoW() * pixelPerGeoUnit);
+    public float getStraightBitmapW() {
+        return getGeoW() * pixelPerGeoUnit;
     }
 
-    public int getBitmapH() {
-        return Math.round(getGeoH() * pixelPerGeoUnit);
+    public float getStraightBitmapH() {
+        return getGeoH() * pixelPerGeoUnit;
     }
 
-    public int getSvgW() {
-        return getBitmapW() * svgFactor;
+    public long getRotatedBitmapW() {
+        double width = getStraightBitmapW();
+        if (rotation != 0.0) {
+            double height = getStraightBitmapH();
+            width = Math.abs(width * Math.cos(rotation)) + Math.abs(height * Math.sin(rotation));
+        }
+        return Math.round(width);
     }
 
-    public int getSvgH() {
-        return getBitmapH() * svgFactor;
+    public long getRotatedBitmapH() {
+        double height = getStraightBitmapH();
+        if (rotation != 0.0) {
+            double width = getStraightBitmapW();
+            height = Math.abs(height * Math.cos(rotation)) + Math.abs(width * Math.sin(rotation));
+        }
+        return Math.round(height);
+    }
+
+    public float getRotatedGeoW() {
+        float width = getGeoW();
+        if (rotation != 0.0) {
+            float height = getGeoH();
+            width = (float) (Math.abs(width * Math.cos(rotation)) + Math.abs(height * Math.sin(rotation)));
+        }
+        return width;
+    }
+
+    public float getRotatedGeoH() {
+        float height = getGeoH();
+        if (rotation != 0.0) {
+            float width = getGeoW();
+            height = (float) (Math.abs(height * Math.cos(rotation)) + Math.abs(width * Math.sin(rotation)));
+        }
+        return height;
+    }
+
+    public float getRotatedPaperW() {
+        float width = getPaperW();
+        if (rotation != 0.0) {
+            float height = getPaperH();
+            width = (float) (Math.abs(width * Math.cos(rotation)) + Math.abs(height * Math.sin(rotation)));
+        }
+        return width;
+    }
+
+    public float getRotatedPaperH() {
+        float height = getPaperH();
+        if (rotation != 0.0) {
+            float width = getPaperW();
+            height = (float) (Math.abs(height * Math.cos(rotation)) + Math.abs(width * Math.sin(rotation)));
+        }
+        return height;
+    }
+
+    public float getRotatedMinGeoX() {
+        return minGeoX - (getRotatedGeoW() - getGeoW()) / 2.0F;
+    }
+
+    public float getRotatedMaxGeoX() {
+        return maxGeoX + (getRotatedGeoW() - getGeoW()) / 2.0F;
+    }
+
+    public float getRotatedMinGeoY() {
+        return minGeoY - (getRotatedGeoH() - getGeoH()) / 2.0F;
+    }
+
+    public float getRotatedMaxGeoY() {
+        return maxGeoY + (getRotatedGeoH() - getGeoH()) / 2.0F;
+    }
+
+    public long getRotatedSvgW() {
+        return getRotatedBitmapW() * svgFactor;
+    }
+
+    public long getRotatedSvgH() {
+        return getRotatedBitmapH() * svgFactor;
+    }
+
+    public long getStraightSvgW() {
+        return (long) (getStraightBitmapW() * svgFactor);
+    }
+
+    public long getStraightSvgH() {
+        return (long) (getStraightBitmapH() * svgFactor);
     }
 
     public float getPaperW() {
@@ -70,31 +154,6 @@ public class Transformer implements Cloneable {
 
     public float getPaperH() {
         return paperHeight;
-    }
-
-    public void setGeoTransform(PdfContentByte dc) {
-        AffineTransform transform = getGeoTransform();
-        dc.transform(transform);
-
-        dc.rectangle(minGeoX, minGeoY, getGeoW(), getGeoH());
-        dc.clip();
-        dc.newPath();
-    }
-
-    public AffineTransform getGeoTransform() {
-        AffineTransform transform = new AffineTransform();
-
-        final AffineTransform pageTranslate = AffineTransform.getTranslateInstance(paperPosX, paperPosY);
-        transform.concatenate(pageTranslate);
-
-        final AffineTransform scale = AffineTransform.getScaleInstance(
-                getPaperW() / getGeoW(),
-                getPaperH() / getGeoH());
-        transform.concatenate(scale);
-
-        final AffineTransform mapTranslate = AffineTransform.getTranslateInstance(-minGeoX, -minGeoY);
-        transform.concatenate(mapTranslate);
-        return transform;
     }
 
     public void setMapPos(float x, float y) {
@@ -110,17 +169,35 @@ public class Transformer implements Cloneable {
         return paperPosY;
     }
 
-    public void setSvgTransform(PdfContentByte dc) {
-        final AffineTransform pageTranslate = AffineTransform.getTranslateInstance(paperPosX, paperPosY);
-        final AffineTransform scale = AffineTransform.getScaleInstance(
-                getPaperW() / getSvgW(),
-                getPaperH() / getSvgH());
-        pageTranslate.concatenate(scale);
-        dc.transform(pageTranslate);
+    private AffineTransform getBaseTransform() {
+        final AffineTransform result = AffineTransform.getTranslateInstance(paperPosX, paperPosY);
+        if (rotation != 0.0F) {
+            result.rotate(rotation, getPaperW() / 2, getPaperH() / 2);
+            result.translate(-(getRotatedPaperW() - getPaperW()) / 2, -(getRotatedPaperH() - getPaperH()) / 2);
+        }
+        return result;
+    }
 
-        dc.rectangle(0, 0, getSvgW(), getSvgH());
-        dc.clip();
-        dc.newPath();
+    public AffineTransform getGeoTransform(boolean reverse) {
+        final AffineTransform result = AffineTransform.getTranslateInstance(paperPosX, paperPosY);
+        if (rotation != 0.0F) {
+            result.rotate((reverse ? -1 : 1) * rotation, getPaperW() / 2, getPaperH() / 2);
+        }
+        result.scale(getPaperW() / getGeoW(), getPaperH() / getGeoH());
+        result.translate(-minGeoX, -minGeoY);
+        return result;
+    }
+
+    public AffineTransform getSvgTransform() {
+        final AffineTransform result = getBaseTransform();
+        result.scale(getPaperW() / getStraightSvgW(), getPaperH() / getStraightSvgH());
+        return result;
+    }
+
+    public AffineTransform getPdfTransform() {
+        final AffineTransform result = getBaseTransform();
+        result.scale(getPaperW() / getStraightBitmapW(), getPaperH() / getStraightBitmapH());
+        return result;
     }
 
     public int getScale() {
@@ -174,5 +251,19 @@ public class Transformer implements Cloneable {
 
     public int getSvgFactor() {
         return svgFactor;
+    }
+
+    public double getRotation() {
+        return rotation;
+    }
+
+    public void setClipping(PdfContentByte dc) {
+        dc.rectangle(paperPosX, paperPosY, paperWidth, paperHeight);
+        dc.clip();
+        dc.newPath();
+    }
+
+    public void setRotation(double rotation) {
+        this.rotation = rotation;
     }
 }

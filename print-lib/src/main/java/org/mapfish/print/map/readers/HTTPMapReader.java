@@ -23,7 +23,7 @@ public abstract class HTTPMapReader extends MapReader {
     private final RenderingContext context;
     protected final PJsonObject params;
     protected final URI baseUrl;
-    private static final Set<String> OVERRIDE_ALL = new MatchAllSet<String>();
+    public static final Set<String> OVERRIDE_ALL = new MatchAllSet<String>();
 
     protected HTTPMapReader(RenderingContext context, PJsonObject params) {
         super(params);
@@ -85,7 +85,8 @@ public abstract class HTTPMapReader extends MapReader {
             WMSMapReader wms = (WMSMapReader) other;
             PJsonObject customParams = params.optJSONObject("customParams");
             PJsonObject customParamsOther = wms.params.optJSONObject("customParams");
-            return baseUrl.equals(wms.baseUrl) && customParams.equals(customParamsOther);
+            return baseUrl.equals(wms.baseUrl) &&
+                    (customParams != null ? customParams.equals(customParamsOther) : customParamsOther == null);
         } else {
             return false;
         }

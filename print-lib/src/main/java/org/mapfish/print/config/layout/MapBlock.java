@@ -65,7 +65,8 @@ public class MapBlock extends Block {
         final PJsonArray center = params.getJSONArray("center");
         final PJsonObject parent = (PJsonObject) params.getParent().getParent();
         String units = parent.getString("units");
-        return new Transformer(center.getFloat(0), center.getFloat(1), width, height, params.getInt("scale"), dpi, units);
+        return new Transformer(center.getFloat(0), center.getFloat(1), width, height,
+                params.getInt("scale"), dpi, units, params.optFloat("rotation", 0.0F) * Math.PI / 180.0);
     }
 
     public void setSpacingAfter(int spacingAfter) {

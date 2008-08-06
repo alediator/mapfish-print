@@ -8,6 +8,7 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.config.layout.Block;
+import org.mapfish.print.config.layout.MapBlock;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.text.SimpleDateFormat;
@@ -67,20 +68,19 @@ public class PDFUtils {
         return result.toString();
     }
 
+    private static Pattern FORMAT_PATTERN = Pattern.compile("^format\\s+(%[-+# 0,(]*\\d*(\\.\\d*)?(d))\\s+(.*)$");
+
     private static String getContextValue(RenderingContext context, PJsonObject params, String key) {
+        Matcher matcher;
         if (key.equals("pageNum")) {
             return Integer.toString(context.getWriter().getPageNumber());
         } else if (key.equals("now")) {
             return new Date().toString();
         } else if (key.startsWith("now ")) {
-            try {
-                SimpleDateFormat format = new SimpleDateFormat(key.substring(4));
-                return format.format(new Date());
-            } catch (IllegalArgumentException e) {
-                // gracefuly fallback to the standard format
-                context.addError(e);
-                return new Date().toString();
-            }
+            return formatTime(context, key);
+        } else
+        if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
+            return format(context, params, matcher);
         } else if (key.equals("configDir")) {
             return context.getConfigDir();
         }
@@ -92,8 +92,50 @@ public class PDFUtils {
         return result;
     }
 
+    private static String format(RenderingContext context, PJsonObject params, Matcher matcher) {
+        final String valueTxt = getContextValue(context, params, matcher.group(4));
+        final Object value;
+        switch (matcher.group(3).charAt(0)) {
+            case 'd':
+            case 'o':
+            case 'x':
+            case 'X':
+                value = Long.valueOf(valueTxt);
+                break;
+            case 'e':
+            case 'E':
+            case 'f':
+            case 'g':
+            case 'G':
+            case 'a':
+            case 'A':
+                value = Double.valueOf(valueTxt);
+                break;
+            default:
+                value = valueTxt;
+        }
+        try {
+            return String.format(matcher.group(1), value);
+        } catch (RuntimeException e) {
+            // gracefuly fallback to the standard format
+            context.addError(e);
+            return valueTxt;
+        }
+    }
+
+    private static String formatTime(RenderingContext context, String key) {
+        try {
+            SimpleDateFormat format = new SimpleDateFormat(key.substring(4));
+            return format.format(new Date());
+        } catch (IllegalArgumentException e) {
+            // gracefuly fallback to the standard format
+            context.addError(e);
+            return new Date().toString();
+        }
+    }
+
     public static PdfPTable buildTable(ArrayList<Block> items, PJsonObject params, RenderingContext context, int nbColumns) throws DocumentException {
-        final PdfPTable table = new PdfPTable(nbColumns>0?nbColumns:items.size());
+        final PdfPTable table = new PdfPTable(nbColumns > 0 ? nbColumns : items.size());
         table.setWidthPercentage(100f);
 
         for (int i = 0; i < items.size(); i++) {
@@ -118,7 +160,7 @@ public class PDFUtils {
                 cell[0].setBorder(PdfPCell.NO_BORDER);
                 cell[0].setHorizontalAlignment(block.getAlign().getCode());
                 cell[0].setVerticalAlignment(block.getVertAlign().getCode());
-                if (block.getBackgroundColor() != null) {
+                if (!(block instanceof MapBlock) && block.getBackgroundColor() != null) {
                     cell[0].setBackgroundColor(block.getBackgroundColor());
                 }
             }

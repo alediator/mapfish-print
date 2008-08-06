@@ -30,12 +30,12 @@ public class WMSMapReader extends HTTPMapReader {
         URIUtils.addParamOverride(result, "FORMAT", format);
         final MapRenderer.Format type;
         if (format.equals("image/svg+xml")) {
-            URIUtils.addParamOverride(result, "WIDTH", Integer.toString(transformer.getSvgW()));
-            URIUtils.addParamOverride(result, "HEIGHT", Integer.toString(transformer.getSvgH()));
+            URIUtils.addParamOverride(result, "WIDTH", Long.toString(transformer.getRotatedSvgW()));
+            URIUtils.addParamOverride(result, "HEIGHT", Long.toString(transformer.getRotatedSvgH()));
             type = MapRenderer.Format.SVG;
         } else {
-            URIUtils.addParamOverride(result, "WIDTH", Integer.toString(transformer.getBitmapW()));
-            URIUtils.addParamOverride(result, "HEIGHT", Integer.toString(transformer.getBitmapH()));
+            URIUtils.addParamOverride(result, "WIDTH", Long.toString(transformer.getRotatedBitmapW()));
+            URIUtils.addParamOverride(result, "HEIGHT", Long.toString(transformer.getRotatedBitmapH()));
             type = format.equals("application/x-pdf") ? MapRenderer.Format.PDF : MapRenderer.Format.BITMAP;
         }
         URIUtils.addParamOverride(result, "LAYERS", StringUtils.join(layers, ","));
@@ -44,7 +44,7 @@ public class WMSMapReader extends HTTPMapReader {
         URIUtils.addParamOverride(result, "REQUEST", "GetMap");
         //URIUtils.addParamOverride(result, "EXCEPTIONS", "application/vnd.ogc.se_inimage");
         URIUtils.addParamOverride(result, "VERSION", "1.1.1");
-        URIUtils.addParamOverride(result, "BBOX", String.format("%s,%s,%s,%s", transformer.minGeoX, transformer.minGeoY, transformer.maxGeoX, transformer.maxGeoY));
+        URIUtils.addParamOverride(result, "BBOX", String.format("%s,%s,%s,%s", transformer.getRotatedMinGeoX(), transformer.getRotatedMinGeoY(), transformer.getRotatedMaxGeoX(), transformer.getRotatedMaxGeoY()));
         if (!first) {
             URIUtils.addParamOverride(result, "TRANSPARENT", "true");
         }

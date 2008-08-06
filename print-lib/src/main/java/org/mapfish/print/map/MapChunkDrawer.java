@@ -49,9 +49,10 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
             //manage the overview map
             mainTransformer = context.getLayout().getMainPage().getMap().createTransformer(context, params);
             transformer.zoom(mainTransformer, (float) (1.0 / overviewMap));
+            transformer.setRotation(0);   //overview always north up!
         }
 
-        transformer.setMapPos(rectangle.getLeft() + 1.5f, rectangle.getBottom());
+        transformer.setMapPos(rectangle.getLeft(), rectangle.getBottom());
         if (Math.abs(rectangle.getWidth() - transformer.getPaperW()) > 0.2) {
             throw new RuntimeException("The map width on the paper is wrong");
         }
@@ -82,10 +83,13 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
         //draw some background
         if (backgroundColor != null) {
             dc.saveState();
-            dc.setColorFill(backgroundColor);
-            dc.rectangle(rectangle.getLeft(), rectangle.getBottom(), rectangle.getWidth(), rectangle.getHeight());
-            dc.fill();
-            dc.restoreState();
+            try {
+                dc.setColorFill(backgroundColor);
+                dc.rectangle(rectangle.getLeft(), rectangle.getBottom(), rectangle.getWidth(), rectangle.getHeight());
+                dc.fill();
+            } finally {
+                dc.restoreState();
+            }
         }
 
         //do the rendering
@@ -96,20 +100,49 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
 
         if (mainTransformer != null) {
             //only for key maps: draw the real map extent
-            dc.saveState();
+            drawMapExtent(dc, mainTransformer);
+        }
+    }
 
+    /**
+     * Used by overview maps to draw the extent of the real map.
+     */
+    private void drawMapExtent(PdfContentByte dc, Transformer mainTransformer) {
+        dc.saveState();
+        try {
             //in "degrees" unit, there seems to have rounding errors if I use the
             //PDF transform facility. Therefore, I do the transform by hand :-(
-            AffineTransform transform = transformer.getGeoTransform();
+            transformer.setRotation(mainTransformer.getRotation());
+            AffineTransform transform = transformer.getGeoTransform(true);
+            transformer.setRotation(0);
+
             Point2D.Float ll = new Point2D.Float();
+            Point2D.Float lr = new Point2D.Float();
             Point2D.Float ur = new Point2D.Float();
+            Point2D.Float ul = new Point2D.Float();
             transform.transform(new Point2D.Float(mainTransformer.getMinGeoX(), mainTransformer.getMinGeoY()), ll);
+            transform.transform(new Point2D.Float(mainTransformer.getMaxGeoX(), mainTransformer.getMinGeoY()), lr);
             transform.transform(new Point2D.Float(mainTransformer.getMaxGeoX(), mainTransformer.getMaxGeoY()), ur);
+            transform.transform(new Point2D.Float(mainTransformer.getMinGeoX(), mainTransformer.getMaxGeoY()), ul);
 
             dc.setLineWidth(1);
             dc.setColorStroke(new Color(255, 0, 0));
-            dc.rectangle(ll.x, ll.y, ur.x - ll.x, ur.y - ll.y);
+            dc.moveTo(ll.x, ll.y);
+            dc.lineTo(lr.x, lr.y);
+            dc.lineTo(ur.x, ur.y);
+            dc.lineTo(ul.x, ul.y);
+            dc.closePath();
             dc.stroke();
+
+            if (mainTransformer.getRotation() != 0.0) {
+                //draw a little arrow
+                dc.setLineWidth(0.5F);
+                dc.moveTo((3 * ll.x + lr.x) / 4, (3 * ll.y + lr.y) / 4);
+                dc.lineTo((2 * ll.x + 2 * lr.x + ul.x + ur.x) / 6, (2 * ll.y + 2 * lr.y + ul.y + ur.y) / 6);
+                dc.lineTo((ll.x + 3 * lr.x) / 4, (ll.y + 3 * lr.y) / 4);
+                dc.stroke();
+            }
+        } finally {
             dc.restoreState();
         }
     }

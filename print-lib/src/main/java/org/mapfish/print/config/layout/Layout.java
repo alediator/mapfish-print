@@ -55,10 +55,6 @@ public class Layout {
     }
 
     public void printClientConfig(JSONWriter json) throws JSONException {
-        MapBlock map = mainPage.getMap();
-        if (map != null) {
-            json.key("map");
-            map.printClientConfig(json);
-        }
+        mainPage.printClientConfig(json);
     }
 }

@@ -4,6 +4,7 @@ import com.lowagie.text.BadElementException;
 import com.lowagie.text.Chunk;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
 import com.lowagie.text.Image;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.BaseFont;
@@ -20,7 +21,6 @@ import org.mapfish.print.utils.DistanceUnit;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.awt.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +47,8 @@ public class ScalebarBlock extends ParagraphBlock {
     private Integer labelDistance = null;
 
     private String font = "Helvetica";
-
     private Float fontSize = null;
+    private String fontEncoding = BaseFont.WINANSI;
 
     private Color color = Color.BLACK;
 
@@ -72,13 +72,7 @@ public class ScalebarBlock extends ParagraphBlock {
         final double maxWidthIntervaleDistance = DistanceUnit.PT.convertTo(maxSize, scaleUnit) * scale / intervals;
         final double intervalDistance = getNearestNiceValue(maxWidthIntervaleDistance, scaleUnit);
 
-        final Font pdfFont;
-        try {
-            pdfFont = new Font(BaseFont.createFont(font, BaseFont.CP1252, BaseFont.EMBEDDED), getFontSize());
-        } catch (IOException e) {
-            throw new InvalidValueException("font", font, e);
-        }
-
+        final Font pdfFont = FontFactory.getFont(font, fontEncoding, getFontSize());
         tryLayout(context, paragraph, pdfFont, scaleUnit, scale, intervalDistance, 0);
     }
 
@@ -276,6 +270,10 @@ public class ScalebarBlock extends ParagraphBlock {
 
     public void setFontSize(float fontSize) {
         this.fontSize = fontSize;
+    }
+
+    public void setFontEncoding(String fontEncoding) {
+        this.fontEncoding = fontEncoding;
     }
 
     public void setColor(Color color) {

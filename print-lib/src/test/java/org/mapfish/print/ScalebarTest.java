@@ -163,7 +163,6 @@ public class ScalebarTest extends PrintTestCase {
         draw(page1, doc, context, block);
 
 
-
         doc.close();
         writer.close();
         outFile.close();

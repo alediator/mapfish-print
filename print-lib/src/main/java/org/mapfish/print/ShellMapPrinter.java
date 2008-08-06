@@ -91,7 +91,7 @@ public class ShellMapPrinter {
 
         } else {
             final InputStream inFile = getInputStream();
-            printer.print(FileUtilities.readWholeTextStream(inFile), outFile);
+            printer.print(FileUtilities.readWholeTextStream(inFile, "UTF-8"), outFile);
         }
     }
 

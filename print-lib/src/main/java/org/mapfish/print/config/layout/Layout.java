@@ -12,11 +12,17 @@ import org.mapfish.print.utils.PJsonObject;
  * Config and logic for one layout instance.
  */
 public class Layout {
+    private MetaData metaData;
+
     private TitlePage titlePage;
 
     private MainPage mainPage;
 
     public void render(PJsonObject params, RenderingContext context) throws DocumentException {
+        if(metaData!=null) {
+            metaData.render(params, context);
+        }
+
         if (titlePage != null) {
             titlePage.render(params, context);
         }
@@ -44,6 +50,10 @@ public class Layout {
 
     public void setMainPage(MainPage mainPage) {
         this.mainPage = mainPage;
+    }
+
+    public void setMetaData(MetaData metaData) {
+        this.metaData = metaData;
     }
 
     public Rectangle getFirstPageSize() {

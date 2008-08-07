@@ -36,6 +36,13 @@ layouts:
   #===========================================================================
   A4 portrait:
   #===========================================================================
+    metaData:
+      title: '${title}'
+      author: 'MapFish print module'
+      subject: 'Simple layout'
+      keywords: 'map,print'
+      creator: 'MapFish'
+
     titlePage:
       pageSize: A4
       items:

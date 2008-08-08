@@ -10,7 +10,9 @@ import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.MatchAllSet;
 import org.pvalsecc.misc.URIUtils;
 
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,7 +22,7 @@ import java.util.Set;
 public abstract class HTTPMapReader extends MapReader {
     public static final Logger LOGGER = Logger.getLogger(HTTPMapReader.class);
 
-    private final RenderingContext context;
+    protected final RenderingContext context;
     protected final PJsonObject params;
     protected final URI baseUrl;
     public static final Set<String> OVERRIDE_ALL = new MatchAllSet<String>();
@@ -61,31 +63,36 @@ public abstract class HTTPMapReader extends MapReader {
                 }
             }
 
-            MapRenderer.Format format = addQueryParams(queryParams, transformer, srs, first);
+            MapRenderer formater = MapRenderer.get(getFormat());
 
-            final URI url = URIUtils.addParams(baseUrl, queryParams, OVERRIDE_ALL);
-            LOGGER.debug(url);
+            addCommonQueryParams(queryParams, transformer, srs, first);
+            final URI commonUri = URIUtils.addParams(baseUrl, queryParams, OVERRIDE_ALL);
 
-            MapRenderer formater = MapRenderer.get(format);
-
-            formater.render(transformer, url, dc, context, opacity);
+            renderTiles(formater, transformer, commonUri, dc);
         } catch (Exception e) {
             context.addError(e);
         }
     }
 
-    protected abstract MapRenderer.Format addQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first);
+    protected abstract void renderTiles(MapRenderer formater, Transformer transformer, URI commonUri, PdfContentByte dc) throws IOException, URISyntaxException;
+
+    protected abstract MapRenderer.Format getFormat();
+
+    /**
+     * Adds the query parameters common to every tile
+     */
+    protected abstract void addCommonQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first);
 
     public boolean canMerge(MapReader other) {
         if (!super.canMerge(other)) {
             return false;
         }
 
-        if (other instanceof WMSMapReader) {
-            WMSMapReader wms = (WMSMapReader) other;
+        if (other instanceof HTTPMapReader) {
+            HTTPMapReader http = (HTTPMapReader) other;
             PJsonObject customParams = params.optJSONObject("customParams");
-            PJsonObject customParamsOther = wms.params.optJSONObject("customParams");
-            return baseUrl.equals(wms.baseUrl) &&
+            PJsonObject customParamsOther = http.params.optJSONObject("customParams");
+            return baseUrl.equals(http.baseUrl) &&
                     (customParams != null ? customParams.equals(customParamsOther) : customParamsOther == null);
         } else {
             return false;

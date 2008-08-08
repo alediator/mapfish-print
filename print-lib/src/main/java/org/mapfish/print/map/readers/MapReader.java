@@ -22,6 +22,8 @@ public abstract class MapReader {
             WMSMapReader.create(target, context, params);
         } else if ("MapServer".equalsIgnoreCase(type)) {
             MapServerMapReader.create(target, context, params);
+        } else if ("TileCache".equalsIgnoreCase(type)) {
+            TileCacheMapReader.create(target, context, params);
         } else {
             throw new InvalidJsonValueException(params, "type", type);
         }

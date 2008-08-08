@@ -7,6 +7,7 @@ import org.mapfish.print.Transformer;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public abstract class MapRenderer {
@@ -22,7 +23,7 @@ public abstract class MapRenderer {
         return renderers.get(format);
     }
 
-    public abstract void render(Transformer transformer, URI url, PdfContentByte dc, RenderingContext context, float opacity) throws IOException;
+    public abstract void render(Transformer transformer, List<URI> urls, PdfContentByte dc, RenderingContext context, float opacity, int nbTilesHorizontal, float offsetX, float offsetY, long bitmapTileW, long bitmapTileH) throws IOException;
 
     public enum Format {
         BITMAP,

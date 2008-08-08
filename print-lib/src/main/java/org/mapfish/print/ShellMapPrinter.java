@@ -37,7 +37,7 @@ public class ShellMapPrinter {
     @Option(desc = "The location of the description of what has to be printed. By default, STDIN")
     private String spec = null;
 
-    @Option(desc = "Used only if log4jConfig is not specified. 2 if you want the debug information (stacktraces are shown), 1 for infos and 0 for only warnings and errors")
+    @Option(desc = "Used only if log4jConfig is not specified. 3 if you want everything, 2 if you want the debug information (stacktraces are shown), 1 for infos and 0 for only warnings and errors")
     private int verbose = 1;
 
     @Option(desc = "The destination file. By default, STDOUT")
@@ -111,8 +111,11 @@ public class ShellMapPrinter {
                 case 1:
                     level = Level.INFO;
                     break;
-                default:
+                case 2:
                     level = Level.DEBUG;
+                    break;
+                default:
+                    level = Level.TRACE;
                     break;
             }
             Logger.getRootLogger().setLevel(level);

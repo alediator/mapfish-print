@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
 import org.w3c.dom.Document;
@@ -53,10 +54,14 @@ public class SVGMapRenderer extends MapRenderer {
         }
     }
 
-    public void render(Transformer transformer, URI url, PdfContentByte dc, RenderingContext context, float opacity) throws IOException {
+    public void render(Transformer transformer, java.util.List<URI> uris, PdfContentByte dc, RenderingContext context, float opacity, int nbTilesHorizontal, float offsetX, float offsetY, long bitmapTileW, long bitmapTileH) throws IOException {
+        if (uris.size() != 1) {
+            //tiling not supported in SVG
+            throw new InvalidValueException("format", "application/x-pdf");
+        }
+
         dc.saveState();
         try {
-            transformer.setClipping(dc);
             dc.transform(transformer.getSvgTransform());
 
             if (opacity < 1.0) {
@@ -74,7 +79,9 @@ public class SVGMapRenderer extends MapRenderer {
             g2.setRenderingHint(RenderingHintsKeyExt.KEY_TRANSCODING, RenderingHintsKeyExt.VALUE_TRANSCODING_PRINTING);
             g2.setRenderingHint(RenderingHintsKeyExt.KEY_AVOID_TILE_PAINTING, RenderingHintsKeyExt.VALUE_AVOID_TILE_PAINTING_ON);
 
-            final TranscoderInput ti = getTranscoderInput(url.toURL(), transformer, context);
+            final URI uri = uris.get(0);
+            LOGGER.debug(uri);
+            final TranscoderInput ti = getTranscoderInput(uri.toURL(), transformer, context);
             if (ti != null) {
                 PrintTranscoder pt = new PrintTranscoder();
                 pt.transcode(ti, null);
@@ -136,7 +143,7 @@ public class SVGMapRenderer extends MapRenderer {
         XMLSerializer serializer = new XMLSerializer(out, format);
         serializer.serialize(doc);
 
-        LOGGER.debug(out.toString());
+        LOGGER.trace(out.toString());
         out.close();
     }
 

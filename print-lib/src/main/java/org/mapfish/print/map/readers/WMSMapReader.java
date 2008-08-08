@@ -8,11 +8,19 @@ import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.StringUtils;
 import org.pvalsecc.misc.URIUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class WMSMapReader extends HTTPMapReader {
+/**
+ * Support for the WMS protocol with possibilities to go through a WMS-C service
+ * (TileCache).
+ */
+public class WMSMapReader extends TileableMapReader {
     private final List<String> layers = new ArrayList<String>();
 
     private final String format;
@@ -21,35 +29,34 @@ public class WMSMapReader extends HTTPMapReader {
 
     private WMSMapReader(String layer, String style, RenderingContext context, PJsonObject params) {
         super(context, params);
+        tileCacheLayerInfo = WMSServerInfo.getInfo(baseUrl).getTileCacheLayer(layer);
         layers.add(layer);
         styles.add(style);
         format = params.getString("format");
     }
 
-    protected MapRenderer.Format addQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first) {
-        URIUtils.addParamOverride(result, "FORMAT", format);
-        final MapRenderer.Format type;
+    protected MapRenderer.Format getFormat() {
         if (format.equals("image/svg+xml")) {
-            URIUtils.addParamOverride(result, "WIDTH", Long.toString(transformer.getRotatedSvgW()));
-            URIUtils.addParamOverride(result, "HEIGHT", Long.toString(transformer.getRotatedSvgH()));
-            type = MapRenderer.Format.SVG;
+            return MapRenderer.Format.SVG;
+        } else if (format.equals("application/x-pdf")) {
+            return MapRenderer.Format.PDF;
         } else {
-            URIUtils.addParamOverride(result, "WIDTH", Long.toString(transformer.getRotatedBitmapW()));
-            URIUtils.addParamOverride(result, "HEIGHT", Long.toString(transformer.getRotatedBitmapH()));
-            type = format.equals("application/x-pdf") ? MapRenderer.Format.PDF : MapRenderer.Format.BITMAP;
+            return MapRenderer.Format.BITMAP;
         }
+    }
+
+    protected void addCommonQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first) {
+        URIUtils.addParamOverride(result, "FORMAT", format);
         URIUtils.addParamOverride(result, "LAYERS", StringUtils.join(layers, ","));
         URIUtils.addParamOverride(result, "SRS", srs);
         URIUtils.addParamOverride(result, "SERVICE", "WMS");
         URIUtils.addParamOverride(result, "REQUEST", "GetMap");
         //URIUtils.addParamOverride(result, "EXCEPTIONS", "application/vnd.ogc.se_inimage");
         URIUtils.addParamOverride(result, "VERSION", "1.1.1");
-        URIUtils.addParamOverride(result, "BBOX", String.format("%s,%s,%s,%s", transformer.getRotatedMinGeoX(), transformer.getRotatedMinGeoY(), transformer.getRotatedMaxGeoX(), transformer.getRotatedMaxGeoY()));
         if (!first) {
             URIUtils.addParamOverride(result, "TRANSPARENT", "true");
         }
         URIUtils.addParamOverride(result, "STYLES", StringUtils.join(styles, ","));
-        return type;
     }
 
     protected static void create(List<MapReader> target, RenderingContext context, PJsonObject params) {
@@ -81,11 +88,30 @@ public class WMSMapReader extends HTTPMapReader {
             return false;
         }
 
+        if (tileCacheLayerInfo != null) {
+            //no layer merge when tilecache is here...
+            return false;
+        }
+
         if (other instanceof WMSMapReader) {
             WMSMapReader wms = (WMSMapReader) other;
             return format.equals(wms.format);
         } else {
             return false;
         }
+    }
+
+    protected URI getTileUri(URI commonUri, Transformer transformer, float minGeoX, float minGeoY, float maxGeoX, float maxGeoY, long w, long h) throws URISyntaxException, UnsupportedEncodingException {
+
+        Map<String, List<String>> tileParams = new HashMap<String, List<String>>();
+        if (format.equals("image/svg+xml")) {
+            URIUtils.addParamOverride(tileParams, "WIDTH", Long.toString(transformer.getRotatedSvgW()));
+            URIUtils.addParamOverride(tileParams, "HEIGHT", Long.toString(transformer.getRotatedSvgH()));
+        } else {
+            URIUtils.addParamOverride(tileParams, "WIDTH", Long.toString(w));
+            URIUtils.addParamOverride(tileParams, "HEIGHT", Long.toString(h));
+        }
+        URIUtils.addParamOverride(tileParams, "BBOX", String.format("%s,%s,%s,%s", minGeoX, minGeoY, maxGeoX, maxGeoY));
+        return URIUtils.addParams(commonUri, tileParams, OVERRIDE_ALL);
     }
 }

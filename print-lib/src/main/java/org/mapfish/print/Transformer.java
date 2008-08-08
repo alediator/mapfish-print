@@ -200,6 +200,10 @@ public class Transformer implements Cloneable {
         return result;
     }
 
+    public AffineTransform getBitmapTransform() {
+        return getPdfTransform();
+    }
+
     public int getScale() {
         return scale;
     }

@@ -93,10 +93,17 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
         }
 
         //do the rendering
-        for (int i = 0; i < readers.size(); i++) {
-            MapReader reader = readers.get(i);
-            reader.render(transformer, dc, srs, i == 0);
+        dc.saveState();
+        try {
+            transformer.setClipping(dc);
+            for (int i = 0; i < readers.size(); i++) {
+                MapReader reader = readers.get(i);
+                reader.render(transformer, dc, srs, i == 0);
+            }
+        } finally {
+            dc.restoreState();
         }
+
 
         if (mainTransformer != null) {
             //only for key maps: draw the real map extent

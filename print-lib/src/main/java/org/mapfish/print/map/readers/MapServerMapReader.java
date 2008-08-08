@@ -1,5 +1,6 @@
 package org.mapfish.print.map.readers;
 
+import com.lowagie.text.pdf.PdfContentByte;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
 import org.mapfish.print.map.renderers.MapRenderer;
@@ -8,6 +9,8 @@ import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.StringUtils;
 import org.pvalsecc.misc.URIUtils;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,26 +26,39 @@ public class MapServerMapReader extends HTTPMapReader {
         format = params.getString("format");
     }
 
-    protected MapRenderer.Format addQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first) {
-        final MapRenderer.Format type;
+    protected void renderTiles(MapRenderer formater, Transformer transformer, URI commonUri, PdfContentByte dc) throws IOException {
+        //tiling not supported for MapServer protocol...
+        List<URI> uris = new ArrayList<URI>(1);
+        uris.add(commonUri);
+        formater.render(transformer, uris, dc, context, opacity, 1, 0, 0,
+                transformer.getRotatedBitmapW(), transformer.getRotatedBitmapH());
+    }
+
+    protected MapRenderer.Format getFormat() {
+        if (format.equals("image/svg+xml")) {
+            return MapRenderer.Format.SVG;
+        } else if (format.equals("application/x-pdf")) {
+            return MapRenderer.Format.PDF;
+        } else {
+            return MapRenderer.Format.BITMAP;
+        }
+    }
+
+    protected void addCommonQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first) {
         final long w;
         final long h;
         if (format.equals("image/svg+xml")) {
             URIUtils.addParamOverride(result, "map_imagetype", "svg");
             w = transformer.getRotatedSvgW();
             h = transformer.getRotatedSvgH();
-            type = MapRenderer.Format.SVG;
         } else if (format.equals("application/x-pdf")) {
             URIUtils.addParamOverride(result, "MAP_IMAGETYPE", "pdf");
             w = transformer.getRotatedBitmapW();
             h = transformer.getRotatedBitmapH();
-            type = MapRenderer.Format.PDF;
-
         } else {
             URIUtils.addParamOverride(result, "MAP_IMAGETYPE", "png");
             w = transformer.getRotatedBitmapW();
             h = transformer.getRotatedBitmapH();
-            type = MapRenderer.Format.BITMAP;
         }
         URIUtils.addParamOverride(result, "MODE", "map");
         URIUtils.addParamOverride(result, "LAYERS", StringUtils.join(layers, " "));
@@ -52,7 +68,6 @@ public class MapServerMapReader extends HTTPMapReader {
         if (!first) {
             URIUtils.addParamOverride(result, "TRANSPARENT", "true");
         }
-        return type;
     }
 
     protected static void create(List<MapReader> target, RenderingContext context, PJsonObject params) {

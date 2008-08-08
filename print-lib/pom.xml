@@ -2,12 +2,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.mapfish.print</groupId>
   <artifactId>print-lib</artifactId>
   <packaging>jar</packaging>
-  <version>0.1</version>
+  <version>${theVersion}</version>
+
   <name>print-lib</name>
-  <url>http://maven.apache.org</url>
+  <description>The main library of the MapFish print module</description>
+
+  <parent>
+    <groupId>org.mapfish.print</groupId>
+    <artifactId>print-root</artifactId>
+    <version>0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
   <build>
     <plugins>
       <plugin>
@@ -18,20 +26,22 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
-  <licenses>
-    <license>
-      <name>LGPL, version 2.1</name>
-      <url>http://www.opensource.org/licenses/lgpl-license.php</url>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <parent>
-    <groupId>org.mapfish.print</groupId>
-    <artifactId>print-root</artifactId>
-    <version>0.1</version>
-  </parent>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -91,10 +101,28 @@
       <version>1.8</version>
     </dependency>
   </dependencies>
+
   <repositories>
     <repository>
-      <id>pvalsecc</id>
-      <url>http://www.thus.ch/~patrick/maven</url>
+      <id>org.mapfish</id>
+      <url>http://dev.mapfish.org/maven/repository</url>
     </repository>
   </repositories>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-changelog-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

@@ -73,7 +73,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20070829</version>
+      <version>20080701</version>
     </dependency>
     <dependency>
       <groupId>org.jyaml</groupId>

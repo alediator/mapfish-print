@@ -75,7 +75,7 @@
   <!-- this version is a fake, don't touch it -->
   <properties>
     <!-- this is the real version -->
-    <theVersion>0.3</theVersion>
+    <theVersion>0.3-SNAPSHOT</theVersion>
   </properties>
 
   <licenses>

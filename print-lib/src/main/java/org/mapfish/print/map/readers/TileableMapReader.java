@@ -36,16 +36,15 @@ public abstract class TileableMapReader extends HTTPMapReader {
 
         if (tileCacheLayerInfo != null) {
             //tiled
-            float targetResolution = transformer.getGeoW() / transformer.getStraightBitmapW();
-            TileCacheLayerInfo.ResolutionInfo resolution = tileCacheLayerInfo.getNearestResolution(targetResolution);
+            transformer = fixTiledTransformer(transformer);
             bitmapTileW = tileCacheLayerInfo.getWidth();
             bitmapTileH = tileCacheLayerInfo.getHeight();
-            final float tileGeoWidth = resolution.value * bitmapTileW;
-            final float tileGeoHeight = resolution.value * bitmapTileH;
+            final float tileGeoWidth = transformer.getResolution() * bitmapTileW;
+            final float tileGeoHeight = transformer.getResolution() * bitmapTileH;
             float tileMinGeoX = (float) (Math.floor((minGeoX - tileCacheLayerInfo.getMinX()) / tileGeoWidth) * tileGeoWidth) + tileCacheLayerInfo.getMinX();
             float tileMinGeoY = (float) (Math.floor((minGeoY - tileCacheLayerInfo.getMinY()) / tileGeoHeight) * tileGeoHeight) + tileCacheLayerInfo.getMinY();
-            offsetX = (minGeoX - tileMinGeoX) / resolution.value;
-            offsetY = (minGeoY - tileMinGeoY) / resolution.value;
+            offsetX = (minGeoX - tileMinGeoX) / transformer.getResolution();
+            offsetY = (minGeoY - tileMinGeoY) / transformer.getResolution();
             for (float geoY = tileMinGeoY; geoY < maxGeoY; geoY += tileGeoHeight) {
                 nbTilesW = 0;
                 for (float geoX = tileMinGeoX; geoX < maxGeoX; geoX += tileGeoWidth) {
@@ -64,6 +63,17 @@ public abstract class TileableMapReader extends HTTPMapReader {
             urls.add(getTileUri(commonUri, transformer, minGeoX, minGeoY, maxGeoX, maxGeoY, bitmapTileW, bitmapTileH));
         }
         formater.render(transformer, urls, dc, context, opacity, nbTilesW, offsetX, offsetY, bitmapTileW, bitmapTileH);
+    }
+
+    /**
+     * fix the resolution to something compatible with the resolutions available in tilecache.
+     */
+    private Transformer fixTiledTransformer(Transformer transformer) {
+        float targetResolution = transformer.getGeoW() / transformer.getStraightBitmapW();
+        TileCacheLayerInfo.ResolutionInfo resolution = tileCacheLayerInfo.getNearestResolution(targetResolution);
+        transformer = transformer.clone();
+        transformer.setResolution(resolution.value);
+        return transformer;
     }
 
     /**

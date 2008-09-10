@@ -20,7 +20,6 @@ public class DnsHostMatcher extends HostMatcher {
         return super.validate(uri);
     }
 
-
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("DnsHostMatcher");

@@ -270,4 +270,12 @@ public class Transformer implements Cloneable {
     public void setRotation(double rotation) {
         this.rotation = rotation;
     }
+
+    public float getResolution() {
+        return 1/pixelPerGeoUnit;
+    }
+
+    public void setResolution(float resolution) {
+        this.pixelPerGeoUnit = 1/resolution;
+    }
 }

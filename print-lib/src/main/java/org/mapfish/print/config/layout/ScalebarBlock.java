@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Block for drawing a scale bar
  */
-public class ScalebarBlock extends ParagraphBlock {
+public class ScalebarBlock extends ParagraphFontBlock {
     private int maxSize = 150;
 
     private Type type = Type.LINE;
@@ -45,10 +45,6 @@ public class ScalebarBlock extends ParagraphBlock {
     private Direction textDirection = Direction.UP;
 
     private Integer labelDistance = null;
-
-    private String font = "Helvetica";
-    private Float fontSize = null;
-    private String fontEncoding = BaseFont.WINANSI;
 
     private Color color = Color.BLACK;
 
@@ -72,7 +68,7 @@ public class ScalebarBlock extends ParagraphBlock {
         final double maxWidthIntervaleDistance = DistanceUnit.PT.convertTo(maxSize, scaleUnit) * scale / intervals;
         final double intervalDistance = getNearestNiceValue(maxWidthIntervaleDistance, scaleUnit);
 
-        final Font pdfFont = FontFactory.getFont(font, fontEncoding, getFontSize());
+        final Font pdfFont = getPdfFont();
         tryLayout(context, paragraph, pdfFont, scaleUnit, scale, intervalDistance, 0);
     }
 
@@ -262,18 +258,6 @@ public class ScalebarBlock extends ParagraphBlock {
 
     public void setLabelDistance(int labelDistance) {
         this.labelDistance = labelDistance;
-    }
-
-    public void setFont(String font) {
-        this.font = font;
-    }
-
-    public void setFontSize(float fontSize) {
-        this.fontSize = fontSize;
-    }
-
-    public void setFontEncoding(String fontEncoding) {
-        this.fontEncoding = fontEncoding;
     }
 
     public void setColor(Color color) {

@@ -136,13 +136,11 @@ public abstract class ScalebarDrawer implements PDFCustomBlocks.ChunkDrawer {
                 offsetH = -label.width / 2;
                 offsetV = -maxLabelHeight;
 
-            } else
-            if (block.getTextDirection().getAngle() == -block.getBarDirection().getAngle()) {
+            } else if (block.getTextDirection().getAngle() == -block.getBarDirection().getAngle()) {
                 //opposite direction
                 offsetH = label.width / 2;
                 offsetV = 0;
-            } else
-            if (block.getTextDirection().getAngle() - block.getBarDirection().getAngle() < 0) {
+            } else if (block.getTextDirection().getAngle() - block.getBarDirection().getAngle() < 0) {
                 offsetH = label.width / 2;
                 offsetV = -label.height;
             } else {

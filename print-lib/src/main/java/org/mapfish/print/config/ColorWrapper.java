@@ -44,12 +44,12 @@ public class ColorWrapper extends AbstractWrapper implements SimpleObjectWrapper
         //try to decode stuff like #FFFFFF
         if (result == null) {
             try {
-                Integer intval = Integer.decode(color);
-                int i = intval.intValue();
-                if ((i & 0xFF000000) != 0) {
-                    result = new Color((i >> 24) & 0xFF, (i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF);
+                Long longval = Long.decode(color);
+                long i = longval.longValue();
+                if (i >= 0x1000000L) {
+                    result = new Color((int) (i >> 24) & 0xFF, (int) (i >> 16) & 0xFF, (int) (i >> 8) & 0xFF, (int) i & 0xFF);
                 } else {
-                    result = new Color((i >> 16) & 0xFF, (i >> 8) & 0xFF, i & 0xFF);
+                    result = new Color((int) (i >> 16) & 0xFF, (int) (i >> 8) & 0xFF, (int) i & 0xFF);
                 }
             } catch (NumberFormatException ignored) {
             }

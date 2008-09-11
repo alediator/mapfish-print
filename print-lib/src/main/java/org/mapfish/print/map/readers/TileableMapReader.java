@@ -49,7 +49,14 @@ public abstract class TileableMapReader extends HTTPMapReader {
                 nbTilesW = 0;
                 for (float geoX = tileMinGeoX; geoX < maxGeoX; geoX += tileGeoWidth) {
                     nbTilesW++;
-                    urls.add(getTileUri(commonUri, transformer, geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight, bitmapTileW, bitmapTileH));
+                    if (tileCacheLayerInfo.isVisible(geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight)) {
+                        urls.add(getTileUri(commonUri, transformer, geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight, bitmapTileW, bitmapTileH));
+                    } else {
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Tile out of bounds: " + getTileUri(commonUri, transformer, geoX, geoY, geoX + tileGeoWidth, geoY + tileGeoHeight, bitmapTileW, bitmapTileH));
+                        }
+                        urls.add(null);
+                    }
                 }
             }
 

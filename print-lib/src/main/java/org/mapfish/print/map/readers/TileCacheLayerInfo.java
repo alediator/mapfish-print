@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Holds the information we need to manage a tilecache layer. 
+ * Holds the information we need to manage a tilecache layer.
  */
 public class TileCacheLayerInfo {
     private static final Pattern FORMAT_REGEXP = Pattern.compile("^[^/]+/([^/]+)$");
@@ -17,9 +17,11 @@ public class TileCacheLayerInfo {
     private final float[] resolutions;
     private final float minX;
     private final float minY;
+    private final float maxX;
+    private final float maxY;
     private String extension;
 
-    public TileCacheLayerInfo(String resolutions, int width, int height, float minX, float minY, String format) {
+    public TileCacheLayerInfo(String resolutions, int width, int height, float minX, float minY, float maxX, float maxY, String format) {
         String[] resolutionsTxt = RESOLUTIONS_REGEXP.split(resolutions);
         this.resolutions = new float[resolutionsTxt.length];
         for (int i = 0; i < resolutionsTxt.length; ++i) {
@@ -30,6 +32,8 @@ public class TileCacheLayerInfo {
         this.height = height;
         this.minX = minX;
         this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
 
         Matcher formatMatcher = FORMAT_REGEXP.matcher(format);
         if (formatMatcher.matches()) {
@@ -42,7 +46,7 @@ public class TileCacheLayerInfo {
         }
     }
 
-    public TileCacheLayerInfo(PJsonArray resolutions, int width, int height, float minX, float minY, String extension) {
+    public TileCacheLayerInfo(PJsonArray resolutions, int width, int height, float minX, float minY, float maxX, float maxY, String extension) {
         this.resolutions = new float[resolutions.size()];
         for (int i = 0; i < resolutions.size(); ++i) {
             this.resolutions[i] = resolutions.getFloat(i);
@@ -52,6 +56,8 @@ public class TileCacheLayerInfo {
         this.height = height;
         this.minX = minX;
         this.minY = minY;
+        this.maxX = maxX;
+        this.maxY = maxY;
 
         this.extension = extension;
     }
@@ -132,6 +138,8 @@ public class TileCacheLayerInfo {
         sb.append(", height=").append(height);
         sb.append(", minX=").append(minX);
         sb.append(", minY=").append(minY);
+        sb.append(", maxX=").append(maxX);
+        sb.append(", maxY=").append(maxY);
         sb.append(", extension='").append(extension).append('\'');
         sb.append(", resolutions=").append(resolutions == null ? "null" : "");
         for (int i = 0; resolutions != null && i < resolutions.length; ++i) {
@@ -139,5 +147,10 @@ public class TileCacheLayerInfo {
         }
         sb.append('}');
         return sb.toString();
+    }
+
+    public boolean isVisible(float x1, float y1, float x2, float y2) {
+        return x1 >= minX && x1 <= maxX && y1 >= minY && y1 <= maxY &&
+                x2 >= minX && x2 <= maxX && y2 >= minY && y2 <= maxY;
     }
 }

@@ -44,29 +44,8 @@ public class ImageBlock extends ParagraphBlock {
         if (url.getPath().endsWith(".svg")) {
             drawSVG(context, params, paragraph, url);
         } else {
-            drawImage(context, params, paragraph, url);
+            PDFUtils.addImage(maxWidth, maxHeight, paragraph, url, getRotationRadian(context, params));
         }
-    }
-
-    private void drawImage(RenderingContext context, PJsonObject params, Paragraph paragraph, URI url) throws BadElementException {
-        final Image image;
-        try {
-            image = Image.getInstance(url.toString());
-        } catch (IOException e) {
-            throw new InvalidValueException("url", url.toString(), e);
-        }
-
-        if (maxWidth != 0.0f || maxHeight != 0.0f) {
-            image.scaleToFit(maxWidth != 0.0f ? maxWidth : Integer.MAX_VALUE, maxHeight != 0.0f ? maxHeight : Integer.MAX_VALUE);
-        }
-
-        final float rotation = getRotationRadian(context, params);
-        if (rotation != 0.0F) {
-            image.setRotation(rotation);
-        }
-
-        Chunk chunk = new Chunk(image, 0f, 0f, true);
-        paragraph.add(chunk);
     }
 
     private float getRotationRadian(RenderingContext context, PJsonObject params) {

@@ -37,6 +37,9 @@ public class BitmapMapRenderer extends MapRenderer {
 
             for (int i = 0; i < uris.size(); i++) {
                 URI uri = uris.get(i);
+                if (uri == null) {
+                    continue;
+                }
 
                 final int line = i / nbTilesHorizontal;
                 final int col = i % nbTilesHorizontal;

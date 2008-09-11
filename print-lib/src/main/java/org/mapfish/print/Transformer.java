@@ -272,10 +272,10 @@ public class Transformer implements Cloneable {
     }
 
     public float getResolution() {
-        return 1/pixelPerGeoUnit;
+        return 1 / pixelPerGeoUnit;
     }
 
     public void setResolution(float resolution) {
-        this.pixelPerGeoUnit = 1/resolution;
+        this.pixelPerGeoUnit = 1 / resolution;
     }
 }

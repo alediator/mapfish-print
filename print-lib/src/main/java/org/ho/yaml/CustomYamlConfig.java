@@ -12,16 +12,7 @@ import org.mapfish.print.config.ColorWrapper;
 import org.mapfish.print.config.CustomEnumWrapper;
 import org.mapfish.print.config.DnsHostMatcher;
 import org.mapfish.print.config.LocalHostMatcher;
-import org.mapfish.print.config.layout.AttributesBlock;
-import org.mapfish.print.config.layout.ColumnDefs;
-import org.mapfish.print.config.layout.ColumnsBlock;
-import org.mapfish.print.config.layout.HorizontalAlign;
-import org.mapfish.print.config.layout.ImageBlock;
-import org.mapfish.print.config.layout.Layouts;
-import org.mapfish.print.config.layout.MapBlock;
-import org.mapfish.print.config.layout.ScalebarBlock;
-import org.mapfish.print.config.layout.TextBlock;
-import org.mapfish.print.config.layout.VerticalAlign;
+import org.mapfish.print.config.layout.*;
 import org.mapfish.print.scalebar.Direction;
 import org.mapfish.print.scalebar.Type;
 import org.mapfish.print.utils.DistanceUnit;
@@ -57,6 +48,7 @@ public class CustomYamlConfig extends YamlConfig {
         transfers.put("map", MapBlock.class.getName());
         transfers.put("attributes", AttributesBlock.class.getName());
         transfers.put("scalebar", ScalebarBlock.class.getName());
+        transfers.put("legends", LegendsBlock.class.getName());
 
         //hosts matchers
         transfers.put("localMatch", LocalHostMatcher.class.getName());

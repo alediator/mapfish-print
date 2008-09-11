@@ -25,6 +25,11 @@ public class ColorWrapperTest extends PrintTestCase {
         wrapper.setObject("#1256b823");
         assertEquals(new Color(0x12, 0x56, 0xb8, 0x23), wrapper.getObject());
 
+        wrapper.setObject("#FF56b823");
+        assertEquals(new Color(0xFF, 0x56, 0xb8, 0x23), wrapper.getObject());
+
+        wrapper.setObject("#FFFFFFFF");
+        assertEquals(new Color(0xFF, 0xFF, 0xFF, 0xFF), wrapper.getObject());
     }
 
     public void testText() {

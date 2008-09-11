@@ -23,7 +23,7 @@ public class TileCacheMapReader extends TileableMapReader {
         this.layer = params.getString("layer");
         PJsonArray maxExtent = params.getJSONArray("maxExtent");
         PJsonArray tileSize = params.getJSONArray("tileSize");
-        tileCacheLayerInfo = new TileCacheLayerInfo(params.getJSONArray("resolutions"), tileSize.getInt(0), tileSize.getInt(1), maxExtent.getFloat(0), maxExtent.getFloat(1), params.getString("extension"));
+        tileCacheLayerInfo = new TileCacheLayerInfo(params.getJSONArray("resolutions"), tileSize.getInt(0), tileSize.getInt(1), maxExtent.getFloat(0), maxExtent.getFloat(1), maxExtent.getFloat(2), maxExtent.getFloat(3), params.getString("extension"));
     }
 
     protected MapRenderer.Format getFormat() {

@@ -1,10 +1,6 @@
 package org.mapfish.print;
 
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Element;
-import com.lowagie.text.Image;
-import com.lowagie.text.Phrase;
+import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.config.layout.Block;
@@ -16,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.URI;
+import java.io.IOException;
 
 public class PDFUtils {
     public static Image createEmptyImage(float width, float height) throws BadElementException {
@@ -78,8 +76,7 @@ public class PDFUtils {
             return new Date().toString();
         } else if (key.startsWith("now ")) {
             return formatTime(context, key);
-        } else
-        if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
+        } else if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
             return format(context, params, matcher);
         } else if (key.equals("configDir")) {
             return context.getConfigDir();
@@ -166,5 +163,25 @@ public class PDFUtils {
             }
         }, context);
         return cell[0];
+    }
+
+    public static void addImage(float maxWidth, float maxHeight, Paragraph target, URI url, float rotation) throws BadElementException {
+        final Image image;
+        try {
+            image = Image.getInstance(url.toString());
+        } catch (IOException e) {
+            throw new InvalidValueException("url", url.toString(), e);
+        }
+
+        if (maxWidth != 0.0f || maxHeight != 0.0f) {
+            image.scaleToFit(maxWidth != 0.0f ? maxWidth : Integer.MAX_VALUE, maxHeight != 0.0f ? maxHeight : Integer.MAX_VALUE);
+        }
+
+        if (rotation != 0.0F) {
+            image.setRotation(rotation);
+        }
+
+        Chunk chunk = new Chunk(image, 0f, 0f, true);
+        target.add(chunk);
     }
 }

@@ -19,7 +19,7 @@ public class Layout {
     private MainPage mainPage;
 
     public void render(PJsonObject params, RenderingContext context) throws DocumentException {
-        if(metaData!=null) {
+        if (metaData != null) {
             metaData.render(params, context);
         }
 

@@ -105,10 +105,12 @@ public class WMSServerInfo {
                 Element bbox = DOMUtil.getFirstChildElement(layer, "BoundingBox");
                 float minX = Float.parseFloat(DOMUtil.getAttrValue(bbox, "minx"));
                 float minY = Float.parseFloat(DOMUtil.getAttrValue(bbox, "miny"));
+                float maxX = Float.parseFloat(DOMUtil.getAttrValue(bbox, "maxx"));
+                float maxY = Float.parseFloat(DOMUtil.getAttrValue(bbox, "maxy"));
                 String format = DOMUtil.getChildText(DOMUtil.getFirstChildElement(tileSet, "Format"));
 
                 String layerName = DOMUtil.getChildText(DOMUtil.getFirstChildElement(layer, "Name"));
-                final TileCacheLayerInfo info = new TileCacheLayerInfo(resolutions, width, height, minX, minY, format);
+                final TileCacheLayerInfo info = new TileCacheLayerInfo(resolutions, width, height, minX, minY, maxX, maxY, format);
                 result.tileCacheLayers.put(layerName, info);
             }
         }

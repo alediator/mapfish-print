@@ -4,6 +4,7 @@ import com.lowagie.text.Font;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
 import org.mapfish.print.PDFCustomBlocks;
+import org.mapfish.print.ChunkDrawer;
 import org.mapfish.print.config.layout.ScalebarBlock;
 
 import java.awt.geom.AffineTransform;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * Base class for drawing a scale bar.
  */
-public abstract class ScalebarDrawer implements PDFCustomBlocks.ChunkDrawer {
+public abstract class ScalebarDrawer extends ChunkDrawer {
     protected final ScalebarBlock block;
     protected final List<Label> labels;
     protected final int barSize;
@@ -25,10 +26,11 @@ public abstract class ScalebarDrawer implements PDFCustomBlocks.ChunkDrawer {
     private final float maxLabelWidth;
     private final float maxLabelHeight;
 
-    public ScalebarDrawer(ScalebarBlock block, List<Label> labels, int barSize,
+    public ScalebarDrawer(PDFCustomBlocks customBlocks, ScalebarBlock block, List<Label> labels, int barSize,
                           int labelDistance, int subIntervals, float intervalWidth, Font pdfFont,
                           float leftLabelMargin, float rightLabelMargin, float maxLabelWidth, float maxLabelHeight
     ) {
+        super(customBlocks);
         this.block = block;
         this.labels = labels;
         this.barSize = barSize;
@@ -42,23 +44,23 @@ public abstract class ScalebarDrawer implements PDFCustomBlocks.ChunkDrawer {
         this.maxLabelHeight = maxLabelHeight;
     }
 
-    public static ScalebarDrawer create(ScalebarBlock block, Type type, List<Label> labels,
+    public static ScalebarDrawer create(PDFCustomBlocks customBlocks, ScalebarBlock block, Type type, List<Label> labels,
                                         int barSize, int labelDistance,
                                         int subIntervals, float intervalWidth, Font pdfFont, float leftLabelMargin,
                                         float rightLabelMargin, float maxLabelWidth, float maxLabelHeight) {
         switch (type) {
             case BAR:
-                return new BarScalebarDrawer(block, labels, barSize, labelDistance, subIntervals, intervalWidth, pdfFont, leftLabelMargin, rightLabelMargin, maxLabelWidth, maxLabelHeight);
+                return new BarScalebarDrawer(customBlocks, block, labels, barSize, labelDistance, subIntervals, intervalWidth, pdfFont, leftLabelMargin, rightLabelMargin, maxLabelWidth, maxLabelHeight);
             case BAR_SUB:
-                return new BarSubScalebarDrawer(block, labels, barSize, labelDistance, subIntervals, intervalWidth, pdfFont, leftLabelMargin, rightLabelMargin, maxLabelWidth, maxLabelHeight);
+                return new BarSubScalebarDrawer(customBlocks, block, labels, barSize, labelDistance, subIntervals, intervalWidth, pdfFont, leftLabelMargin, rightLabelMargin, maxLabelWidth, maxLabelHeight);
             case LINE:
-                return new LineScalebarDrawer(block, labels, barSize, labelDistance, subIntervals, intervalWidth, pdfFont, leftLabelMargin, rightLabelMargin, maxLabelWidth, maxLabelHeight);
+                return new LineScalebarDrawer(customBlocks, block, labels, barSize, labelDistance, subIntervals, intervalWidth, pdfFont, leftLabelMargin, rightLabelMargin, maxLabelWidth, maxLabelHeight);
             default:
                 throw new RuntimeException("Unknown type: " + type);
         }
     }
 
-    public void render(Rectangle rectangle, PdfContentByte dc) {
+    public void renderImpl(Rectangle rectangle, PdfContentByte dc) {
         dc.saveState();
         try {
             //sets the transformation for drawing the labels and do it
@@ -83,7 +85,7 @@ public abstract class ScalebarDrawer implements PDFCustomBlocks.ChunkDrawer {
             lineTransform.concatenate(rotate);
             lineTransform.translate(leftLabelMargin, labelDistance + maxLabelHeight);
             dc.transform(lineTransform);
-            dc.setLineWidth(block.getLineWidth());
+            dc.setLineWidth((float) block.getLineWidth());
             dc.setColorStroke(block.getColor());
             drawBar(dc);
         } finally {
@@ -136,11 +138,13 @@ public abstract class ScalebarDrawer implements PDFCustomBlocks.ChunkDrawer {
                 offsetH = -label.width / 2;
                 offsetV = -maxLabelHeight;
 
-            } else if (block.getTextDirection().getAngle() == -block.getBarDirection().getAngle()) {
+            } else
+            if (block.getTextDirection().getAngle() == -block.getBarDirection().getAngle()) {
                 //opposite direction
                 offsetH = label.width / 2;
                 offsetV = 0;
-            } else if (block.getTextDirection().getAngle() - block.getBarDirection().getAngle() < 0) {
+            } else
+            if (block.getTextDirection().getAngle() - block.getBarDirection().getAngle() < 0) {
                 offsetH = label.width / 2;
                 offsetV = -label.height;
             } else {

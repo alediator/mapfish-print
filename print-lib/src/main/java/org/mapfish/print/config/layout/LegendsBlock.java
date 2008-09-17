@@ -12,16 +12,16 @@ import com.lowagie.text.pdf.BaseFont;
 import java.net.URI;
 
 public class LegendsBlock extends Block {
-    private float maxIconWidth = 8f;
-    private float maxIconHeight = 8f;
-    private float classIndentation = 20f;
-    private float layerSpace = 5f;
-    private float classSpace = 2f;
+    private double maxIconWidth = 8f;
+    private double maxIconHeight = 8f;
+    private double classIndentation = 20f;
+    private double layerSpace = 5f;
+    private double classSpace = 2f;
 
     private String layerFont = "Helvetica";
-    protected float layerFontSize = 10f;
+    protected double layerFontSize = 10f;
     private String classFont = "Helvetica";
-    protected float classFontSize = 8f;
+    protected double classFontSize = 8f;
     private String fontEncoding = BaseFont.WINANSI;
 
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
@@ -35,9 +35,9 @@ public class LegendsBlock extends Block {
         if (legends != null && legends.size() > 0) {
             for (int i = 0; i < legends.size(); ++i) {
                 PJsonObject layer = legends.getJSONObject(i);
-                final PdfPCell cell = createLine(0f, layer, layerPdfFont);
+                final PdfPCell cell = createLine(0.0, layer, layerPdfFont);
                 if (i > 0) {
-                    cell.setPaddingTop(layerSpace);
+                    cell.setPaddingTop((float) layerSpace);
                 }
                 table.addCell(cell);
 
@@ -45,7 +45,7 @@ public class LegendsBlock extends Block {
                 for (int j = 0; j < classes.size(); ++j) {
                     PJsonObject clazz = classes.getJSONObject(j);
                     final PdfPCell classCell = createLine(classIndentation, clazz, classPdfFont);
-                    classCell.setPaddingTop(classSpace);
+                    classCell.setPaddingTop((float) classSpace);
                     table.addCell(classCell);
                 }
             }
@@ -54,14 +54,14 @@ public class LegendsBlock extends Block {
         target.add(table);
     }
 
-    private PdfPCell createLine(float indent, PJsonObject node, Font pdfFont) throws BadElementException {
+    private PdfPCell createLine(double indent, PJsonObject node, Font pdfFont) throws BadElementException {
         final String name = node.getString("name");
         final String icon = node.optString("icon");
 
         final Paragraph result = new Paragraph();
         result.setFont(pdfFont);
         if (icon != null) {
-            PDFUtils.addImage(maxIconWidth, maxIconHeight, result, URI.create(icon), 0.0f);
+            result.add(PDFUtils.createImage(maxIconWidth, maxIconHeight, URI.create(icon), 0.0f));
             result.add(" ");
         }
         result.add(name);
@@ -69,7 +69,7 @@ public class LegendsBlock extends Block {
         final PdfPCell cell = new PdfPCell(result);
         cell.setBorder(PdfPCell.NO_BORDER);
         cell.setPadding(0f);
-        cell.setPaddingLeft(indent);
+        cell.setPaddingLeft((float) indent);
 
         if (getBackgroundColor() != null) {
             cell.setBackgroundColor(getBackgroundColor());
@@ -78,15 +78,15 @@ public class LegendsBlock extends Block {
         return cell;
     }
 
-    public void setMaxIconWidth(float maxIconWidth) {
+    public void setMaxIconWidth(double maxIconWidth) {
         this.maxIconWidth = maxIconWidth;
     }
 
-    public void setMaxIconHeight(float maxIconHeight) {
+    public void setMaxIconHeight(double maxIconHeight) {
         this.maxIconHeight = maxIconHeight;
     }
 
-    public void setClassIndentation(float classIndentation) {
+    public void setClassIndentation(double classIndentation) {
         this.classIndentation = classIndentation;
     }
 
@@ -94,7 +94,7 @@ public class LegendsBlock extends Block {
         this.classFont = classFont;
     }
 
-    public void setClassFontSize(float classFontSize) {
+    public void setClassFontSize(double classFontSize) {
         this.classFontSize = classFontSize;
     }
 
@@ -103,18 +103,18 @@ public class LegendsBlock extends Block {
     }
 
     protected Font getLayerPdfFont() {
-        return FontFactory.getFont(layerFont, fontEncoding, layerFontSize);
+        return FontFactory.getFont(layerFont, fontEncoding, (float) layerFontSize);
     }
 
     protected Font getClassPdfFont() {
-        return FontFactory.getFont(classFont, fontEncoding, classFontSize);
+        return FontFactory.getFont(classFont, fontEncoding, (float) classFontSize);
     }
 
-    public void setLayerSpace(float layerSpace) {
+    public void setLayerSpace(double layerSpace) {
         this.layerSpace = layerSpace;
     }
 
-    public void setClassSpace(float classSpace) {
+    public void setClassSpace(double classSpace) {
         this.classSpace = classSpace;
     }
 
@@ -122,7 +122,7 @@ public class LegendsBlock extends Block {
         this.layerFont = layerFont;
     }
 
-    public void setLayerFontSize(float layerFontSize) {
+    public void setLayerFontSize(double layerFontSize) {
         this.layerFontSize = layerFontSize;
     }
 

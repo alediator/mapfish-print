@@ -18,11 +18,11 @@ public class ColumnDef {
         this.cell = cell;
     }
 
-    public PdfPCell createHeaderPdfCell(PJsonObject params, RenderingContext context) throws DocumentException {
-        return PDFUtils.createCell(params, context, header);
+    public PdfPCell createHeaderPdfCell(PJsonObject params, RenderingContext context, int col, int nbRows, int nbCols, TableConfig config) throws DocumentException {
+        return PDFUtils.createCell(params, context, header, 0, col, nbRows, nbCols, config);
     }
 
-    public PdfPCell createContentPdfCell(PJsonObject params, RenderingContext context) throws DocumentException {
-        return PDFUtils.createCell(params, context, cell);
+    public PdfPCell createContentPdfCell(PJsonObject params, RenderingContext context, int row, int col, int nbRows, int nbCols, TableConfig config) throws DocumentException {
+        return PDFUtils.createCell(params, context, cell, row, col, nbRows, nbCols, config);
     }
 }

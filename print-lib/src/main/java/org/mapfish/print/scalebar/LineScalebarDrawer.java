@@ -3,6 +3,7 @@ package org.mapfish.print.scalebar;
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.PdfContentByte;
 import org.mapfish.print.config.layout.ScalebarBlock;
+import org.mapfish.print.PDFCustomBlocks;
 
 import java.util.List;
 
@@ -11,11 +12,11 @@ import java.util.List;
  */
 
 public class LineScalebarDrawer extends ScalebarDrawer {
-    public LineScalebarDrawer(ScalebarBlock block, List<Label> labels, int barSize,
+    public LineScalebarDrawer(PDFCustomBlocks customBlocks, ScalebarBlock block, List<Label> labels, int barSize,
                               int labelDistance, int subIntervals, float intervalWidth, Font pdfFont,
                               float leftLabelMargin, float rightLabelMargin, float maxLabelWidth,
                               float maxLabelHeight) {
-        super(block, labels, barSize, labelDistance, subIntervals, intervalWidth,
+        super(customBlocks, block, labels, barSize, labelDistance, subIntervals, intervalWidth,
                 pdfFont, leftLabelMargin, rightLabelMargin, maxLabelWidth, maxLabelHeight);
     }
 

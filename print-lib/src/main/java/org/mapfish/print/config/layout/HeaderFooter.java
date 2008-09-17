@@ -31,7 +31,7 @@ public class HeaderFooter {
 
     public void render(final Rectangle rectangle, PdfContentByte dc, PJsonObject params, RenderingContext context) {
         try {
-            final PdfPTable table = PDFUtils.buildTable(items, params, context, 1/*multiple items are arranged by lines*/);
+            final PdfPTable table = PDFUtils.buildTable(items, params, context, 1/*multiple items are arranged by lines*/, null);
 
             table.setTotalWidth(rectangle.getWidth());
             table.writeSelectedRows(0, -1, rectangle.getLeft(), rectangle.getTop(), dc);

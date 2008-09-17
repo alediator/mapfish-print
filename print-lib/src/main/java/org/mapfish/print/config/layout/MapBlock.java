@@ -6,6 +6,9 @@ import com.lowagie.text.Image;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfPTableEvent;
+import com.lowagie.text.pdf.PdfPCell;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.mapfish.print.InvalidJsonValueException;
@@ -28,7 +31,7 @@ public class MapBlock extends Block {
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
         Transformer transformer = createTransformer(context, params);
 
-        final MapChunkDrawer drawer = new MapChunkDrawer(transformer, overviewMap, params, context, getBackgroundColor());
+        final MapChunkDrawer drawer = new MapChunkDrawer(context.getCustomBlocks(), transformer, overviewMap, params, context, getBackgroundColor());
 
         if (isAbsolute()) {
             context.getCustomBlocks().addAbsoluteDrawer(new PDFCustomBlocks.AbsoluteDrawer() {
@@ -38,18 +41,7 @@ public class MapBlock extends Block {
                 }
             });
         } else {
-            //create an empty image just for reserving the room for the map
-            Image background = PDFUtils.createEmptyImage(transformer.getPaperW(), transformer.getPaperH());
-
-            Chunk mapChunk = new Chunk(background, 0f, 0f, true);
-
-            //register a drawer that will do the job once the position of the map is known
-            context.getCustomBlocks().addChunkDrawer(mapChunk, drawer);
-
-            final Paragraph mapParagraph = new Paragraph(mapChunk);
-            mapParagraph.setAlignment(Paragraph.ALIGN_CENTER);
-            mapParagraph.setSpacingAfter(spacingAfter);
-            target.add(mapParagraph);
+            target.add(PDFUtils.createPlaceholderTable(transformer.getPaperW(), transformer.getPaperH(), spacingAfter, drawer, align, context.getCustomBlocks()));
         }
     }
 

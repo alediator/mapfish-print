@@ -2,10 +2,7 @@ package org.mapfish.print.map;
 
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
-import org.mapfish.print.InvalidJsonValueException;
-import org.mapfish.print.PDFCustomBlocks;
-import org.mapfish.print.RenderingContext;
-import org.mapfish.print.Transformer;
+import org.mapfish.print.*;
 import org.mapfish.print.map.readers.MapReader;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
@@ -19,7 +16,7 @@ import java.util.List;
 /**
  * Special drawer for map chunks.
  */
-public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
+public class MapChunkDrawer extends ChunkDrawer {
     private final Transformer transformer;
     private final double overviewMap;
     private final PJsonObject params;
@@ -27,7 +24,8 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
     private final Color backgroundColor;
 
 
-    public MapChunkDrawer(Transformer transformer, double overviewMap, PJsonObject params, RenderingContext context, Color backgroundColor) {
+    public MapChunkDrawer(PDFCustomBlocks customBlocks, Transformer transformer, double overviewMap, PJsonObject params, RenderingContext context, Color backgroundColor) {
+        super(customBlocks);
         this.transformer = transformer;
         this.overviewMap = overviewMap;
         this.params = params;
@@ -35,7 +33,7 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
         this.backgroundColor = backgroundColor;
     }
 
-    public void render(Rectangle rectangle, PdfContentByte dc) {
+    public void renderImpl(Rectangle rectangle, PdfContentByte dc) {
         final PJsonObject parent = (PJsonObject) params.getParent().getParent();
         final PJsonArray layers = parent.getJSONArray("layers");
         String srs = parent.getString("srs");
@@ -57,7 +55,7 @@ public class MapChunkDrawer implements PDFCustomBlocks.ChunkDrawer {
             throw new RuntimeException("The map width on the paper is wrong");
         }
         if (Math.abs(rectangle.getHeight() - transformer.getPaperH()) > 0.2) {
-            throw new RuntimeException("The map height on the paper is wrong");
+            throw new RuntimeException("The map height on the paper is wrong (" + rectangle.getHeight() + "!=" + transformer.getPaperH() + ")");
         }
 
         //create the readers/renderers

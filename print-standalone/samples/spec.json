@@ -25,10 +25,13 @@
             mapTitle: "First map",
             comment: "This is the first page selected by the user.",
             rotation: 0,
-            data: [
-                {id:1, name: 'blah', icon: 'icon_pan'},
-                {id:2, name: 'blip', icon: 'icon_zoomin'}
-            ]
+            data: {
+                data: [
+                    {id:1, name: 'blah', icon: 'icon_pan'},
+                    {id:2, name: 'blip', icon: 'icon_zoomin'}
+                ],
+                columns: ['id', 'name', 'icon']
+            }
         },
         {
             center: [6, 45.5],

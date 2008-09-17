@@ -10,8 +10,8 @@ import java.awt.*;
  * Base class for blocks that can be found in "items" arrays.
  */
 public abstract class Block {
-    private HorizontalAlign align = HorizontalAlign.LEFT;
-    private VerticalAlign vertAlign = VerticalAlign.MIDDLE;
+    protected HorizontalAlign align = null;
+    private VerticalAlign vertAlign = null;
     private Color backgroundColor = null;
 
     public Block() {

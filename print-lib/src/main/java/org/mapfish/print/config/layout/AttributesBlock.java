@@ -13,37 +13,44 @@ public class AttributesBlock extends Block {
     private String source;
     private ColumnDefs columnDefs = new ColumnDefs();
 
+    private TableConfig tableConfig = null;
+
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
-        PJsonArray data = params.getJSONArray(source);
-        if (data.size() == 0) {
+        PJsonObject sourceJson = params.optJSONObject(source);
+        if (sourceJson == null) {
+            sourceJson = context.getGlobalParams().optJSONObject(source);
+        }
+        if (sourceJson == null || sourceJson.size() == 0) {
             return;
         }
-        PJsonObject firstLine = data.getJSONObject(0);
+        PJsonArray data = sourceJson.optJSONArray("data");
+        PJsonArray firstLine = sourceJson.getJSONArray("columns");
 
         final PdfPTable table = new PdfPTable(firstLine.size());
         table.setWidthPercentage(100f);
 
-        Iterator<String> cols = firstLine.keys();
-        while (cols.hasNext()) {
-            String name = cols.next();
+        int nbCols = firstLine.size();
+        int nbRows = data.size() + 1;
+        for (int colNum = 0; colNum < firstLine.size(); ++colNum) {
+            String name = firstLine.getString(colNum);
             ColumnDef colDef = columnDefs.get(name);
-            if (colDef == null) {
-                throw new InvalidJsonValueException(firstLine, "key", name);
+            if (colDef != null) {
+                table.addCell(colDef.createHeaderPdfCell(params, context, colNum, nbRows, nbCols, tableConfig));
+            } else {
+                //noinspection ThrowableInstanceNeverThrown
+                context.addError(new InvalidJsonValueException(firstLine, name, "Unknown column"));
             }
-            table.addCell(colDef.createHeaderPdfCell(params, context));
         }
         table.setHeaderRows(1);
 
         for (int rowNum = 0; rowNum < data.size(); ++rowNum) {
             PJsonObject row = data.getJSONObject(rowNum);
-            cols = firstLine.keys();
-            while (cols.hasNext()) {
-                String name = cols.next();
+            for (int colNum = 0; colNum < firstLine.size(); ++colNum) {
+                String name = firstLine.getString(colNum);
                 ColumnDef colDef = columnDefs.get(name);
-                if (colDef == null) {
-                    throw new InvalidJsonValueException(firstLine, "key", name);
+                if (colDef != null) {
+                    table.addCell(colDef.createContentPdfCell(row, context, rowNum + 1, colNum, nbRows, nbCols, tableConfig));
                 }
-                table.addCell(colDef.createContentPdfCell(row, context));
             }
         }
         target.add(table);
@@ -55,5 +62,9 @@ public class AttributesBlock extends Block {
 
     public void setColumnDefs(ColumnDefs columnDefs) {
         this.columnDefs = columnDefs;
+    }
+
+    public void setTableConfig(TableConfig tableConfig) {
+        this.tableConfig = tableConfig;
     }
 }

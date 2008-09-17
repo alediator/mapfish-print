@@ -1,18 +1,9 @@
 package org.mapfish.print.config.layout;
 
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.Chunk;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.Image;
-import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.BaseFont;
-import org.mapfish.print.InvalidJsonValueException;
-import org.mapfish.print.InvalidValueException;
-import org.mapfish.print.PDFCustomBlocks;
-import org.mapfish.print.PDFUtils;
-import org.mapfish.print.RenderingContext;
+import org.mapfish.print.*;
 import org.mapfish.print.scalebar.Direction;
 import org.mapfish.print.scalebar.Label;
 import org.mapfish.print.scalebar.ScalebarDrawer;
@@ -27,7 +18,7 @@ import java.util.List;
 /**
  * Block for drawing a scale bar
  */
-public class ScalebarBlock extends ParagraphFontBlock {
+public class ScalebarBlock extends FontBlock {
     private int maxSize = 150;
 
     private Type type = Type.LINE;
@@ -53,10 +44,10 @@ public class ScalebarBlock extends ParagraphFontBlock {
      */
     private Color barBgColor = null;
 
-    private Float lineWidth = null;
+    private Double lineWidth = null;
 
 
-    protected void fillParagraph(RenderingContext context, PJsonObject params, Paragraph paragraph) throws DocumentException {
+    public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
         final PJsonObject parent = (PJsonObject) params.getParent().getParent();
         final DistanceUnit mapUnits = DistanceUnit.fromString(parent.getString("units"));
         if (mapUnits == null) {
@@ -69,13 +60,13 @@ public class ScalebarBlock extends ParagraphFontBlock {
         final double intervalDistance = getNearestNiceValue(maxWidthIntervaleDistance, scaleUnit);
 
         final Font pdfFont = getPdfFont();
-        tryLayout(context, paragraph, pdfFont, scaleUnit, scale, intervalDistance, 0);
+        tryLayout(context, target, pdfFont, scaleUnit, scale, intervalDistance, 0);
     }
 
     /**
      * Try recursively to find the correct layout.
      */
-    private void tryLayout(RenderingContext context, Paragraph paragraph, Font pdfFont, DistanceUnit scaleUnit, int scale, double intervalDistance, int tryNumber) throws DocumentException {
+    private void tryLayout(RenderingContext context, PdfElement target, Font pdfFont, DistanceUnit scaleUnit, int scale, double intervalDistance, int tryNumber) throws DocumentException {
         if (tryNumber > 3) {
             //noinspection ThrowableInstanceNeverThrown
             context.addError(new InvalidValueException("maxSize too small", Integer.toString(maxSize)));
@@ -113,12 +104,12 @@ public class ScalebarBlock extends ParagraphFontBlock {
 
         if (intervals * intervalPaperWidth + leftLabelMargin + rightLabelMargin <= maxSize) {
             //the layout fits the maxSize
-            doLayout(context, paragraph, pdfFont, labels, intervalPaperWidth, scaleUnit, intervalDistance, intervalUnit,
+            doLayout(context, target, pdfFont, labels, intervalPaperWidth, scaleUnit, intervalDistance, intervalUnit,
                     leftLabelMargin, rightLabelMargin);
         } else {
             //not enough room because of the labels, try a smaller bar
             double nextIntervalDistance = getNearestNiceValue(intervalDistance * 0.9, scaleUnit);
-            tryLayout(context, paragraph, pdfFont, scaleUnit, scale, nextIntervalDistance, tryNumber + 1);
+            tryLayout(context, target, pdfFont, scaleUnit, scale, nextIntervalDistance, tryNumber + 1);
         }
     }
 
@@ -127,9 +118,9 @@ public class ScalebarBlock extends ParagraphFontBlock {
      * <p/>
      * Creates the drawer and schedule it for drawing when the position of the block is known.
      */
-    private void doLayout(RenderingContext context, Paragraph paragraph, Font pdfFont, List<Label> labels,
+    private void doLayout(RenderingContext context, PdfElement target, Font pdfFont, List<Label> labels,
                           float intervalWidth, DistanceUnit scaleUnit, double intervalDistance,
-                          DistanceUnit intervalUnit, float leftLabelPaperMargin, float rightLabelPaperMargin) throws BadElementException {
+                          DistanceUnit intervalUnit, float leftLabelPaperMargin, float rightLabelPaperMargin) throws DocumentException {
         float maxLabelHeight = 0.0f;
         float maxLabelWidth = 0.0f;
         for (int i = 0; i < labels.size(); i++) {
@@ -137,25 +128,28 @@ public class ScalebarBlock extends ParagraphFontBlock {
             maxLabelHeight = Math.max(maxLabelHeight, label.height);
             maxLabelWidth = Math.max(maxLabelWidth, label.width);
         }
-        float width = intervalWidth * intervals + leftLabelPaperMargin + rightLabelPaperMargin;
-        float height = getBarSize() + getLabelDistance() + maxLabelHeight;
-        final Image background;
+        final float straightWidth = intervalWidth * intervals + leftLabelPaperMargin + rightLabelPaperMargin;
+        final float straightHeight = getBarSize() + getLabelDistance() + maxLabelHeight;
+        final float width;
+        final float height;
         if (barDirection == Direction.DOWN || barDirection == Direction.UP) {
-            background = PDFUtils.createEmptyImage(width, height);
+            width = straightWidth;
+            height = straightHeight;
         } else {
             //noinspection SuspiciousNameCombination
-            background = PDFUtils.createEmptyImage(height, width);
+            width = straightHeight;
+            //noinspection SuspiciousNameCombination
+            height = straightWidth;
         }
 
         int numSubIntervals = 1;
         if (subIntervals) {
             numSubIntervals = getNbSubIntervals(scaleUnit, intervalDistance, intervalUnit);
         }
-        PDFCustomBlocks.ChunkDrawer drawer = ScalebarDrawer.create(this, type, labels, getBarSize(), getLabelDistance(), numSubIntervals, intervalWidth, pdfFont, leftLabelPaperMargin, rightLabelPaperMargin, maxLabelWidth, maxLabelHeight);
 
-        Chunk mapChunk = new Chunk(background, 0f, 0f, true);
-        context.getCustomBlocks().addChunkDrawer(mapChunk, drawer);
-        paragraph.add(mapChunk);
+        ChunkDrawer drawer = ScalebarDrawer.create(context.getCustomBlocks(), this, type, labels, getBarSize(), getLabelDistance(),
+                numSubIntervals, intervalWidth, pdfFont, leftLabelPaperMargin, rightLabelPaperMargin, maxLabelWidth, maxLabelHeight);
+        target.add(PDFUtils.createPlaceholderTable(width, height, spacingAfter, drawer, align, context.getCustomBlocks()));
     }
 
     /**
@@ -268,7 +262,7 @@ public class ScalebarBlock extends ParagraphFontBlock {
         this.barBgColor = barBgColor;
     }
 
-    public void setLineWidth(Float lineWidth) {
+    public void setLineWidth(double lineWidth) {
         this.lineWidth = lineWidth;
     }
 
@@ -288,19 +282,19 @@ public class ScalebarBlock extends ParagraphFontBlock {
         }
     }
 
-    public float getFontSize() {
+    public double getFontSize() {
         if (fontSize != null) {
             return fontSize;
         } else {
-            return maxSize * 10.0f / 200.0f;
+            return maxSize * 10.0 / 200.0;
         }
     }
 
-    public Float getLineWidth() {
+    public double getLineWidth() {
         if (lineWidth != null) {
             return lineWidth;
         } else {
-            return maxSize / 150.0f;
+            return maxSize / 150.0;
         }
     }
 

@@ -27,6 +27,7 @@ public class CustomYamlConfig extends YamlConfig {
         Map<String, Object> handlers = new HashMap<String, Object>();
         handlers.put(Layouts.class.getName(), Layouts.Wrapper.class.getName());
         handlers.put(ColumnDefs.class.getName(), ColumnDefs.Wrapper.class.getName());
+        handlers.put(Exceptions.class.getName(), Exceptions.Wrapper.class.getName());
         handlers.put(Color.class.getName(), ColorWrapper.class.getName());
 
         //special enum parser

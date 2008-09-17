@@ -3,8 +3,7 @@ package org.mapfish.print;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
-import org.mapfish.print.config.layout.Block;
-import org.mapfish.print.config.layout.MapBlock;
+import org.mapfish.print.config.layout.*;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.text.SimpleDateFormat;
@@ -16,10 +15,45 @@ import java.net.URI;
 import java.io.IOException;
 
 public class PDFUtils {
-    public static Image createEmptyImage(float width, float height) throws BadElementException {
+    public static Image createEmptyImage(double width, double height) throws BadElementException {
         Image background = Image.getInstance(1, 1, 1, 1, new byte[]{0}, new int[]{0, 0});
-        background.scaleAbsolute(width, height);
+        background.scaleAbsolute((float) width, (float) height);
         return background;
+    }
+
+    /**
+     * When we have to do some custom drawing in a block that is layed out by
+     * iText, we first give an empty table with the good dimensions to iText,
+     * then iText will call a callback with the actual position. When that
+     * happens, we use the given drawer to do the actual drawing.
+     */
+    public static PdfPTable createPlaceholderTable(double width, double height, double spacingAfter,
+                                                   ChunkDrawer drawer, HorizontalAlign align,
+                                                   PDFCustomBlocks customBlocks) {
+        PdfPTable placeHolderTable = new PdfPTable(1);
+        placeHolderTable.setLockedWidth(true);
+        placeHolderTable.setTotalWidth((float) width);
+        final PdfPCell placeHolderCell = new PdfPCell();
+        placeHolderCell.setMinimumHeight((float) height);
+        placeHolderCell.setPadding(0f);
+        placeHolderCell.setBorder(PdfPCell.NO_BORDER);
+        placeHolderTable.addCell(placeHolderCell);
+        customBlocks.addChunkDrawer(drawer);
+        placeHolderTable.setTableEvent(drawer);
+        placeHolderTable.setComplete(true);
+
+        final PdfPCell surroundingCell = new PdfPCell(placeHolderTable);
+        surroundingCell.setPadding(0f);
+        surroundingCell.setBorder(PdfPCell.NO_BORDER);
+        if (align != null)
+            surroundingCell.setHorizontalAlignment(align.getCode());
+
+        PdfPTable surroundingTable = new PdfPTable(1);
+        surroundingTable.setSpacingAfter((float) spacingAfter);
+        surroundingTable.addCell(surroundingCell);
+        surroundingTable.setComplete(true);
+
+        return surroundingTable;
     }
 
     private static final Pattern VAR_REGEXP = Pattern.compile("\\$\\{([^}]+)\\}");
@@ -76,7 +110,8 @@ public class PDFUtils {
             return new Date().toString();
         } else if (key.startsWith("now ")) {
             return formatTime(context, key);
-        } else if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
+        } else
+        if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
             return format(context, params, matcher);
         } else if (key.equals("configDir")) {
             return context.getConfigDir();
@@ -131,19 +166,23 @@ public class PDFUtils {
         }
     }
 
-    public static PdfPTable buildTable(ArrayList<Block> items, PJsonObject params, RenderingContext context, int nbColumns) throws DocumentException {
-        final PdfPTable table = new PdfPTable(nbColumns > 0 ? nbColumns : items.size());
+    public static PdfPTable buildTable(ArrayList<Block> items, PJsonObject params, RenderingContext context, int nbColumns, TableConfig tableConfig) throws DocumentException {
+        nbColumns = nbColumns > 0 ? nbColumns : items.size();
+        int nbRows = (items.size() + nbColumns - 1) / nbColumns;
+        final PdfPTable table = new PdfPTable(nbColumns);
         table.setWidthPercentage(100f);
 
         for (int i = 0; i < items.size(); i++) {
             final Block block = items.get(i);
-            final PdfPCell cell = createCell(params, context, block);
+            final PdfPCell cell = createCell(params, context, block, i / nbColumns, i % nbColumns, nbRows, nbColumns, tableConfig);
             table.addCell(cell);
         }
+        table.setComplete(true);
         return table;
     }
 
-    public static PdfPCell createCell(PJsonObject params, RenderingContext context, final Block block) throws DocumentException {
+    public static PdfPCell createCell(PJsonObject params, RenderingContext context, final Block block, final int row,
+                                      final int col, final int nbRows, final int nbCols, final TableConfig tableConfig) throws DocumentException {
         final PdfPCell[] cell = new PdfPCell[1];
         block.render(params, new Block.PdfElement() {
             public void add(Element element) throws DocumentException {
@@ -155,9 +194,15 @@ public class PDFUtils {
                     cell[0] = new PdfPCell(phrase);
                 }
                 cell[0].setBorder(PdfPCell.NO_BORDER);
-                cell[0].setHorizontalAlignment(block.getAlign().getCode());
-                cell[0].setVerticalAlignment(block.getVertAlign().getCode());
-                if (!(block instanceof MapBlock) && block.getBackgroundColor() != null) {
+                cell[0].setPadding(0);
+                if (tableConfig != null) {
+                    tableConfig.apply(cell[0], row, col, nbRows, nbCols);
+                }
+                if (block.getAlign() != null)
+                    cell[0].setHorizontalAlignment(block.getAlign().getCode());
+                if (block.getVertAlign() != null)
+                    cell[0].setVerticalAlignment(block.getVertAlign().getCode());
+                if (!(block instanceof MapBlock) && !(block instanceof ScalebarBlock) && block.getBackgroundColor() != null) {
                     cell[0].setBackgroundColor(block.getBackgroundColor());
                 }
             }
@@ -165,7 +210,7 @@ public class PDFUtils {
         return cell[0];
     }
 
-    public static void addImage(float maxWidth, float maxHeight, Paragraph target, URI url, float rotation) throws BadElementException {
+    public static Chunk createImage(double maxWidth, double maxHeight, URI url, float rotation) throws BadElementException {
         final Image image;
         try {
             image = Image.getInstance(url.toString());
@@ -174,14 +219,13 @@ public class PDFUtils {
         }
 
         if (maxWidth != 0.0f || maxHeight != 0.0f) {
-            image.scaleToFit(maxWidth != 0.0f ? maxWidth : Integer.MAX_VALUE, maxHeight != 0.0f ? maxHeight : Integer.MAX_VALUE);
+            image.scaleToFit(maxWidth != 0.0 ? (float) maxWidth : Integer.MAX_VALUE, maxHeight != 0.0 ? (float) maxHeight : Integer.MAX_VALUE);
         }
 
         if (rotation != 0.0F) {
             image.setRotation(rotation);
         }
 
-        Chunk chunk = new Chunk(image, 0f, 0f, true);
-        target.add(chunk);
+        return new Chunk(image, 0f, 0f, true);
     }
 }

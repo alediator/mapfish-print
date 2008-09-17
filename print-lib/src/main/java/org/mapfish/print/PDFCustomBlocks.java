@@ -6,12 +6,7 @@ import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
 import com.lowagie.text.Rectangle;
-import com.lowagie.text.pdf.PdfAnnotation;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfImportedPage;
-import com.lowagie.text.pdf.PdfPageEventHelper;
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.*;
 import org.apache.log4j.Logger;
 import org.mapfish.print.config.layout.HeaderFooter;
 import org.mapfish.print.utils.PJsonObject;
@@ -29,10 +24,7 @@ import java.util.Map;
 public class PDFCustomBlocks extends PdfPageEventHelper {
     public static final Logger LOGGER = Logger.getLogger(PDFCustomBlocks.class);
 
-    private int ids = 0;
-
-    private final Map<String, DrawerHolder> drawers = new HashMap<String, DrawerHolder>();
-    private DrawerHolder last = null;
+    private ChunkDrawer last = null;
     private final PdfWriter writer;
     private final RenderingContext context;
     private HeaderFooter header;
@@ -56,29 +48,6 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
         this.writer = writer;
         this.context = context;
         writer.setPageEvent(this);
-    }
-
-    /**
-     * The callback called for every chunk having a generic tag set.
-     */
-    public void onGenericTag(PdfWriter writer, Document doc, Rectangle rectangle, String s) {
-        super.onGenericTag(writer, doc, rectangle, s);
-        DrawerHolder holder = drawers.remove(s);
-        if (holder != null) {
-            final PdfContentByte dc = writer.getDirectContent();
-            holder.chunkDrawer.render(rectangle, dc);
-            for (int i = 0; i < holder.others.size(); i++) {
-                AbsoluteDrawer absoluteDrawer = holder.others.get(i);
-                try {
-                    absoluteDrawer.render(dc);
-                } catch (DocumentException e) {
-                    addError(e);
-                }
-            }
-            if (holder == last) {
-                last = null;
-            }
-        }
     }
 
     public void onStartPage(PdfWriter writer, Document document) {
@@ -161,15 +130,19 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
     }
 
     /**
-     * Link a custom drawer and a chunk.
+     * Register a custom drawer.
      */
-    public void addChunkDrawer(Chunk chunk, ChunkDrawer chunkDrawer) {
-        int id = ids++;
-        final String idTxt = "map" + Integer.toString(id);
-        DrawerHolder holder = new DrawerHolder(chunkDrawer);
-        drawers.put(idTxt, holder);
-        chunk.setGenericTag(idTxt);
-        last = holder;
+    public void addChunkDrawer(ChunkDrawer chunkDrawer) {
+        last = chunkDrawer;
+    }
+
+    /**
+     * Called when a custom drawer has been rendered.
+     */
+    public void blockRendered(ChunkDrawer chunkDrawer) {
+        if (last == chunkDrawer) {
+            last = null;
+        }
     }
 
     /**
@@ -177,7 +150,8 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
      */
     public void addAbsoluteDrawer(AbsoluteDrawer chunkDrawer) throws DocumentException {
         if (last != null) {
-            last.others.add(chunkDrawer);
+            //a chunk drawer is scheduled, need to draw oneself after it.
+            last.addAbsoluteDrawer(chunkDrawer);
         } else {
             //no chunk drawer is scheduled. We can draw it right away.
             chunkDrawer.render(writer.getDirectContent());
@@ -208,29 +182,14 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
             totalPageNum = new TotalPageNum(writer, font);
         }
 
-        return totalPageNum.createPlaceHolder(this);
-    }
-
-    /**
-     * Base class for the chunk drawers
-     */
-    public static interface ChunkDrawer {
-        void render(Rectangle rectangle, PdfContentByte dc);
+        return totalPageNum.createPlaceHolder();
     }
 
     /**
      * Base class for the absolute drawers
      */
-    public static interface AbsoluteDrawer {
-        void render(PdfContentByte dc) throws DocumentException;
+    public static abstract class AbsoluteDrawer {
+        public abstract void render(PdfContentByte dc) throws DocumentException;
     }
 
-    private static class DrawerHolder {
-        private final ChunkDrawer chunkDrawer;
-        private final List<AbsoluteDrawer> others = new ArrayList<AbsoluteDrawer>();
-
-        public DrawerHolder(ChunkDrawer chunkDrawer) {
-            this.chunkDrawer = chunkDrawer;
-        }
-    }
 }

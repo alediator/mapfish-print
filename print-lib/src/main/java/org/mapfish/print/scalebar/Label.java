@@ -23,11 +23,11 @@ public class Label {
      */
     public final float height;
 
-    public Label(float paperOffset, String label, BaseFont font, float fontSize, boolean rotated) {
+    public Label(float paperOffset, String label, BaseFont font, double fontSize, boolean rotated) {
         this.paperOffset = paperOffset;
         this.label = label;
-        final float textWidth = font.getWidthPoint(label, fontSize);
-        final float textHeight = font.getAscentPoint(label, fontSize) - font.getDescentPoint(label, fontSize);
+        final float textWidth = font.getWidthPoint(label, (float) fontSize);
+        final float textHeight = font.getAscentPoint(label, (float) fontSize) - font.getDescentPoint(label, (float) fontSize);
         if (rotated) {
             this.height = textWidth;
             this.width = textHeight;

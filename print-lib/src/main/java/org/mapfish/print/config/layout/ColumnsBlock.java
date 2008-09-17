@@ -13,20 +13,22 @@ import java.util.ArrayList;
 public class ColumnsBlock extends Block {
     private ArrayList<Block> items = new ArrayList<Block>();
     private int[] widths = null;
-    private float spacingAfter = 0.0f;
+    private double spacingAfter = 0.0f;
     private int absoluteX = Integer.MIN_VALUE;
     private int absoluteY = Integer.MIN_VALUE;
     private int width = Integer.MIN_VALUE;
     private int nbColumns = Integer.MIN_VALUE;
+    private TableConfig config;
 
     public void render(final PJsonObject params, PdfElement target, final RenderingContext context) throws DocumentException {
 
         if (isAbsolute()) {
             context.getCustomBlocks().addAbsoluteDrawer(new PDFCustomBlocks.AbsoluteDrawer() {
                 public void render(PdfContentByte dc) throws DocumentException {
-                    final PdfPTable table = PDFUtils.buildTable(items, params, context, nbColumns);
+                    final PdfPTable table = PDFUtils.buildTable(items, params, context, nbColumns, config);
 
                     table.setTotalWidth(width);
+                    table.setLockedWidth(true);
 
                     if (widths != null) {
                         table.setWidths(widths);
@@ -36,13 +38,13 @@ public class ColumnsBlock extends Block {
                 }
             });
         } else {
-            final PdfPTable table = PDFUtils.buildTable(items, params, context, nbColumns);
+            final PdfPTable table = PDFUtils.buildTable(items, params, context, nbColumns, config);
 
             if (widths != null) {
                 table.setWidths(widths);
             }
 
-            table.setSpacingAfter(spacingAfter);
+            table.setSpacingAfter((float) spacingAfter);
             target.add(table);
         }
     }
@@ -55,7 +57,7 @@ public class ColumnsBlock extends Block {
         this.widths = widths;
     }
 
-    public void setSpacingAfter(float spacingAfter) {
+    public void setSpacingAfter(double spacingAfter) {
         this.spacingAfter = spacingAfter;
     }
 
@@ -89,5 +91,9 @@ public class ColumnsBlock extends Block {
             }
         }
         return null;
+    }
+
+    public void setConfig(TableConfig config) {
+        this.config = config;
     }
 }

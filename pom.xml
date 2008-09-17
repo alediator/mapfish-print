@@ -6,6 +6,14 @@
   <artifactId>print-root</artifactId>
   <packaging>pom</packaging>
 
+  <!-- see: http://ceki.blogspot.com/2006/11/solution-to-maven2-version-number.html
+       to understand what follows -->
+  <version>0.0-SNAPSHOT</version> <!-- this version is a fake, don't touch it -->
+  <properties>
+    <!-- this is the real version -->
+    <theVersion>0.3-SNAPSHOT</theVersion>
+  </properties>
+
   <name>Print</name>
   <description>The root project for the MapFish print module</description>
   <url>http://www.mapfish.org/</url>
@@ -69,15 +77,6 @@
     </developer>
   </developers>
 
-  <!-- see: http://ceki.blogspot.com/2006/11/solution-to-maven2-version-number.html
-       to understand what follows -->
-  <version>0.0-SNAPSHOT</version>
-  <!-- this version is a fake, don't touch it -->
-  <properties>
-    <!-- this is the real version -->
-    <theVersion>0.3-SNAPSHOT</theVersion>
-  </properties>
-
   <licenses>
     <license>
       <name>BSD License</name>
@@ -109,14 +108,14 @@
     <repository>
       <id>org.mapfish</id>
       <url>
-        scpexe://dev.mapfish.org/var/www/dev.mapfish.org/htdocs/maven/repository
+        scpexe://admin@dev.mapfish.org/var/www/dev.mapfish.org/htdocs/maven/repository
       </url>
     </repository>
     <site>
       <id>org.mapfish</id>
       <name>MapFish Maven Projects</name>
       <url>
-        scpexe://dev.mapfish.org/var/www/dev.mapfish.org/htdocs/maven/site/print
+        scpexe://admin@dev.mapfish.org/var/www/dev.mapfish.org/htdocs/maven/site/print
       </url>
     </site>
     <downloadUrl>http://dev.mapfish.org/maven/repository</downloadUrl>

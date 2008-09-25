@@ -29,12 +29,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,6 +55,9 @@ public class WMSServerInfo {
 
     private static DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 
+    static {
+        documentBuilderFactory.setValidating(false);  //doesn't work?!?!?
+    }
     /**
      * Not null if we actually use a TileCache server.
      */
@@ -87,7 +93,7 @@ public class WMSServerInfo {
             con.connect();
             int code = con.getResponseCode();
             if (code < 200 || code >= 300) {
-                throw new IOException("Error " + code + " while reading the Capabilities from " + baseUrl + ": " + con.getResponseMessage());
+                throw new IOException("Error " + code + " while reading the Capabilities from " + url + ": " + con.getResponseMessage());
             }
             InputStream stream = con.getInputStream();
             final WMSServerInfo result;
@@ -104,6 +110,14 @@ public class WMSServerInfo {
 
     protected static WMSServerInfo parseCapabilities(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+
+        //we don't want the DTD to be checked and it's the only way I found
+        documentBuilder.setEntityResolver(new EntityResolver() {
+            public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+                return new InputSource(new StringReader(""));
+            }
+        });
+        
         Document doc = documentBuilder.parse(stream);
 
         NodeList tileSets = doc.getElementsByTagName("TileSet");

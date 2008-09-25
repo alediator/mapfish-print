@@ -64,8 +64,10 @@ public class PDFUtils {
         final PdfPCell surroundingCell = new PdfPCell(placeHolderTable);
         surroundingCell.setPadding(0f);
         surroundingCell.setBorder(PdfPCell.NO_BORDER);
-        if (align != null)
+        if (align != null) {
+            placeHolderTable.setHorizontalAlignment(align.getCode());
             surroundingCell.setHorizontalAlignment(align.getCode());
+        }
 
         PdfPTable surroundingTable = new PdfPTable(1);
         surroundingTable.setSpacingAfter((float) spacingAfter);

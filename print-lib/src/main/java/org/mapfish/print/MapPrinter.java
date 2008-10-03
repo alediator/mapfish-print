@@ -92,9 +92,11 @@ public class MapPrinter {
 
         Document doc = new Document(layout.getFirstPageSize());
         PdfWriter writer = PdfWriter.getInstance(doc, outFile);
-        writer.setFullCompression();
-        writer.setPdfVersion(PdfWriter.PDF_VERSION_1_5);
-        writer.setCompressionLevel(PdfStream.BEST_COMPRESSION);
+        if (!layout.isSupportLegacyReader()) {
+            writer.setFullCompression();
+            writer.setPdfVersion(PdfWriter.PDF_VERSION_1_5);
+            writer.setCompressionLevel(PdfStream.BEST_COMPRESSION);
+        }
         RenderingContext context = new RenderingContext(doc, writer, config, jsonSpec, configDir, layout);
 
         layout.render(jsonSpec, context);

@@ -30,6 +30,7 @@ public class MetaData {
     private String subject;
     private String keywords;
     private String creator;
+    private boolean supportLegacyReader;
 
     public void setTitle(String title) {
         this.title = title;
@@ -49,6 +50,14 @@ public class MetaData {
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public void setSupportLegacyReader(boolean supportLegacyReader) {
+        this.supportLegacyReader = supportLegacyReader;
+    }
+
+    public boolean isSupportLegacyReader() {
+        return supportLegacyReader;
     }
 
     public void render(PJsonObject params, RenderingContext context) {

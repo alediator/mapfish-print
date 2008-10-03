@@ -86,4 +86,8 @@ public class Layout {
     public void printClientConfig(JSONWriter json) throws JSONException {
         mainPage.printClientConfig(json);
     }
+
+    public boolean isSupportLegacyReader() {
+        return metaData!=null && metaData.isSupportLegacyReader(); 
+    }
 }

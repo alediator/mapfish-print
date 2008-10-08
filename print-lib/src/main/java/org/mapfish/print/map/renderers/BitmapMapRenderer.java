@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
+import org.mapfish.print.PDFUtils;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -66,7 +67,7 @@ public class BitmapMapRenderer extends MapRenderer {
                 }
 
                 LOGGER.debug(uri);
-                final Image map = Image.getInstance(uri.toURL());
+                final Image map = PDFUtils.getImage(uri);
                 map.scaleAbsolute(bitmapTileW, bitmapTileH);
                 map.setAbsolutePosition(posX, posY);
 

@@ -24,6 +24,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.config.layout.*;
 import org.mapfish.print.utils.PJsonObject;
+import org.pvalsecc.misc.FileUtilities;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,12 +33,34 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.net.URI;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 
 public class PDFUtils {
     public static Image createEmptyImage(double width, double height) throws BadElementException {
         Image background = Image.getInstance(1, 1, 1, 1, new byte[]{0}, new int[]{0, 0});
         background.scaleAbsolute((float) width, (float) height);
         return background;
+    }
+
+    /**
+     * Gets an iText image. Avoids doing the query twice. 
+     */
+    public static Image getImage(URI uri) throws IOException, BadElementException {
+        if(!uri.isAbsolute()) {
+            //non-absolute URI are local, so we can use the normal iText method
+            return Image.getInstance(uri.toString());            
+        } else {
+            //read the whole image content in memory, then give that to iText
+            InputStream is = uri.toURL().openStream();
+            ByteArrayOutputStream imageBytes=new ByteArrayOutputStream();
+            try {
+                FileUtilities.copyStream(is, imageBytes);
+            } finally {
+                is.close();
+            }
+            return Image.getInstance(imageBytes.toByteArray());
+        }
     }
 
     /**
@@ -234,7 +257,7 @@ public class PDFUtils {
     public static Chunk createImage(double maxWidth, double maxHeight, URI url, float rotation) throws BadElementException {
         final Image image;
         try {
-            image = Image.getInstance(url.toString());
+            image = getImage(url);
         } catch (IOException e) {
             throw new InvalidValueException("url", url.toString(), e);
         }

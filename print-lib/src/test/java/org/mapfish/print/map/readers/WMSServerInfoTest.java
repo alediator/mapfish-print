@@ -134,7 +134,7 @@ public class WMSServerInfoTest extends PrintTestCase {
         assertEquals(lowestRes, layerInfo.getNearestResolution(0.1F));
         assertEquals(lowestRes, layerInfo.getNearestResolution(2.5F));
         assertEquals(lowestRes, layerInfo.getNearestResolution(2.6F));
-        assertEquals(lowestRes, layerInfo.getNearestResolution(4.99999F));
+        assertEquals(new TileCacheLayerInfo.ResolutionInfo(7, 5.0F), layerInfo.getNearestResolution(4.99999F));
         assertEquals(new TileCacheLayerInfo.ResolutionInfo(7, 5.0F), layerInfo.getNearestResolution(5.0F));
         assertEquals(new TileCacheLayerInfo.ResolutionInfo(0, 800.0F), layerInfo.getNearestResolution(1000.0F));
 

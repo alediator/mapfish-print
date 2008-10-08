@@ -53,7 +53,7 @@ public class TileCacheMapReader extends TileableMapReader {
     }
 
     protected URI getTileUri(URI commonUri, Transformer transformer, float minGeoX, float minGeoY, float maxGeoX, float maxGeoY, long w, long h) throws URISyntaxException, UnsupportedEncodingException {
-        float targetResolution = transformer.getGeoW() / transformer.getStraightBitmapW();
+        float targetResolution = (maxGeoX-minGeoX)/w;
         TileCacheLayerInfo.ResolutionInfo resolution = tileCacheLayerInfo.getNearestResolution(targetResolution);
 
         int tileX = Math.round((minGeoX - tileCacheLayerInfo.getMinX()) / (resolution.value * w));

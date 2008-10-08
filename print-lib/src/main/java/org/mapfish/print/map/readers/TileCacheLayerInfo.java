@@ -29,8 +29,14 @@ import java.util.regex.Pattern;
  * Holds the information we need to manage a tilecache layer.
  */
 public class TileCacheLayerInfo {
-    private static final Pattern FORMAT_REGEXP = Pattern.compile("^[^/]+/([^/]+)$");
+    /**
+     * Tolerance we accept when trying to determine the nearest resolution.
+     */
+    private static final double RESOLUTION_TOLERANCE = 1.05;
+
+    private static final Pattern FORMAT_REGEXP = Pattern.compile("^[^/]+/([^/]+)$");    
     private static final Pattern RESOLUTIONS_REGEXP = Pattern.compile("\\s+");
+
     private final int width;
     private final int height;
     private final float[] resolutions;
@@ -94,7 +100,7 @@ public class TileCacheLayerInfo {
         float result = resolutions[pos];
         for (int i = resolutions.length - 1; i >= 0; --i) {
             float cur = resolutions[i];
-            if (cur > result && cur <= targetResolution) {
+            if (cur > result && cur <= targetResolution * RESOLUTION_TOLERANCE) {
                 result = cur;
                 pos = i;
             }

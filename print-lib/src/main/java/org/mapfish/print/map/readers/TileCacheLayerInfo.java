@@ -174,8 +174,13 @@ public class TileCacheLayerInfo {
         return sb.toString();
     }
 
+    /**
+     * Receives the extent of a tile and checks that tilecache has it.
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
     public boolean isVisible(float x1, float y1, float x2, float y2) {
-        return x1 >= minX && x1 <= maxX && y1 >= minY && y1 <= maxY &&
-                x2 >= minX && x2 <= maxX && y2 >= minY && y2 <= maxY;
+        return x1 >= minX && x1 <= maxX && y1 >= minY && y1 <= maxY /*&&
+                x2 >= minX && x2 <= maxX && y2 >= minY && y2 <= maxY*/;
+        //we don't use x2 and y2 since tilecache doesn't seems to care about those...
     }
 }

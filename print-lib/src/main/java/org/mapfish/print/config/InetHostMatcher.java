@@ -21,11 +21,7 @@ package org.mapfish.print.config;
 
 import org.apache.log4j.Logger;
 
-import java.net.InetAddress;
-import java.net.MalformedURLException;
-import java.net.SocketException;
-import java.net.URI;
-import java.net.UnknownHostException;
+import java.net.*;
 
 public abstract class InetHostMatcher extends HostMatcher {
     public static final Logger LOGGER = Logger.getLogger(InetHostMatcher.class);
@@ -34,7 +30,12 @@ public abstract class InetHostMatcher extends HostMatcher {
 
     public boolean validate(URI uri) throws UnknownHostException, SocketException, MalformedURLException {
         final InetAddress maskAddress = getMaskAddress();
-        final InetAddress[] requestedIPs = InetAddress.getAllByName(uri.getHost());
+        final InetAddress[] requestedIPs;
+        try {
+            requestedIPs = InetAddress.getAllByName(uri.getHost());
+        } catch (UnknownHostException ex) {
+            return false;
+        }
         for (int i = 0; i < requestedIPs.length; ++i) {
             InetAddress requestedIP = requestedIPs[i];
             if (!isInAuthorized(requestedIP, maskAddress)) {

@@ -19,22 +19,12 @@
 
 package org.mapfish.print.config.layout;
 
-import com.lowagie.text.Chunk;
 import com.lowagie.text.DocumentException;
-import com.lowagie.text.Image;
-import com.lowagie.text.Paragraph;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfPTableEvent;
-import com.lowagie.text.pdf.PdfPCell;
 import org.json.JSONException;
 import org.json.JSONWriter;
-import org.mapfish.print.InvalidJsonValueException;
-import org.mapfish.print.PDFCustomBlocks;
-import org.mapfish.print.PDFUtils;
-import org.mapfish.print.RenderingContext;
-import org.mapfish.print.Transformer;
+import org.mapfish.print.*;
 import org.mapfish.print.map.MapChunkDrawer;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
@@ -50,7 +40,7 @@ public class MapBlock extends Block {
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
         Transformer transformer = createTransformer(context, params);
 
-        final MapChunkDrawer drawer = new MapChunkDrawer(context.getCustomBlocks(), transformer, overviewMap, params, context, getBackgroundColor());
+        final MapChunkDrawer drawer = new MapChunkDrawer(context.getCustomBlocks(), transformer, overviewMap, params, context, getBackgroundColorVal(context, params));
 
         if (isAbsolute()) {
             context.getCustomBlocks().addAbsoluteDrawer(new PDFCustomBlocks.AbsoluteDrawer() {

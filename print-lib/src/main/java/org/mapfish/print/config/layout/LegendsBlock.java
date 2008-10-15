@@ -19,14 +19,14 @@
 
 package org.mapfish.print.config.layout;
 
-import org.mapfish.print.RenderingContext;
-import org.mapfish.print.PDFUtils;
-import org.mapfish.print.utils.PJsonObject;
-import org.mapfish.print.utils.PJsonArray;
 import com.lowagie.text.*;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.BaseFont;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import org.mapfish.print.PDFUtils;
+import org.mapfish.print.RenderingContext;
+import org.mapfish.print.utils.PJsonArray;
+import org.mapfish.print.utils.PJsonObject;
 
 import java.net.URI;
 
@@ -54,7 +54,7 @@ public class LegendsBlock extends Block {
         if (legends != null && legends.size() > 0) {
             for (int i = 0; i < legends.size(); ++i) {
                 PJsonObject layer = legends.getJSONObject(i);
-                final PdfPCell cell = createLine(0.0, layer, layerPdfFont);
+                final PdfPCell cell = createLine(0.0, layer, layerPdfFont, context, params);
                 if (i > 0) {
                     cell.setPaddingTop((float) layerSpace);
                 }
@@ -63,7 +63,7 @@ public class LegendsBlock extends Block {
                 PJsonArray classes = layer.getJSONArray("classes");
                 for (int j = 0; j < classes.size(); ++j) {
                     PJsonObject clazz = classes.getJSONObject(j);
-                    final PdfPCell classCell = createLine(classIndentation, clazz, classPdfFont);
+                    final PdfPCell classCell = createLine(classIndentation, clazz, classPdfFont, context, params);
                     classCell.setPaddingTop((float) classSpace);
                     table.addCell(classCell);
                 }
@@ -73,7 +73,7 @@ public class LegendsBlock extends Block {
         target.add(table);
     }
 
-    private PdfPCell createLine(double indent, PJsonObject node, Font pdfFont) throws BadElementException {
+    private PdfPCell createLine(double indent, PJsonObject node, Font pdfFont, RenderingContext context, PJsonObject params) throws BadElementException {
         final String name = node.getString("name");
         final String icon = node.optString("icon");
 
@@ -90,8 +90,8 @@ public class LegendsBlock extends Block {
         cell.setPadding(0f);
         cell.setPaddingLeft((float) indent);
 
-        if (getBackgroundColor() != null) {
-            cell.setBackgroundColor(getBackgroundColor());
+        if (getBackgroundColorVal(context, params) != null) {
+            cell.setBackgroundColor(getBackgroundColorVal(context, params));
         }
 
         return cell;

@@ -125,6 +125,9 @@ public class PDFUtils {
         return result;
     }
 
+    /**
+     * Evaluates stuff like "toto ${titi}"
+     */
     public static String evalString(RenderingContext context, PJsonObject params, String val) {
         if (val == null) {
             return null;
@@ -235,7 +238,7 @@ public class PDFUtils {
         return table;
     }
 
-    public static PdfPCell createCell(PJsonObject params, RenderingContext context, final Block block, final int row,
+    public static PdfPCell createCell(final PJsonObject params, final RenderingContext context, final Block block, final int row,
                                       final int col, final int nbRows, final int nbCols, final TableConfig tableConfig) throws DocumentException {
         final PdfPCell[] cell = new PdfPCell[1];
         block.render(params, new Block.PdfElement() {
@@ -256,8 +259,8 @@ public class PDFUtils {
                     cell[0].setHorizontalAlignment(block.getAlign().getCode());
                 if (block.getVertAlign() != null)
                     cell[0].setVerticalAlignment(block.getVertAlign().getCode());
-                if (!(block instanceof MapBlock) && !(block instanceof ScalebarBlock) && block.getBackgroundColor() != null) {
-                    cell[0].setBackgroundColor(block.getBackgroundColor());
+                if (!(block instanceof MapBlock) && !(block instanceof ScalebarBlock) && block.getBackgroundColorVal(context, params) != null) {
+                    cell[0].setBackgroundColor(block.getBackgroundColorVal(context, params));
                 }
             }
         }, context);

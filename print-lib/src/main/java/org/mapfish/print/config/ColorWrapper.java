@@ -57,6 +57,8 @@ public class ColorWrapper extends AbstractWrapper implements SimpleObjectWrapper
 
 
     public static Color convertColor(String color) {
+        if (color == null) return null;
+
         //look for a system ressource named like that
         Color result = Color.getColor(color);
 

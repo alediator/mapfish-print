@@ -21,7 +21,9 @@ package org.mapfish.print.config.layout;
 
 import com.lowagie.text.DocumentException;
 import org.mapfish.print.InvalidValueException;
+import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.config.ColorWrapper;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.awt.*;
@@ -34,7 +36,7 @@ import java.util.regex.Pattern;
 public abstract class Block {
     protected HorizontalAlign align = null;
     private VerticalAlign vertAlign = null;
-    private Color backgroundColor = null;
+    private String backgroundColor = null;
     private String condition = null;
 
     public Block() {
@@ -62,11 +64,11 @@ public abstract class Block {
         this.vertAlign = vertAlign;
     }
 
-    public Color getBackgroundColor() {
-        return backgroundColor;
+    public Color getBackgroundColorVal(RenderingContext context, PJsonObject params) {
+        return ColorWrapper.convertColor(PDFUtils.evalString(context, params, backgroundColor));
     }
 
-    public void setBackgroundColor(Color backgroundColor) {
+    public void setBackgroundColor(String backgroundColor) {
         this.backgroundColor = backgroundColor;
     }
 

@@ -26,15 +26,15 @@ import org.mapfish.print.config.layout.*;
 import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.FileUtilities;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.net.URI;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ByteArrayOutputStream;
 
 public class PDFUtils {
     public static Image createEmptyImage(double width, double height) throws BadElementException {
@@ -44,16 +44,16 @@ public class PDFUtils {
     }
 
     /**
-     * Gets an iText image. Avoids doing the query twice. 
+     * Gets an iText image. Avoids doing the query twice.
      */
     public static Image getImage(URI uri) throws IOException, BadElementException {
-        if(!uri.isAbsolute()) {
+        if (!uri.isAbsolute()) {
             //non-absolute URI are local, so we can use the normal iText method
-            return Image.getInstance(uri.toString());            
+            return Image.getInstance(uri.toString());
         } else {
             //read the whole image content in memory, then give that to iText
             InputStream is = uri.toURL().openStream();
-            ByteArrayOutputStream imageBytes=new ByteArrayOutputStream();
+            ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
             try {
                 FileUtilities.copyStream(is, imageBytes);
             } finally {
@@ -154,11 +154,10 @@ public class PDFUtils {
             return new Date().toString();
         } else if (key.startsWith("now ")) {
             return formatTime(context, key);
-        } else
-        if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
+        } else if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
             return format(context, params, matcher);
         } else if (key.equals("configDir")) {
-            return context.getConfigDir();
+            return context.getConfigDir().replace('\\', '/');
         }
 
         String result = context.getGlobalParams().optString(key);
@@ -211,15 +210,26 @@ public class PDFUtils {
     }
 
     public static PdfPTable buildTable(ArrayList<Block> items, PJsonObject params, RenderingContext context, int nbColumns, TableConfig tableConfig) throws DocumentException {
-        nbColumns = nbColumns > 0 ? nbColumns : items.size();
-        int nbRows = (items.size() + nbColumns - 1) / nbColumns;
+        int nbCells = 0;
+        for (int i = 0; i < items.size(); i++) {
+            final Block block = items.get(i);
+            if (block.isVisible(context, params)) {
+                nbCells++;
+            }
+        }
+        nbColumns = nbColumns > 0 ? nbColumns : nbCells;
+        int nbRows = (nbCells + nbColumns - 1) / nbColumns;
         final PdfPTable table = new PdfPTable(nbColumns);
         table.setWidthPercentage(100f);
 
+        int cellNum = 0;
         for (int i = 0; i < items.size(); i++) {
             final Block block = items.get(i);
-            final PdfPCell cell = createCell(params, context, block, i / nbColumns, i % nbColumns, nbRows, nbColumns, tableConfig);
-            table.addCell(cell);
+            if (block.isVisible(context, params)) {
+                final PdfPCell cell = createCell(params, context, block, cellNum / nbColumns, cellNum % nbColumns, nbRows, nbColumns, tableConfig);
+                table.addCell(cell);
+                cellNum++;
+            }
         }
         table.setComplete(true);
         return table;

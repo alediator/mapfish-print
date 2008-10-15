@@ -20,10 +20,13 @@
 package org.mapfish.print.config.layout;
 
 import com.lowagie.text.DocumentException;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.awt.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Base class for blocks that can be found in "items" arrays.
@@ -32,6 +35,7 @@ public abstract class Block {
     protected HorizontalAlign align = null;
     private VerticalAlign vertAlign = null;
     private Color backgroundColor = null;
+    private String condition = null;
 
     public Block() {
 
@@ -74,4 +78,30 @@ public abstract class Block {
         return vertAlign;
     }
 
+    private static final Pattern CONDITION_REGEXP = Pattern.compile("^(!?)(.*)$");
+
+    public boolean isVisible(RenderingContext context, PJsonObject params) {
+        if (condition == null) {
+            return true;
+        }
+
+        Matcher matcher = CONDITION_REGEXP.matcher(condition);
+        if (!matcher.matches()) {
+            throw new InvalidValueException("condition", condition);
+        }
+
+        String value = params.optString(condition);
+        if (value == null) {
+            value = context.getGlobalParams().optString(matcher.group(2));
+        }
+        boolean result = value != null && value.length() > 0 && !value.equals("0") && !value.equalsIgnoreCase("false");
+        if (matcher.group(1).equals("!")) {
+            result = !result;
+        }
+        return result;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
+    }
 }

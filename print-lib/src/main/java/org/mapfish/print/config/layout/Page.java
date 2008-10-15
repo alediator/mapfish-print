@@ -19,11 +19,7 @@
 
 package org.mapfish.print.config.layout;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Element;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Rectangle;
+import com.lowagie.text.*;
 import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
@@ -65,11 +61,13 @@ public class Page {
 
         for (int i = 0; i < items.size(); i++) {
             Block block = items.get(i);
-            block.render(params, new Block.PdfElement() {
-                public void add(Element element) throws DocumentException {
-                    doc.add(element);
-                }
-            }, context);
+            if (block.isVisible(context, params)) {
+                block.render(params, new Block.PdfElement() {
+                    public void add(Element element) throws DocumentException {
+                        doc.add(element);
+                    }
+                }, context);
+            }
         }
     }
 

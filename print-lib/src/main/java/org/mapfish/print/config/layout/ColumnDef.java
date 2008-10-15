@@ -44,4 +44,8 @@ public class ColumnDef {
     public PdfPCell createContentPdfCell(PJsonObject params, RenderingContext context, int row, int col, int nbRows, int nbCols, TableConfig config) throws DocumentException {
         return PDFUtils.createCell(params, context, cell, row, col, nbRows, nbCols, config);
     }
+
+    public boolean isVisible(RenderingContext context, PJsonObject params) {
+        return header.isVisible(context, params);
+    }
 }

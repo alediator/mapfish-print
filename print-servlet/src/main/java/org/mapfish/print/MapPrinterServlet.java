@@ -27,14 +27,7 @@ import org.pvalsecc.misc.FileUtilities;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -63,8 +56,7 @@ public class MapPrinterServlet extends BaseMapServlet {
             createAndGetPDF(httpServletRequest, httpServletResponse);
         } else if (additionalPath.equals(INFO_URL)) {
             getInfo(httpServletRequest, httpServletResponse, getBaseUrl(httpServletRequest));
-        } else
-        if (additionalPath.startsWith("/") && additionalPath.endsWith(TEMP_FILE_SUFFIX)) {
+        } else if (additionalPath.startsWith("/") && additionalPath.endsWith(TEMP_FILE_SUFFIX)) {
             getPDF(httpServletResponse, additionalPath.substring(1, additionalPath.length() - 4));
         } else {
             error(httpServletResponse, "Unknown method: " + additionalPath, 404);
@@ -154,6 +146,7 @@ public class MapPrinterServlet extends BaseMapServlet {
         } catch (Throwable e) {
             deleteFile(tempFile);
             error(httpServletResponse, e);
+            return;
         }
 
         final String id = generateId(tempFile);

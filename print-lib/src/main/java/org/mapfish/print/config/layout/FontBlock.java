@@ -19,13 +19,12 @@
 
 package org.mapfish.print.config.layout;
 
-import org.mapfish.print.RenderingContext;
-import org.mapfish.print.utils.PJsonObject;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.pdf.BaseFont;
+import org.mapfish.print.config.ColorWrapper;
+
+import java.awt.*;
 
 public abstract class FontBlock extends Block {
     private String font = "Helvetica";
@@ -33,6 +32,8 @@ public abstract class FontBlock extends Block {
     private String fontEncoding = BaseFont.WINANSI;
 
     protected double spacingAfter = 0;
+
+    private String fontColor = "black";
 
     public void setFont(String font) {
         this.font = font;
@@ -63,10 +64,20 @@ public abstract class FontBlock extends Block {
     }
 
     protected Font getPdfFont() {
-        return FontFactory.getFont(font, fontEncoding, (float) getFontSize());
+        Font result = FontFactory.getFont(font, fontEncoding, (float) getFontSize());
+        result.setColor(getFontColorVal());
+        return result;
     }
 
     public void setSpacingAfter(double spacingAfter) {
         this.spacingAfter = spacingAfter;
+    }
+
+    public void setFontColor(String fontColor) {
+        this.fontColor = fontColor;
+    }
+
+    public Color getFontColorVal() {
+        return ColorWrapper.convertColor(fontColor);
     }
 }

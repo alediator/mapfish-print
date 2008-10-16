@@ -21,8 +21,8 @@ package org.mapfish.print.scalebar;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.PdfContentByte;
-import org.mapfish.print.config.layout.ScalebarBlock;
 import org.mapfish.print.PDFCustomBlocks;
+import org.mapfish.print.config.layout.ScalebarBlock;
 
 import java.awt.*;
 import java.util.List;
@@ -43,7 +43,7 @@ public class BarScalebarDrawer extends ScalebarDrawer {
         float subIntervalWidth = intervalWidth / subIntervals;
         for (int i = 0; i < block.getIntervals() * subIntervals; ++i) {
             float pos = i * subIntervalWidth;
-            final Color color = i % 2 == 0 ? block.getBarBgColor() : block.getColor();
+            final Color color = i % 2 == 0 ? block.getBarBgColorVal() : block.getColorVal();
             if (color != null) {
                 dc.setColorFill(color);
                 dc.rectangle(pos, 0, subIntervalWidth, barSize);

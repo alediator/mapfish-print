@@ -22,8 +22,8 @@ package org.mapfish.print.scalebar;
 import com.lowagie.text.Font;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
-import org.mapfish.print.PDFCustomBlocks;
 import org.mapfish.print.ChunkDrawer;
+import org.mapfish.print.PDFCustomBlocks;
 import org.mapfish.print.config.layout.ScalebarBlock;
 
 import java.awt.geom.AffineTransform;
@@ -90,7 +90,7 @@ public abstract class ScalebarDrawer extends ChunkDrawer {
             labelTransform.concatenate(rotate);
             labelTransform.translate(leftLabelMargin, maxLabelHeight);
             dc.transform(labelTransform);
-            dc.setColorStroke(block.getColor());
+            dc.setColorStroke(block.getColorVal());
             dc.setFontAndSize(pdfFont.getCalculatedBaseFont(false), pdfFont.getSize());
             drawLabels(dc);
 
@@ -105,7 +105,7 @@ public abstract class ScalebarDrawer extends ChunkDrawer {
             lineTransform.translate(leftLabelMargin, labelDistance + maxLabelHeight);
             dc.transform(lineTransform);
             dc.setLineWidth((float) block.getLineWidth());
-            dc.setColorStroke(block.getColor());
+            dc.setColorStroke(block.getColorVal());
             drawBar(dc);
         } finally {
             dc.restoreState();
@@ -157,13 +157,11 @@ public abstract class ScalebarDrawer extends ChunkDrawer {
                 offsetH = -label.width / 2;
                 offsetV = -maxLabelHeight;
 
-            } else
-            if (block.getTextDirection().getAngle() == -block.getBarDirection().getAngle()) {
+            } else if (block.getTextDirection().getAngle() == -block.getBarDirection().getAngle()) {
                 //opposite direction
                 offsetH = label.width / 2;
                 offsetV = 0;
-            } else
-            if (block.getTextDirection().getAngle() - block.getBarDirection().getAngle() < 0) {
+            } else if (block.getTextDirection().getAngle() - block.getBarDirection().getAngle() < 0) {
                 offsetH = label.width / 2;
                 offsetV = -label.height;
             } else {

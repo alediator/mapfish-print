@@ -23,6 +23,7 @@ import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.BaseFont;
 import org.mapfish.print.*;
+import org.mapfish.print.config.ColorWrapper;
 import org.mapfish.print.scalebar.Direction;
 import org.mapfish.print.scalebar.Label;
 import org.mapfish.print.scalebar.ScalebarDrawer;
@@ -56,12 +57,12 @@ public class ScalebarBlock extends FontBlock {
 
     private Integer labelDistance = null;
 
-    private Color color = Color.BLACK;
+    private String color = "black";
 
     /**
      * The background color of the odd intervals (only for the scalebar of type "bar")
      */
-    private Color barBgColor = null;
+    private String barBgColor = null;
 
     private Double lineWidth = null;
 
@@ -273,12 +274,12 @@ public class ScalebarBlock extends FontBlock {
         this.labelDistance = labelDistance;
     }
 
-    public void setColor(Color color) {
-        this.color = color;
+    public void setBarBgColor(String barBgColor) {
+        this.barBgColor = barBgColor;
     }
 
-    public void setBarBgColor(Color barBgColor) {
-        this.barBgColor = barBgColor;
+    public void setColor(String color) {
+        this.color = color;
     }
 
     public void setLineWidth(double lineWidth) {
@@ -329,11 +330,11 @@ public class ScalebarBlock extends FontBlock {
         return intervals;
     }
 
-    public Color getColor() {
-        return color;
+    public Color getBarBgColorVal() {
+        return ColorWrapper.convertColor(barBgColor);
     }
 
-    public Color getBarBgColor() {
-        return barBgColor;
+    public Color getColorVal() {
+        return ColorWrapper.convertColor(color);
     }
 }

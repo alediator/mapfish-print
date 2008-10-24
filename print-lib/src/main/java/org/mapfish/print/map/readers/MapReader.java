@@ -23,10 +23,14 @@ import com.lowagie.text.pdf.PdfContentByte;
 import org.mapfish.print.InvalidJsonValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
+import org.mapfish.print.map.readers.VectorMapReader;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.util.List;
 
+/**
+ * Logic to read and render a map layer.
+ */
 public abstract class MapReader {
     protected final float opacity;
 
@@ -43,6 +47,8 @@ public abstract class MapReader {
             MapServerMapReader.create(target, context, params);
         } else if ("TileCache".equalsIgnoreCase(type)) {
             TileCacheMapReader.create(target, context, params);
+         } else if ("Vector".equalsIgnoreCase(type)) {
+             VectorMapReader.create(target, context, params);
         } else {
             throw new InvalidJsonValueException(params, "type", type);
         }
@@ -50,7 +56,12 @@ public abstract class MapReader {
 
     public abstract boolean testMerge(MapReader other);
 
-    public boolean canMerge(MapReader other) {
+     /**
+      * Test if two layers can be merged (this and other). If it's the case,
+      * merge other inside this and return true.
+      * @return False if no merge occured.
+      */
+     protected boolean canMerge(MapReader other) {
         return opacity == other.opacity;
     }
 

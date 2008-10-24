@@ -126,7 +126,7 @@ public class SVGMapRenderer extends MapRenderer {
                 final TransformerFactory factory = TransformerFactory.newInstance();
                 javax.xml.transform.Transformer xslt = factory.newTransformer(new DOMSource(svgZoomOut));
                 //TODO: may want a different zoom factor in function of the layer and the type (symbol, line or font)
-                xslt.setParameter("zoomFactor", transformer.getSvgFactor());
+                xslt.setParameter("zoomFactor", transformer.getSvgFactor() * context.getStyleFactor());
                 final InputStream inputStream = url.openStream();
                 xslt.transform(new StreamSource(inputStream), transformedSvg);
                 Document doc = (Document) transformedSvg.getNode();

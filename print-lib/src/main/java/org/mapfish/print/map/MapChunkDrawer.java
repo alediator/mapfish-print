@@ -78,6 +78,7 @@ public class MapChunkDrawer extends ChunkDrawer {
             mainTransformer = context.getLayout().getMainPage().getMap().createTransformer(context, params);
             transformer.zoom(mainTransformer, (float) (1.0 / overviewMap));
             transformer.setRotation(0);   //overview always north up!
+            context.setStyleFactor((float) (transformer.getPaperW()/mainTransformer.getPaperW()/overviewMap));
         }
 
         transformer.setMapPos(rectangle.getLeft(), rectangle.getBottom());
@@ -92,8 +93,10 @@ public class MapChunkDrawer extends ChunkDrawer {
         List<MapReader> readers = new ArrayList<MapReader>(layers.size());
         for (int i = 0; i < layers.size(); ++i) {
             PJsonObject layer = layers.getJSONObject(i);
-            final String type = layer.getString("type");
-            MapReader.create(readers, type, context, layer);
+            if(mainTransformer==null || layer.optBool("overview", true)) {
+                final String type = layer.getString("type");
+                MapReader.create(readers, type, context, layer);
+            }
         }
 
         //check if we cannot merge a few queries
@@ -141,6 +144,7 @@ public class MapChunkDrawer extends ChunkDrawer {
         if (mainTransformer != null) {
             //only for key maps: draw the real map extent
             drawMapExtent(dc, mainTransformer);
+            context.setStyleFactor(1.0f);
         }
     }
 

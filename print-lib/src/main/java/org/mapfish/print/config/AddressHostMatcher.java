@@ -26,8 +26,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 public class AddressHostMatcher extends InetHostMatcher {
-    public static final Logger LOGGER = Logger.getLogger(InetHostMatcher.class);
-
     private String ip = null;
     private String mask = null;
 

@@ -22,6 +22,7 @@ package org.mapfish.print;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfTemplate;
 import org.mapfish.print.config.layout.*;
 import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.FileUtilities;
@@ -33,6 +34,7 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,19 +46,55 @@ public class PDFUtils {
     }
 
     /**
-     * Gets an iText image. Avoids doing the query twice.
+     * Gets an iText image with a cache that uses PdfTemplates to re-use the same
+     * bitmap content multiple times in order to reduce the file size.
      */
-    public static Image getImage(URI uri) throws IOException, BadElementException {
-        if (!uri.isAbsolute()) {
-            //non-absolute URI are local, so we can use the normal iText method
-            return Image.getInstance(uri.toString());
-        } else {
-            //read the whole image content in memory, then give that to iText
-            InputStream is = uri.toURL().openStream();
-            ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
-            try {
-                FileUtilities.copyStream(is, imageBytes);
-            } finally {
+     public static Image getImage(RenderingContext context, URI uri, float w, float h) throws IOException, DocumentException {
+         Map<URI, PdfTemplate> cache = context.getTemplateCache();
+
+         PdfTemplate template = cache.get(uri);
+         if (template == null) {
+             Image content = getImageDirect(uri);
+             content.setAbsolutePosition(0, 0);
+             template = context.getDirectContent().createTemplate(content.getPlainWidth(), content.getPlainHeight());
+             template.addImage(content);
+             cache.put(uri, template);
+         }
+
+
+        //fix the size/aspect ratio of the image in function of what is specified by the user
+         if (w == 0.0f) {
+             if (h == 0.0f) {
+                 w = template.getWidth();
+                 h = template.getHeight();
+             } else {
+                 w = h / template.getHeight() * template.getWidth();
+             }
+         } else {
+             if (h == 0.0f) {
+                 h = w / template.getWidth() * template.getHeight();
+             }
+         }
+
+         final Image result = Image.getInstance(template);
+         result.scaleAbsolute(w, h);
+         return result;
+     }
+
+     /**
+      * Gets an iText image. Avoids doing the query twice.
+      */
+     private static Image getImageDirect(URI uri) throws IOException, BadElementException {
+         if (!uri.isAbsolute()) {
+             //non-absolute URI are local, so we can use the normal iText method
+             return Image.getInstance(uri.toString());
+         } else {
+             //read the whole image content in memory, then give that to iText
+             InputStream is = uri.toURL().openStream();
+             ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
+             try {
+                 FileUtilities.copyStream(is, imageBytes);
+             } finally {
                 is.close();
             }
             return Image.getInstance(imageBytes.toByteArray());
@@ -157,7 +195,8 @@ public class PDFUtils {
             return new Date().toString();
         } else if (key.startsWith("now ")) {
             return formatTime(context, key);
-        } else if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
+        } else
+        if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
             return format(context, params, matcher);
         } else if (key.equals("configDir")) {
             return context.getConfigDir().replace('\\', '/');
@@ -267,22 +306,22 @@ public class PDFUtils {
         return cell[0];
     }
 
-    public static Chunk createImage(double maxWidth, double maxHeight, URI url, float rotation) throws BadElementException {
+    public static Chunk createImageChunk(RenderingContext context, double maxWidth, double maxHeight, URI url, float rotation) throws DocumentException {
+        final Image image = createImage(context, maxWidth, maxHeight, url, rotation);
+        return new Chunk(image, 0f, 0f, true);
+    }
+
+    public static Image createImage(RenderingContext context, double maxWidth, double maxHeight, URI url, float rotation) throws DocumentException {
         final Image image;
         try {
-            image = getImage(url);
+            image = getImage(context, url, (float) maxWidth, (float) maxHeight);
         } catch (IOException e) {
             throw new InvalidValueException("url", url.toString(), e);
-        }
-
-        if (maxWidth != 0.0f || maxHeight != 0.0f) {
-            image.scaleToFit(maxWidth != 0.0 ? (float) maxWidth : Integer.MAX_VALUE, maxHeight != 0.0 ? (float) maxHeight : Integer.MAX_VALUE);
         }
 
         if (rotation != 0.0F) {
             image.setRotation(rotation);
         }
-
-        return new Chunk(image, 0f, 0f, true);
+        return image;
     }
 }

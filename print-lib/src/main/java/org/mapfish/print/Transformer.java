@@ -197,6 +197,10 @@ public class Transformer implements Cloneable {
         return result;
     }
 
+    /**
+     * @param reverse True to do the rotation in the other direction
+     * @return The affine transformation to go from geographic coordinated to paper coordinates
+     */
     public AffineTransform getGeoTransform(boolean reverse) {
         final AffineTransform result = AffineTransform.getTranslateInstance(paperPosX, paperPosY);
         if (rotation != 0.0F) {

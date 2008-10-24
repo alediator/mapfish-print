@@ -67,8 +67,7 @@ public class BitmapMapRenderer extends MapRenderer {
                 }
 
                 LOGGER.debug(uri);
-                final Image map = PDFUtils.getImage(uri);
-                map.scaleAbsolute(bitmapTileW, bitmapTileH);
+                final Image map = PDFUtils.getImage(context, uri, bitmapTileW, bitmapTileH);
                 map.setAbsolutePosition(posX, posY);
 
                 if (opacity < 1.0) {

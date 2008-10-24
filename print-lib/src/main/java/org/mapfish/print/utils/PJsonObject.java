@@ -21,6 +21,7 @@ package org.mapfish.print.utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONException;
 import org.mapfish.print.JsonMissingException;
 
 import java.util.Iterator;
@@ -98,6 +99,26 @@ public class PJsonObject extends PJsonElement {
         return (float) obj.optDouble(key, defaultValue);
     }
 
+    public boolean getBool(String key) {
+        try {
+            return obj.getBoolean(key);
+        } catch (JSONException e) {
+            throw new JsonMissingException(this, key);
+        }
+    }
+
+    public Boolean optBool(String key) {
+        if(obj.optString(key)==null) {
+            return null;
+        } else {
+            return obj.optBoolean(key);
+        }
+    }
+
+    public boolean optBool(String key, boolean defaultValue) {
+        return obj.optBoolean(key, defaultValue);
+    }
+
     public PJsonObject optJSONObject(String key) {
         final JSONObject val = obj.optJSONObject(key);
         return val != null ? new PJsonObject(this, val, key) : null;
@@ -158,9 +179,9 @@ public class PJsonObject extends PJsonElement {
     }
 
     /**
-     * @deprecated Only for tests!
+     * @deprecated Use only if you know what you are doing!
      */
-    public JSONObject getObj() {
+    public JSONObject getInternalObj() {
         return obj;
     }
 }

@@ -103,7 +103,7 @@ public abstract class HTTPMapReader extends MapReader {
     protected abstract void addCommonQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first);
 
     public boolean canMerge(MapReader other) {
-        if (!super.canMerge(other)) {
+        if (opacity != other.opacity) {
             return false;
         }
 

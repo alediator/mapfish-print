@@ -22,9 +22,14 @@ package org.mapfish.print;
 import com.lowagie.text.Document;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.PdfTemplate;
 import org.mapfish.print.config.Config;
 import org.mapfish.print.config.layout.Layout;
 import org.mapfish.print.utils.PJsonObject;
+
+import java.net.URI;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * Holds some "per rendering request" information.
@@ -37,6 +42,17 @@ public class RenderingContext {
     private final String configDir;
     private final PDFCustomBlocks customBlocks;
     private final Layout layout;
+
+    /**
+     * Factor applyed to styles (line width, ...). Used to make features thinner
+     * in the overview map.
+     */
+    private float styleFactor = 1.0f;
+
+    /**
+     * Cache of PDF images.
+     */
+    private Map<URI, PdfTemplate> templateCache =new HashMap<URI, PdfTemplate>();
 
     public RenderingContext(Document document, PdfWriter writer, Config config, PJsonObject globalParams, String configDir, Layout layout) {
         this.document = document;
@@ -82,5 +98,17 @@ public class RenderingContext {
 
     public void addError(Exception e) {
         customBlocks.addError(e);
+    }
+
+    public float getStyleFactor() {
+        return styleFactor;
+    }
+
+    public void setStyleFactor(float styleFactor) {
+        this.styleFactor = styleFactor;
+    }
+
+    public Map<URI, PdfTemplate> getTemplateCache() {
+        return templateCache;
     }
 }

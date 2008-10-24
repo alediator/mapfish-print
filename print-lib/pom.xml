@@ -100,6 +100,11 @@
       <artifactId>jts</artifactId>
       <version>1.8</version>
     </dependency>
+    <dependency>
+      <groupId>org.mapfish.geo</groupId>
+      <artifactId>mapfish-geo-lib</artifactId>
+      <version>${theVersion}</version>
+    </dependency>
   </dependencies>
 
   <repositories>

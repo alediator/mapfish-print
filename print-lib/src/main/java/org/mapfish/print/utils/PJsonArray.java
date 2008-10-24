@@ -80,4 +80,11 @@ public class PJsonArray extends PJsonElement {
         }
         return val;
     }
+
+    /**
+     * @deprecated Use only if you know what you are doing! 
+     */
+    public JSONArray getInternalArray() {
+        return array;
+    }
 }

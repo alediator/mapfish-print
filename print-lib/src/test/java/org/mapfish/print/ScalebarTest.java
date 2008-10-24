@@ -51,7 +51,7 @@ public class ScalebarTest extends PrintTestCase {
     public void testBars() throws IOException, DocumentException, JSONException {
         PJsonObject spec = MapPrinter.parseSpec(FileUtilities.readWholeTextFile(new File("../print-standalone/samples/spec.json")));
         PJsonObject page1 = spec.getJSONArray("pages").getJSONObject(0);
-        spec.getObj().put("units", "meters");
+        spec.getInternalObj().put("units", "meters");
 
         final Document doc = new Document(PageSize.A4);
         OutputStream outFile = new FileOutputStream("target/testScalebar.pdf");
@@ -88,32 +88,32 @@ public class ScalebarTest extends PrintTestCase {
         block = createBaseBlock();
         block.setSubIntervals(true);
         block.setType(Type.BAR_SUB);
-        page1.getObj().put("scale", 500000);
+        page1.getInternalObj().put("scale", 500000);
         draw(page1, doc, context, block);
 
         block = createBaseBlock();
         block.setSubIntervals(true);
         block.setType(Type.BAR);
-        page1.getObj().put("scale", 100000);
+        page1.getInternalObj().put("scale", 100000);
         draw(page1, doc, context, block);
 
         block = createBaseBlock();
         block.setSubIntervals(true);
         block.setType(Type.BAR);
-        page1.getObj().put("scale", 20000);
-        draw(page1, doc, context, block);
-
-        block = createBaseBlock();
-        block.setSubIntervals(true);
-        block.setType(Type.BAR);
-        block.setUnits(DistanceUnit.IN);
+        page1.getInternalObj().put("scale", 20000);
         draw(page1, doc, context, block);
 
         block = createBaseBlock();
         block.setSubIntervals(true);
         block.setType(Type.BAR);
         block.setUnits(DistanceUnit.IN);
-        page1.getObj().put("scale", 100000);
+        draw(page1, doc, context, block);
+
+        block = createBaseBlock();
+        block.setSubIntervals(true);
+        block.setType(Type.BAR);
+        block.setUnits(DistanceUnit.IN);
+        page1.getInternalObj().put("scale", 100000);
         draw(page1, doc, context, block);
 
         block = createSmallBlock();
@@ -148,7 +148,7 @@ public class ScalebarTest extends PrintTestCase {
         block.setIntervals(7);
         block.setSubIntervals(true);
         block.setUnits(DistanceUnit.IN);
-        page1.getObj().put("scale", 100000);
+        page1.getInternalObj().put("scale", 100000);
         draw(page1, doc, context, block);
 
         block = createBaseBlock();

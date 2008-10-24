@@ -56,7 +56,7 @@ public class ImageBlock extends Block {
         if (url.getPath().endsWith(".svg")) {
             drawSVG(context, params, target, url);
         } else {
-            target.add(PDFUtils.createImage(maxWidth, maxHeight, url, getRotationRadian(context, params)));
+            target.add(PDFUtils.createImageChunk(context, maxWidth, maxHeight, url, getRotationRadian(context, params)));
         }
     }
 

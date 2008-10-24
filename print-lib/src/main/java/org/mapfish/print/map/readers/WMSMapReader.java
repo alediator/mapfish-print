@@ -133,4 +133,8 @@ public class WMSMapReader extends TileableMapReader {
         URIUtils.addParamOverride(tileParams, "BBOX", String.format("%s,%s,%s,%s", minGeoX, minGeoY, maxGeoX, maxGeoY));
         return URIUtils.addParams(commonUri, tileParams, OVERRIDE_ALL);
     }
+
+    public String toString() {
+        return StringUtils.join(layers, ", ");
+    }
 }

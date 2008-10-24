@@ -118,4 +118,8 @@ public class MapServerMapReader extends HTTPMapReader {
             return false;
         }
     }
+
+    public String toString() {
+        return StringUtils.join(layers, ", ");
+    }
 }

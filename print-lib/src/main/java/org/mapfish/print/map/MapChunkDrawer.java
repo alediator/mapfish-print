@@ -21,6 +21,7 @@ package org.mapfish.print.map;
 
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfLayer;
 import org.mapfish.print.*;
 import org.mapfish.print.map.readers.MapReader;
 import org.mapfish.print.utils.PJsonArray;
@@ -41,15 +42,25 @@ public class MapChunkDrawer extends ChunkDrawer {
     private final PJsonObject params;
     private final RenderingContext context;
     private final Color backgroundColor;
+    private final String name;
 
 
-    public MapChunkDrawer(PDFCustomBlocks customBlocks, Transformer transformer, double overviewMap, PJsonObject params, RenderingContext context, Color backgroundColor) {
+    public MapChunkDrawer(PDFCustomBlocks customBlocks, Transformer transformer, double overviewMap, PJsonObject params, RenderingContext context, Color backgroundColor, String name) {
         super(customBlocks);
         this.transformer = transformer;
         this.overviewMap = overviewMap;
         this.params = params;
         this.context = context;
         this.backgroundColor = backgroundColor;
+        this.name = computeName(overviewMap, name);
+    }
+
+    private static String computeName(double overviewMap, String name) {
+        if (name != null) {
+            return name;
+        } else {
+            return (Double.isNaN(overviewMap) ? "map" : "overview");
+        }
     }
 
     public void renderImpl(Rectangle rectangle, PdfContentByte dc) {
@@ -112,10 +123,15 @@ public class MapChunkDrawer extends ChunkDrawer {
         //do the rendering
         dc.saveState();
         try {
+            PdfLayer mapLayer = new PdfLayer(name, context.getWriter());
             transformer.setClipping(dc);
             for (int i = 0; i < readers.size(); i++) {
                 MapReader reader = readers.get(i);
+                PdfLayer pdfLayer = new PdfLayer(reader.toString(), context.getWriter());
+                mapLayer.addChild(pdfLayer);
+                dc.beginLayer(pdfLayer);
                 reader.render(transformer, dc, srs, i == 0);
+                dc.endLayer();
             }
         } finally {
             dc.restoreState();

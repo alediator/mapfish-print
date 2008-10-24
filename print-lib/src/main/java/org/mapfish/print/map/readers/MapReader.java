@@ -53,4 +53,6 @@ public abstract class MapReader {
     public boolean canMerge(MapReader other) {
         return opacity == other.opacity;
     }
+
+    public abstract String toString();
 }

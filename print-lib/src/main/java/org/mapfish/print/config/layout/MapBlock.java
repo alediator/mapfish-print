@@ -37,10 +37,15 @@ public class MapBlock extends Block {
     private int absoluteY = Integer.MIN_VALUE;
     private double overviewMap = Double.NaN;
 
+    /**
+     * Name given in the PDF layer.
+     */
+    private String name = null;
+
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
         Transformer transformer = createTransformer(context, params);
 
-        final MapChunkDrawer drawer = new MapChunkDrawer(context.getCustomBlocks(), transformer, overviewMap, params, context, getBackgroundColorVal(context, params));
+        final MapChunkDrawer drawer = new MapChunkDrawer(context.getCustomBlocks(), transformer, overviewMap, params, context, getBackgroundColorVal(context, params), name);
 
         if (isAbsolute()) {
             context.getCustomBlocks().addAbsoluteDrawer(new PDFCustomBlocks.AbsoluteDrawer() {
@@ -108,5 +113,9 @@ public class MapBlock extends Block {
 
     public void setOverviewMap(double overviewMap) {
         this.overviewMap = overviewMap;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

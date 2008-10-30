@@ -80,7 +80,7 @@ public class LegendsBlock extends Block {
         final Paragraph result = new Paragraph();
         result.setFont(pdfFont);
         if (icon != null) {
-            result.add(PDFUtils.createImage(context, maxIconWidth, maxIconHeight, URI.create(icon), 0.0f));
+            result.add(PDFUtils.createImageChunk(context, maxIconWidth, maxIconHeight, URI.create(icon), 0.0f));
             result.add(" ");
         }
         result.add(name);

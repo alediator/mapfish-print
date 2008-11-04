@@ -60,6 +60,13 @@ following:
    at the end of the post_fetch_project function and re-deploy:
      (cd $PROJECT_MAPFISH_DIR/server/java/print/; mvn install || echo "Cannot compile the print module!!!!!!")
 
+5) If you use WSGI, you must add the following line into %PROJECT_DIR%/%PROJECT_NAME%/%PROJECT_NAME%.wsgi (or .wsgi.in)
+   before the "loadapp" call :
+   # configure the logging system
+   from paste.script.util.logging_config import fileConfig
+   fileConfig('%PASTE_CONFIG%')
+
+
 As a tomcat servlet
 -------------------
 

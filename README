@@ -15,6 +15,7 @@ To build this project, you need:
 The other external libs are taken care of by maven
 
 The build command to use is:
+  cd %PROJECT_DIR%/%MAPFISH_DIR%/server/java/print/
   mvn clean install
 
 

@@ -27,6 +27,7 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.BaseFont;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonObject;
 
 public class TextBlock extends FontBlock {
@@ -52,5 +53,10 @@ public class TextBlock extends FontBlock {
 
     public String getText() {
         return text;
+    }
+
+    public void validate() {
+        super.validate();
+        if(text==null) throw new InvalidValueException("text", "null");
     }
 }

@@ -23,6 +23,7 @@ import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.InvalidJsonValueException;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
 
@@ -93,5 +94,13 @@ public class AttributesBlock extends Block {
 
     public void setTableConfig(TableConfig tableConfig) {
         this.tableConfig = tableConfig;
+    }
+
+    @Override
+    public void validate() {
+        super.validate();
+        if(source==null) throw new InvalidValueException("source", "null");
+        if(columnDefs==null) throw new InvalidValueException("columnDefs", "null");
+        columnDefs.validate();
     }
 }

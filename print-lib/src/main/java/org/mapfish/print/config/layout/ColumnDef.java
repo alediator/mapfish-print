@@ -23,6 +23,7 @@ import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfPCell;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonObject;
 
 public class ColumnDef {
@@ -47,5 +48,12 @@ public class ColumnDef {
 
     public boolean isVisible(RenderingContext context, PJsonObject params) {
         return header.isVisible(context, params);
+    }
+
+    public void validate() {
+        if(header==null) throw new InvalidValueException("header", "null");
+        if(cell==null) throw new InvalidValueException("header", "null");
+        header.validate();
+        cell.validate();
     }
 }

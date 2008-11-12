@@ -32,7 +32,7 @@ import java.util.ArrayList;
  * Holds the config of a page and knows how to do it.
  */
 public class Page {
-    protected ArrayList<? extends Block> items = new ArrayList<Block>();
+    protected ArrayList<? extends Block> items;
     private String pageSize = "A4";
     private HeaderFooter header = null;
     private HeaderFooter footer = null;
@@ -130,5 +130,17 @@ public class Page {
 
     public void setLandscape(boolean landscape) {
         this.landscape = landscape;
+    }
+
+    /**
+     * Called just after the config has been loaded to check it is valid.
+     * @throws InvalidValueException When there is a problem
+     */
+    public void validate() {
+        if(items==null) throw new InvalidValueException("items", "null");
+        if(items.size()<1) throw new InvalidValueException("items", "[]");
+        for (int i = 0; i < items.size(); i++) {
+            items.get(i).validate();            
+        }
     }
 }

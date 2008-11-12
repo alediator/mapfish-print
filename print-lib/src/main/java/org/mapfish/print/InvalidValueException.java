@@ -19,6 +19,9 @@
 
 package org.mapfish.print;
 
+/**
+ * Thrown when there is something invalid in the YAML file
+ */
 public class InvalidValueException extends PrintException {
     public InvalidValueException(String name, String value) {
         this(name, value, null);

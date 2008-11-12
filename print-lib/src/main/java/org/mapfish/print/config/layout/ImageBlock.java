@@ -39,7 +39,7 @@ import java.net.URISyntaxException;
  * Configuration and logic to add an image block.
  */
 public class ImageBlock extends Block {
-    private String url = "";
+    private String url = null;
     private double maxWidth = 0.0;
     private double maxHeight = 0.0;
     private String rotation = "0";
@@ -141,5 +141,11 @@ public class ImageBlock extends Block {
             }
         }
 
+    }
+
+    @Override
+    public void validate() {
+        super.validate();
+        if(url==null) throw new InvalidValueException("url", "null");
     }
 }

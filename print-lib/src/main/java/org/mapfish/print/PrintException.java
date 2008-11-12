@@ -19,6 +19,9 @@
 
 package org.mapfish.print;
 
+/**
+ * Base exception for printing problems.
+ */
 public class PrintException extends RuntimeException {
     public PrintException(String message) {
         super(message);

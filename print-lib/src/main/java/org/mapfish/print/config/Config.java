@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import org.mapfish.print.config.layout.Layout;
 import org.mapfish.print.config.layout.Layouts;
+import org.mapfish.print.InvalidValueException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -65,17 +66,23 @@ public class Config {
      */
     public static Config fromYaml(File file) throws FileNotFoundException {
         YamlConfig config = new CustomYamlConfig();
-        return config.loadType(file, Config.class);
+        Config result = config.loadType(file, Config.class);
+        result.validate();
+        return result;
     }
 
     public static Config fromInputStream(InputStream instream) {
         YamlConfig config = new CustomYamlConfig();
-        return config.loadType(instream, Config.class);
+        Config result = config.loadType(instream, Config.class);
+        result.validate();
+        return result;
     }
 
     public static Config fromString(String strConfig) {
         YamlConfig config = new CustomYamlConfig();
-        return config.loadType(strConfig, Config.class);
+        Config result = config.loadType(strConfig, Config.class);
+        result.validate();
+        return result;
     }
 
     public Layout getLayout(String name) {
@@ -161,5 +168,23 @@ public class Config {
             }
         }
         return false;
+    }
+
+    /**
+     * Called just after the config has been loaded to check it is valid.
+     * @throws InvalidValueException When there is a problem
+     */
+    public void validate() {
+        if(layouts==null) throw new InvalidValueException("layouts", "null");
+        layouts.validate();
+
+        if(dpis==null) throw new InvalidValueException("dpis", "null");
+        if(dpis.size()<1) throw new InvalidValueException("dpis", "[]");
+
+        if(scales==null) throw new InvalidValueException("scales", "null");
+        if(scales.size()<1) throw new InvalidValueException("scales", "[]");
+
+        if(hosts==null) throw new InvalidValueException("hosts", "null");
+        if(hosts.size()<1) throw new InvalidValueException("hosts", "[]");
     }
 }

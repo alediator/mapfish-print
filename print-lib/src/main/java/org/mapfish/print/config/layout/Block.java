@@ -52,6 +52,13 @@ public abstract class Block {
         return null;
     }
 
+    /**
+     * Called just after the config has been loaded to check it is valid.
+     * @throws InvalidValueException When there is a problem
+     */
+    public void validate() {
+    }
+
     public interface PdfElement {
         void add(com.lowagie.text.Element element) throws DocumentException;
     }

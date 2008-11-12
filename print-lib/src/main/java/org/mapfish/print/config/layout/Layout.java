@@ -24,6 +24,7 @@ import com.lowagie.text.Rectangle;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
 
@@ -89,5 +90,16 @@ public class Layout {
 
     public boolean isSupportLegacyReader() {
         return metaData!=null && metaData.isSupportLegacyReader(); 
+    }
+
+    /**
+     * Called just after the config has been loaded to check it is valid.
+     * @throws InvalidValueException When there is a problem
+     */
+    public void validate() {
+        if(mainPage==null) throw new InvalidValueException("mainPage", "null");
+        mainPage.validate();
+
+        if(titlePage!=null) titlePage.validate();
     }
 }

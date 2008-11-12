@@ -20,6 +20,7 @@
 package org.mapfish.print.config.layout;
 
 import org.ho.yaml.wrapper.DefaultMapWrapper;
+import org.mapfish.print.InvalidValueException;
 
 import java.util.HashMap;
 
@@ -34,6 +35,17 @@ public class Layouts extends HashMap<String, Layout> {
 
         public Class<Layout> getExpectedType(Object key) {
             return Layout.class;
+        }
+    }
+
+    /**
+     * Called just after the config has been loaded to check it is valid.
+     * @throws InvalidValueException When there is a problem
+     */
+    public void validate() {
+        if(size()<1) throw new InvalidValueException("layouts", "[]");
+        for (Layout layout : values()) {
+            layout.validate();
         }
     }
 }

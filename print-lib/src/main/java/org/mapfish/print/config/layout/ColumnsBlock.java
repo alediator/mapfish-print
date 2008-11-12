@@ -25,6 +25,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.PDFCustomBlocks;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class ColumnsBlock extends Block {
     private int absoluteY = Integer.MIN_VALUE;
     private int width = Integer.MIN_VALUE;
     private int nbColumns = Integer.MIN_VALUE;
-    private TableConfig config;
+    private TableConfig config = null;
 
     public void render(final PJsonObject params, PdfElement target, final RenderingContext context) throws DocumentException {
 
@@ -114,5 +115,14 @@ public class ColumnsBlock extends Block {
 
     public void setConfig(TableConfig config) {
         this.config = config;
+    }
+
+    public void validate() {
+        super.validate();
+        if(items==null) throw new InvalidValueException("items", "null");
+        if(items.size()<1) throw new InvalidValueException("items", "[]");
+        for (int i = 0; i < items.size(); i++) {
+            items.get(i).validate();
+        }
     }
 }

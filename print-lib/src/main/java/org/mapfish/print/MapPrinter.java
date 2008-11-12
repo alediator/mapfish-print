@@ -31,10 +31,7 @@ import org.mapfish.print.config.Config;
 import org.mapfish.print.config.layout.Layout;
 import org.mapfish.print.utils.PJsonObject;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.TreeSet;
 
 /**
@@ -58,6 +55,21 @@ public class MapPrinter {
                 configDir = ".";
             }
         }
+        initFonts();
+    }
+
+    public MapPrinter(InputStream instreamConfig, String configDir) {
+        this.config = Config.fromInputStream(instreamConfig);
+        this.configDir = configDir;
+
+        initFonts();
+    }
+
+
+    public MapPrinter(String strConfig, String configDir) {
+        this.config = Config.fromString(strConfig);
+        this.configDir = configDir;
+
         initFonts();
     }
 

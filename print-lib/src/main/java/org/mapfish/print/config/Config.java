@@ -29,6 +29,7 @@ import org.mapfish.print.config.layout.Layouts;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.URI;
@@ -65,6 +66,16 @@ public class Config {
     public static Config fromYaml(File file) throws FileNotFoundException {
         YamlConfig config = new CustomYamlConfig();
         return config.loadType(file, Config.class);
+    }
+
+    public static Config fromInputStream(InputStream instream) {
+        YamlConfig config = new CustomYamlConfig();
+        return config.loadType(instream, Config.class);
+    }
+
+    public static Config fromString(String strConfig) {
+        YamlConfig config = new CustomYamlConfig();
+        return config.loadType(strConfig, Config.class);
     }
 
     public Layout getLayout(String name) {

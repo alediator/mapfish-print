@@ -112,11 +112,6 @@
       <id>org.mapfish</id>
       <url>http://dev.mapfish.org/maven/repository</url>
     </repository>
-
-    <repository>
-      <id>fr.geotools</id>
-      <url>http://maven.geotools.fr/repository</url>
-    </repository>
   </repositories>
 
   <reporting>

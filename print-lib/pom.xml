@@ -107,13 +107,6 @@
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>org.mapfish</id>
-      <url>http://dev.mapfish.org/maven/repository</url>
-    </repository>
-  </repositories>
-
   <reporting>
     <plugins>
       <plugin>

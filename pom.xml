@@ -91,6 +91,20 @@
     <module>print-servlet</module>
   </modules>
 
+  <repositories>
+    <repository>
+      <id>org.mapfish</id>
+      <url>http://dev.mapfish.org/maven/repository</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+       <id>org.mapfish</id>
+       <url>http://dev.mapfish.org/maven/repository</url>
+    </pluginRepository>
+  </pluginRepositories>
+
   <scm>
     <connection>
       scm:svn:http://www.mapfish.org/svn/mapfish/trunk/MapFish/server/java/print

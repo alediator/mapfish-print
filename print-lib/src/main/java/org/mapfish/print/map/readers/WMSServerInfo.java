@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.util.DOMUtil;
 import org.mapfish.print.InvalidValueException;
+import org.mapfish.print.RenderingContext;
 import org.pvalsecc.misc.URIUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -66,11 +67,11 @@ public class WMSServerInfo {
     public WMSServerInfo() {
     }
 
-    public static synchronized WMSServerInfo getInfo(URI uri) {
+    public static synchronized WMSServerInfo getInfo(URI uri, RenderingContext context) {
         WMSServerInfo result = cache.get(uri);
         if (result == null) {
             try {
-                result = requestInfo(uri);
+                result = requestInfo(uri, context);
             } catch (Exception e) {
                 throw new InvalidValueException("baseUrl", uri.toString(), e);
             }
@@ -82,7 +83,7 @@ public class WMSServerInfo {
         return result;
     }
 
-    private static WMSServerInfo requestInfo(URI baseUrl) throws IOException, URISyntaxException, ParserConfigurationException, SAXException {
+    private static WMSServerInfo requestInfo(URI baseUrl, RenderingContext context) throws IOException, URISyntaxException, ParserConfigurationException, SAXException {
         Map<String, List<String>> queryParams = new HashMap<String, List<String>>();
         URIUtils.addParamOverride(queryParams, "SERVICE", "WMS");
         URIUtils.addParamOverride(queryParams, "REQUEST", "GetCapabilities");
@@ -90,6 +91,9 @@ public class WMSServerInfo {
         URL url = URIUtils.addParams(baseUrl, queryParams, HTTPMapReader.OVERRIDE_ALL).toURL();
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         try {
+            if (context.getReferer() != null) {
+                con.setRequestProperty("Referer", context.getReferer());
+            }
             con.connect();
             int code = con.getResponseCode();
             if (code < 200 || code >= 300) {

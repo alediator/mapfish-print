@@ -48,7 +48,7 @@ public class WMSMapReader extends TileableMapReader {
 
     private WMSMapReader(String layer, String style, RenderingContext context, PJsonObject params) {
         super(context, params);
-        tileCacheLayerInfo = WMSServerInfo.getInfo(baseUrl).getTileCacheLayer(layer);
+        tileCacheLayerInfo = WMSServerInfo.getInfo(baseUrl, context).getTileCacheLayer(layer);
         layers.add(layer);
         styles.add(style);
         format = params.getString("format");

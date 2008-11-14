@@ -114,7 +114,7 @@ public class MapPrinterServlet extends BaseMapServlet {
 
         File tempFile = null;
         try {
-            tempFile = doCreatePDFFile(spec);
+            tempFile = doCreatePDFFile(spec, httpServletRequest);
             sendPdfFile(httpServletResponse, tempFile);
         } catch (Throwable e) {
             error(httpServletResponse, e);
@@ -138,7 +138,7 @@ public class MapPrinterServlet extends BaseMapServlet {
                 spec.append(cur).append("\n");
             }
 
-            tempFile = doCreatePDFFile(spec.toString());
+            tempFile = doCreatePDFFile(spec.toString(), httpServletRequest);
             if (tempFile == null) {
                 error(httpServletResponse, "Missing 'spec' parameter", 500);
                 return;
@@ -222,17 +222,18 @@ public class MapPrinterServlet extends BaseMapServlet {
     /**
      * Do the actual work of creating the PDF temporary file.
      */
-    private TempFile doCreatePDFFile(String spec) throws IOException, DocumentException, ServletException {
+    private TempFile doCreatePDFFile(String spec, HttpServletRequest httpServletRequest) throws IOException, DocumentException, ServletException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Generating PDF for spec=" + spec);
         }
 
+        String referer=httpServletRequest.getHeader("Referer");
         //create a temporary file that will contain the PDF
         TempFile tempFile = new TempFile(File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX, getTempDir()));
         try {
             FileOutputStream out = new FileOutputStream(tempFile);
 
-            getMapPrinter().print(spec, out);
+            getMapPrinter().print(spec, out, referer);
             out.close();
             return tempFile;
         } catch (IOException e) {

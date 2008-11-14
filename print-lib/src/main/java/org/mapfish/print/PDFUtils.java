@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,7 +55,7 @@ public class PDFUtils {
 
          PdfTemplate template = cache.get(uri);
          if (template == null) {
-             Image content = getImageDirect(uri);
+             Image content = getImageDirect(context, uri);
              content.setAbsolutePosition(0, 0);
              template = context.getDirectContent().createTemplate(content.getPlainWidth(), content.getPlainHeight());
              template.addImage(content);
@@ -84,13 +85,17 @@ public class PDFUtils {
      /**
       * Gets an iText image. Avoids doing the query twice.
       */
-     private static Image getImageDirect(URI uri) throws IOException, BadElementException {
+     private static Image getImageDirect(RenderingContext context, URI uri) throws IOException, BadElementException {
          if (!uri.isAbsolute()) {
              //non-absolute URI are local, so we can use the normal iText method
              return Image.getInstance(uri.toString());
          } else {
              //read the whole image content in memory, then give that to iText
-             InputStream is = uri.toURL().openStream();
+             final URLConnection urlConnection = uri.toURL().openConnection();
+             if (context.getReferer() != null) {
+                 urlConnection.setRequestProperty("Referer", context.getReferer());
+             }
+             InputStream is = urlConnection.getInputStream();
              ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
              try {
                  FileUtilities.copyStream(is, imageBytes);
@@ -195,8 +200,7 @@ public class PDFUtils {
             return new Date().toString();
         } else if (key.startsWith("now ")) {
             return formatTime(context, key);
-        } else
-        if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
+        } else if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
             return format(context, params, matcher);
         } else if (key.equals("configDir")) {
             return context.getConfigDir().replace('\\', '/');

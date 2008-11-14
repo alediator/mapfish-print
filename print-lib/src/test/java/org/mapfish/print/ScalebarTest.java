@@ -57,7 +57,7 @@ public class ScalebarTest extends PrintTestCase {
         OutputStream outFile = new FileOutputStream("target/testScalebar.pdf");
         PdfWriter writer = PdfWriter.getInstance(doc, outFile);
         writer.setFullCompression();
-        RenderingContext context = new RenderingContext(doc, writer, null, spec, null, null);
+        RenderingContext context = new RenderingContext(doc, writer, null, spec, null, null, null);
         doc.setMargins(MARGIN, MARGIN, MARGIN, MARGIN * 3);
         doc.open();
 

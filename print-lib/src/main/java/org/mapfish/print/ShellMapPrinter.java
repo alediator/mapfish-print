@@ -65,6 +65,9 @@ public class ShellMapPrinter {
     @Option(desc = "Get the config for the client form. Doesn't generate a PDF")
     private boolean clientConfig = false;
 
+    @Option(desc = "Referer address to use when doing queries")
+    private String referer = null;
+
     @Option(desc = "Property file for the log4j configuration")
     private String log4jConfig = null;
 
@@ -110,7 +113,7 @@ public class ShellMapPrinter {
 
         } else {
             final InputStream inFile = getInputStream();
-            printer.print(FileUtilities.readWholeTextStream(inFile, "UTF-8"), outFile);
+            printer.print(FileUtilities.readWholeTextStream(inFile, "UTF-8"), outFile, referer);
         }
     }
 

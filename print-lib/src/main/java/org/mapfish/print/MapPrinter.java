@@ -93,7 +93,7 @@ public class MapPrinter {
         }
     }
 
-    public void print(String spec, OutputStream outFile) throws DocumentException {
+    public void print(String spec, OutputStream outFile, String referer) throws DocumentException {
         final PJsonObject jsonSpec = parseSpec(spec);
 
         final String layoutName = jsonSpec.getString("layout");
@@ -109,7 +109,7 @@ public class MapPrinter {
             writer.setPdfVersion(PdfWriter.PDF_VERSION_1_5);
             writer.setCompressionLevel(PdfStream.BEST_COMPRESSION);
         }
-        RenderingContext context = new RenderingContext(doc, writer, config, jsonSpec, configDir, layout);
+        RenderingContext context = new RenderingContext(doc, writer, config, jsonSpec, configDir, layout, referer);
 
         layout.render(jsonSpec, context);
 

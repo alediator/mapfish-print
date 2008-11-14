@@ -42,6 +42,7 @@ public class RenderingContext {
     private final String configDir;
     private final PDFCustomBlocks customBlocks;
     private final Layout layout;
+    private final String referer;
 
     /**
      * Factor applyed to styles (line width, ...). Used to make features thinner
@@ -54,13 +55,15 @@ public class RenderingContext {
      */
     private Map<URI, PdfTemplate> templateCache =new HashMap<URI, PdfTemplate>();
 
-    public RenderingContext(Document document, PdfWriter writer, Config config, PJsonObject globalParams, String configDir, Layout layout) {
+    public RenderingContext(Document document, PdfWriter writer, Config config,
+                            PJsonObject globalParams, String configDir, Layout layout, String referer) {
         this.document = document;
         this.writer = writer;
         this.config = config;
         this.globalParams = globalParams;
         this.configDir = configDir;
         this.layout = layout;
+        this.referer = referer;
         customBlocks = new PDFCustomBlocks(writer, this);
     }
 
@@ -110,5 +113,9 @@ public class RenderingContext {
 
     public Map<URI, PdfTemplate> getTemplateCache() {
         return templateCache;
+    }
+
+    public String getReferer() {
+        return referer;
     }
 }

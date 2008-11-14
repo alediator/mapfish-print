@@ -47,6 +47,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 
 public class SVGMapRenderer extends MapRenderer {
     public static final Logger LOGGER = Logger.getLogger(SVGMapRenderer.class);
@@ -125,18 +126,27 @@ public class SVGMapRenderer extends MapRenderer {
                 DOMResult transformedSvg = new DOMResult();
                 final TransformerFactory factory = TransformerFactory.newInstance();
                 javax.xml.transform.Transformer xslt = factory.newTransformer(new DOMSource(svgZoomOut));
+
                 //TODO: may want a different zoom factor in function of the layer and the type (symbol, line or font)
                 xslt.setParameter("zoomFactor", transformer.getSvgFactor() * context.getStyleFactor());
-                final InputStream inputStream = url.openStream();
-                xslt.transform(new StreamSource(inputStream), transformedSvg);
-                Document doc = (Document) transformedSvg.getNode();
 
-                if (LOGGER.isDebugEnabled()) {
-                    printDom(doc);
+                final URLConnection urlConnection = url.openConnection();
+                if (context.getReferer() != null) {
+                    urlConnection.setRequestProperty("Referer", context.getReferer());
                 }
+                final InputStream inputStream = urlConnection.getInputStream();
 
-                inputStream.close();
+                Document doc;
+                try {
+                    xslt.transform(new StreamSource(inputStream), transformedSvg);
+                    doc = (Document) transformedSvg.getNode();
 
+                    if (LOGGER.isDebugEnabled()) {
+                        printDom(doc);
+                    }
+                } finally {
+                    inputStream.close();
+                }
                 return new TranscoderInput(doc);
 
             } catch (Exception e) {

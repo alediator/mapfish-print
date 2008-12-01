@@ -109,7 +109,7 @@ public class WMSMapReader extends TileableMapReader {
 
         if (tileCacheLayerInfo != null) {
             //no layer merge when tilecache is here...
-            return false;
+            return false;  //TODO: the new versions of tilecache do support layer merge, but there is curently no mean to know what version of tilecache we are dealing with
         }
 
         if (other instanceof WMSMapReader) {

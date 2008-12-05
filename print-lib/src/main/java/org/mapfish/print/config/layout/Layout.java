@@ -38,6 +38,8 @@ public class Layout {
 
     private MainPage mainPage;
 
+    private LastPage lastPage;
+
     public void render(PJsonObject params, RenderingContext context) throws DocumentException {
         if (metaData != null) {
             metaData.render(params, context);
@@ -54,10 +56,10 @@ public class Layout {
                 mainPage.render(cur, context);
             }
         }
-    }
 
-    public TitlePage getTitlePage() {
-        return titlePage;
+        if (lastPage != null) {
+            lastPage.render(params, context);
+        }
     }
 
     public void setTitlePage(TitlePage titlePage) {
@@ -70,6 +72,10 @@ public class Layout {
 
     public void setMainPage(MainPage mainPage) {
         this.mainPage = mainPage;
+    }
+
+    public void setLastPage(LastPage lastPage) {
+        this.lastPage = lastPage;
     }
 
     public void setMetaData(MetaData metaData) {
@@ -101,5 +107,6 @@ public class Layout {
         mainPage.validate();
 
         if(titlePage!=null) titlePage.validate();
+        if(lastPage !=null) lastPage.validate();
     }
 }

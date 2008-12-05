@@ -68,13 +68,13 @@ public class ScalebarBlock extends FontBlock {
 
 
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
-        final PJsonObject parent = (PJsonObject) params.getParent().getParent();
-        final DistanceUnit mapUnits = DistanceUnit.fromString(parent.getString("units"));
+        final PJsonObject globalParams = context.getGlobalParams();
+        final DistanceUnit mapUnits = DistanceUnit.fromString(globalParams.getString("units"));
         if (mapUnits == null) {
-            throw new InvalidJsonValueException(parent, "units", parent.getString("units"));
+            throw new InvalidJsonValueException(globalParams, "units", globalParams.getString("units"));
         }
         DistanceUnit scaleUnit = (units != null ? units : mapUnits);
-        final int scale = params.getInt("scale");
+        final int scale = context.getLayout().getMainPage().getMap().createTransformer(context, params).getScale();
 
         final double maxWidthIntervaleDistance = DistanceUnit.PT.convertTo(maxSize, scaleUnit) * scale / intervals;
         final double intervalDistance = getNearestNiceValue(maxWidthIntervaleDistance, scaleUnit);

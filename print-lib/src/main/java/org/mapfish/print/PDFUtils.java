@@ -204,6 +204,8 @@ public class PDFUtils {
             return format(context, params, matcher);
         } else if (key.equals("configDir")) {
             return context.getConfigDir().replace('\\', '/');
+        } else if (key.equals("scale")) {
+            return Integer.toString(context.getLayout().getMainPage().getMap().createTransformer(context, params).getScale());
         }
 
         String result = context.getGlobalParams().optString(key);

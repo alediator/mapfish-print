@@ -28,6 +28,7 @@ import org.mapfish.print.*;
 import org.mapfish.print.map.MapChunkDrawer;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
+import org.mapfish.print.utils.DistanceUnit;
 
 public class MapBlock extends Block {
     private int spacingAfter = 0;
@@ -59,6 +60,9 @@ public class MapBlock extends Block {
         }
     }
 
+    /**
+     * Creates the transformer in function of the JSON parameters and the block's config
+     */
     public Transformer createTransformer(RenderingContext context, PJsonObject params) {
         Integer dpi = params.optInt("dpi");
         if (dpi == null) {
@@ -68,11 +72,48 @@ public class MapBlock extends Block {
             throw new InvalidJsonValueException(params, "dpi", dpi);
         }
 
-        final PJsonArray center = params.getJSONArray("center");
-        final PJsonObject parent = (PJsonObject) params.getParent().getParent();
-        String units = parent.getString("units");
-        return new Transformer(center.getFloat(0), center.getFloat(1), width, height,
-                params.getInt("scale"), dpi, units, params.optFloat("rotation", 0.0F) * Math.PI / 180.0);
+        String units = context.getGlobalParams().getString("units");
+        final DistanceUnit unitEnum = DistanceUnit.fromString(units);
+        if (unitEnum == null) {
+            throw new RuntimeException("Unknown unit: '" + units + "'");
+        }
+
+        final int scale;
+        final float centerX;
+        final float centerY;
+
+        final PJsonArray center = params.optJSONArray("center");
+        if (center != null) {
+            //normal mode
+            scale = params.getInt("scale");
+            centerX = center.getFloat(0);
+            centerY = center.getFloat(1);
+        } else {
+            //bbox mode
+            PJsonArray bbox = params.getJSONArray("bbox");
+            float minX = bbox.getFloat(0);
+            float minY = bbox.getFloat(1);
+            float maxX = bbox.getFloat(2);
+            float maxY = bbox.getFloat(3);
+
+            if (minX >= maxX)
+                throw new InvalidValueException("maxX", Float.toString(maxX));
+            if (minY >= maxY)
+                throw new InvalidValueException("maxY", Float.toString(maxY));
+
+            centerX = (minX + maxX) / 2.0F;
+            centerY = (minY + maxY) / 2.0F;
+            scale = context.getConfig().getBestScale(Math.max(
+                    (maxX - minX) / (DistanceUnit.PT.convertTo(width, unitEnum)),
+                    (maxY - minY) / (DistanceUnit.PT.convertTo(height, unitEnum))));
+        }
+
+        if (!context.getConfig().isScalePresent(scale)) {
+            throw new InvalidJsonValueException(params, "scale", scale);
+        }
+
+        return new Transformer(centerX, centerY, width, height,
+                scale, dpi, unitEnum, params.optFloat("rotation", 0.0F) * Math.PI / 180.0);
     }
 
     public void setSpacingAfter(int spacingAfter) {

@@ -42,11 +42,7 @@ public class Transformer implements Cloneable {
      */
     private double rotation;
 
-    public Transformer(float centerX, float centerY, int paperWidth, int paperHeight, int scale, int dpi, String unit, double rotation) {
-        final DistanceUnit unitEnum = DistanceUnit.fromString(unit);
-        if (unitEnum == null) {
-            throw new RuntimeException("Unknown unit: '" + unit + "'");
-        }
+    public Transformer(float centerX, float centerY, int paperWidth, int paperHeight, int scale, int dpi, DistanceUnit unitEnum, double rotation) {
         pixelPerGeoUnit = (float) (unitEnum.convertTo(dpi, DistanceUnit.IN) / scale);
 
         float geoWidth = paperWidth * dpi / 72.0f / pixelPerGeoUnit;

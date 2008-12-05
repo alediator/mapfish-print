@@ -25,8 +25,8 @@ import com.lowagie.text.Element;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.pdf.PdfWriter;
 import org.json.JSONException;
-import org.mapfish.print.config.layout.Block;
-import org.mapfish.print.config.layout.ScalebarBlock;
+import org.mapfish.print.config.layout.*;
+import org.mapfish.print.config.Config;
 import org.mapfish.print.scalebar.Direction;
 import org.mapfish.print.scalebar.Type;
 import org.mapfish.print.utils.DistanceUnit;
@@ -37,6 +37,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.TreeSet;
 
 /**
  * This is not an automated test. You have to look at the generated PDF file.
@@ -57,7 +60,7 @@ public class ScalebarTest extends PrintTestCase {
         OutputStream outFile = new FileOutputStream("target/testScalebar.pdf");
         PdfWriter writer = PdfWriter.getInstance(doc, outFile);
         writer.setFullCompression();
-        RenderingContext context = new RenderingContext(doc, writer, null, spec, null, null, null);
+        RenderingContext context = createContext(spec, doc, writer);
         doc.setMargins(MARGIN, MARGIN, MARGIN, MARGIN * 3);
         doc.open();
 
@@ -185,6 +188,19 @@ public class ScalebarTest extends PrintTestCase {
         doc.close();
         writer.close();
         outFile.close();
+    }
+
+    private RenderingContext createContext(PJsonObject spec, Document doc, PdfWriter writer) {
+        Layout layout=new Layout();
+        MainPage mainPage=new MainPage();
+        final MapBlock mapBlock = new MapBlock();
+        mainPage.setItems(new ArrayList<Block>(Arrays.asList(mapBlock)));
+        layout.setMainPage(mainPage);
+        Config config=new Config();
+        config.setDpis(new TreeSet<Integer>(Arrays.asList(96,190)));
+        config.setScales(new TreeSet<Integer>(Arrays.asList(20000,25000,100000,500000,4000000)));
+        RenderingContext context = new RenderingContext(doc, writer, config, spec, null, layout, null);
+        return context;
     }
 
     private ScalebarBlock createSmallBlock() {

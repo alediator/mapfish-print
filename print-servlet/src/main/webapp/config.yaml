@@ -1,4 +1,4 @@
-#===========================================================================
+ #===========================================================================
 # allowed DPIs
 #===========================================================================
 dpis:
@@ -21,6 +21,8 @@ scales:
   - 4000000
   - 8000000
   - 16000000
+  - 32000000
+  - 64000000
 
 #===========================================================================
 # the list of allowed hosts
@@ -33,12 +35,16 @@ hosts:
   - !dnsMatch
     host: labs.metacarta.com
     port: 80
+  - !dnsMatch
+    host: demo.mapfish.org
+    port: 80
 
 layouts:
   #===========================================================================
   A4 portrait:
   #===========================================================================
     mainPage:
+      rotation: true
       pageSize: A4
       header:
         height: 50
@@ -53,19 +59,6 @@ layouts:
           spacingAfter: 30
           width: 440
           height: 483
-        - !columns
-          # columns can have an absolute position. In that case, they need a width.
-          absoluteX: 20
-          absoluteY: 500
-          width: 550
-          items:
-            - !text
-              font: Helvetica
-              fontSize: 40
-              align: center
-              text: |
-                Hello
-                How are you doing?
         - !text
           text: '${comment}'
           spacingAfter: 30

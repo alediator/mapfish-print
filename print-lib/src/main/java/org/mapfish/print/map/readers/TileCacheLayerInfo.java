@@ -24,6 +24,7 @@ import org.mapfish.print.utils.PJsonArray;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Arrays;
 
 /**
  * Holds the information we need to manage a tilecache layer.
@@ -34,7 +35,7 @@ public class TileCacheLayerInfo {
      */
     private static final double RESOLUTION_TOLERANCE = 1.05;
 
-    private static final Pattern FORMAT_REGEXP = Pattern.compile("^[^/]+/([^/]+)$");    
+    private static final Pattern FORMAT_REGEXP = Pattern.compile("^[^/]+/([^/]+)$");
     private static final Pattern RESOLUTIONS_REGEXP = Pattern.compile("\\s+");
 
     private final int width;
@@ -51,8 +52,9 @@ public class TileCacheLayerInfo {
         this.resolutions = new float[resolutionsTxt.length];
         for (int i = 0; i < resolutionsTxt.length; ++i) {
             this.resolutions[i] = Float.parseFloat(resolutionsTxt[i]);
-
         }
+        sortResolutions();
+
         this.width = width;
         this.height = height;
         this.minX = minX;
@@ -77,6 +79,8 @@ public class TileCacheLayerInfo {
             this.resolutions[i] = resolutions.getFloat(i);
 
         }
+        sortResolutions();
+
         this.width = width;
         this.height = height;
         this.minX = minX;
@@ -100,7 +104,7 @@ public class TileCacheLayerInfo {
         float result = resolutions[pos];
         for (int i = resolutions.length - 1; i >= 0; --i) {
             float cur = resolutions[i];
-            if (cur > result && cur <= targetResolution * RESOLUTION_TOLERANCE) {
+            if (cur <= targetResolution * RESOLUTION_TOLERANCE) {
                 result = cur;
                 pos = i;
             }
@@ -182,5 +186,18 @@ public class TileCacheLayerInfo {
         return x1 >= minX && x1 <= maxX && y1 >= minY && y1 <= maxY /*&&
                 x2 >= minX && x2 <= maxX && y2 >= minY && y2 <= maxY*/;
         //we don't use x2 and y2 since tilecache doesn't seems to care about those...
+    }
+
+    /**
+     * The resolutions must be sorted in descending order.
+     */
+    private void sortResolutions() {
+        Arrays.sort(this.resolutions);
+        int right = this.resolutions.length - 1;
+        for (int left = 0; left < right; left++, right--) {
+            float temp = this.resolutions[left];
+            this.resolutions[left] = this.resolutions[right];
+            this.resolutions[right] = temp;
+        }
     }
 }

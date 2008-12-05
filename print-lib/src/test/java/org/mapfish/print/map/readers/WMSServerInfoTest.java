@@ -130,19 +130,137 @@ public class WMSServerInfoTest extends PrintTestCase {
                 2.5F};
         assertTrue(Arrays.equals(expectedResolutions, resolutions));
 
-        final TileCacheLayerInfo.ResolutionInfo lowestRes = new TileCacheLayerInfo.ResolutionInfo(8, 2.5F);
-        assertEquals(lowestRes, layerInfo.getNearestResolution(0.1F));
-        assertEquals(lowestRes, layerInfo.getNearestResolution(2.5F));
-        assertEquals(lowestRes, layerInfo.getNearestResolution(2.6F));
-        assertEquals(new TileCacheLayerInfo.ResolutionInfo(7, 5.0F), layerInfo.getNearestResolution(4.99999F));
-        assertEquals(new TileCacheLayerInfo.ResolutionInfo(7, 5.0F), layerInfo.getNearestResolution(5.0F));
-        assertEquals(new TileCacheLayerInfo.ResolutionInfo(0, 800.0F), layerInfo.getNearestResolution(1000.0F));
+        final TileCacheLayerInfo.ResolutionInfo higherRes = new TileCacheLayerInfo.ResolutionInfo(8, 2.5F);
+        final TileCacheLayerInfo.ResolutionInfo midRes = new TileCacheLayerInfo.ResolutionInfo(7, 5.0F);
+        final TileCacheLayerInfo.ResolutionInfo lowerRes = new TileCacheLayerInfo.ResolutionInfo(0, 800.0F);
+
+        assertEquals(higherRes, layerInfo.getNearestResolution(0.1F));
+        assertEquals(higherRes, layerInfo.getNearestResolution(2.5F));
+        assertEquals(higherRes, layerInfo.getNearestResolution(2.6F));
+        assertEquals(midRes, layerInfo.getNearestResolution(4.99999F));
+        assertEquals(midRes, layerInfo.getNearestResolution(5.0F));
+        assertEquals(lowerRes, layerInfo.getNearestResolution(1000.0F));
 
         assertEquals(155000.0F, layerInfo.getMinX());
         assertEquals(-253050.0F, layerInfo.getMinY());
         assertEquals("png", layerInfo.getExtension());
     }
 
+    /**
+     * Tilecache with resolutions not in the correct order.
+     */
+    public void testParseWeirdTileCache() throws IOException, SAXException, ParserConfigurationException {
+        String response = "<?xml version='1.0' encoding=\"ISO-8859-1\" standalone=\"no\" ?>\n" +
+                "        <!DOCTYPE WMT_MS_Capabilities SYSTEM \n" +
+                "            \"http://schemas.opengeospatial.net/wms/1.1.1/WMS_MS_Capabilities.dtd\" [\n" +
+                "              <!ELEMENT VendorSpecificCapabilities (TileSet*) >\n" +
+                "              <!ELEMENT TileSet (SRS, BoundingBox?, Resolutions,\n" +
+                "                                 Width, Height, Format, Layers*, Styles*) >\n" +
+                "              <!ELEMENT Resolutions (#PCDATA) >\n" +
+                "              <!ELEMENT Width (#PCDATA) >\n" +
+                "              <!ELEMENT Height (#PCDATA) >\n" +
+                "              <!ELEMENT Layers (#PCDATA) >\n" +
+                "              <!ELEMENT Styles (#PCDATA) >\n" +
+                "        ]> \n" +
+                "        <WMT_MS_Capabilities version=\"1.1.1\">\n" +
+                "\n" +
+                "          <Service>\n" +
+                "            <Name>OGC:WMS</Name>\n" +
+                "            <Title></Title>\n" +
+                "            <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"http://www.example.com?\"/>\n" +
+                "          </Service>\n" +
+                "        \n" +
+                "          <Capability>\n" +
+                "            <Request>\n" +
+                "              <GetCapabilities>\n" +
+                "\n" +
+                "                <Format>application/vnd.ogc.wms_xml</Format>\n" +
+                "                <DCPType>\n" +
+                "                  <HTTP>\n" +
+                "                    <Get><OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"http://www.example.com?\"/></Get>\n" +
+                "                  </HTTP>\n" +
+                "                </DCPType>\n" +
+                "              </GetCapabilities>\n" +
+                "              <GetMap>\n" +
+                "\n" +
+                "                <Format>image/png</Format>\n" +
+                "\n" +
+                "                <DCPType>\n" +
+                "                  <HTTP>\n" +
+                "                    <Get><OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"http://www.example.com?\"/></Get>\n" +
+                "                  </HTTP>\n" +
+                "                </DCPType>\n" +
+                "              </GetMap>\n" +
+                "            </Request>\n" +
+                "\n" +
+                "            <Exception>\n" +
+                "              <Format>text/plain</Format>\n" +
+                "            </Exception>\n" +
+                "            <VendorSpecificCapabilities>\n" +
+                "              <TileSet>\n" +
+                "                <SRS>EPSG:21781</SRS>\n" +
+                "                <BoundingBox SRS=\"EPSG:21781\" minx=\"155000.000000\" miny=\"-253050.000000\"\n" +
+                "                                      maxx=\"1365000.000000\" maxy=\"583050.000000\" />\n" +
+                "                <Resolutions>400.00000000000000000000 800.00000000000000000000 200.00000000000000000000 100.00000000000000000000 50.00000000000000000000 20.00000000000000000000 10.00000000000000000000 5.00000000000000000000 2.50000000000000000000</Resolutions>\n" +
+                "\n" +
+                "                <Width>256</Width>\n" +
+                "                <Height>256</Height>\n" +
+                "                <Format>image/png</Format>\n" +
+                "                <Layers>cn</Layers>\n" +
+                "                <Styles></Styles>\n" +
+                "              </TileSet>\n" +
+                "            </VendorSpecificCapabilities>\n" +
+                "            <UserDefinedSymbolization SupportSLD=\"0\" UserLayer=\"0\"\n" +
+                "                                      UserStyle=\"0\" RemoteWFS=\"0\"/>\n" +
+                "            <Layer>\n" +
+                "              <Title>TileCache Layers</Title>\n" +
+                "            <Layer queryable=\"0\" opaque=\"0\" cascaded=\"1\">\n" +
+                "\n" +
+                "              <Name>cn</Name>\n" +
+                "              <Title>cn</Title>\n" +
+                "              <SRS>EPSG:21781</SRS>\n" +
+                "              <BoundingBox SRS=\"EPSG:21781\" minx=\"155000.000000\" miny=\"-253050.000000\"\n" +
+                "                                    maxx=\"1365000.000000\" maxy=\"583050.000000\" />\n" +
+                "            </Layer>\n" +
+                "            </Layer>\n" +
+                "          </Capability>\n" +
+                "        </WMT_MS_Capabilities>";
+
+        InputStream stream = new ByteArrayInputStream(response.getBytes("ISO-8859-1"));
+        WMSServerInfo info = WMSServerInfo.parseCapabilities(stream);
+        assertEquals(true, info.isTileCache());
+        TileCacheLayerInfo layerInfo = info.getTileCacheLayer("cn");
+        assertNotNull(layerInfo);
+        assertEquals(256, layerInfo.getWidth());
+        assertEquals(256, layerInfo.getHeight());
+        final float[] resolutions = layerInfo.getResolutions();
+        final float[] expectedResolutions = {
+                800.0F,
+                400.0F,
+                200.0F,
+                100.0F,
+                50.0F,
+                20.0F,
+                10.0F,
+                5.0F,
+                2.5F};
+        assertTrue(Arrays.equals(expectedResolutions, resolutions));
+
+        final TileCacheLayerInfo.ResolutionInfo higherRes = new TileCacheLayerInfo.ResolutionInfo(8, 2.5F);
+        final TileCacheLayerInfo.ResolutionInfo midRes = new TileCacheLayerInfo.ResolutionInfo(7, 5.0F);
+        final TileCacheLayerInfo.ResolutionInfo lowerRes = new TileCacheLayerInfo.ResolutionInfo(0, 800.0F);
+
+        assertEquals(higherRes, layerInfo.getNearestResolution(0.1F));
+        assertEquals(higherRes, layerInfo.getNearestResolution(2.5F));
+        assertEquals(higherRes, layerInfo.getNearestResolution(2.6F));
+        assertEquals(midRes, layerInfo.getNearestResolution(4.99999F));
+        assertEquals(midRes, layerInfo.getNearestResolution(5.0F));
+        assertEquals(lowerRes, layerInfo.getNearestResolution(1000.0F));
+
+        assertEquals(155000.0F, layerInfo.getMinX());
+        assertEquals(-253050.0F, layerInfo.getMinY());
+        assertEquals("png", layerInfo.getExtension());
+    }
 
     public void testParseMapServer() throws IOException, SAXException, ParserConfigurationException {
         String response = "<?xml version='1.0' encoding=\"UTF-8\" standalone=\"no\" ?>\n" +

@@ -57,6 +57,12 @@ public class Config {
 
     private List<HostMatcher> hosts = new ArrayList<HostMatcher>();
 
+    /**
+     * How much of the asked map we tolerate to be outside of the printed area.
+     * Used only in case of bbox printing (use by the PrintAction JS component).
+     */
+    private static final double BEST_SCALE_TOLERANCE = 0.98;
+
     public Config() {
         hosts.add(new LocalHostMatcher());
     }
@@ -186,5 +192,18 @@ public class Config {
 
         if(hosts==null) throw new InvalidValueException("hosts", "null");
         if(hosts.size()<1) throw new InvalidValueException("hosts", "[]");
+    }
+
+    /**
+     * @return The first scale that is bigger or equal than the target.
+     */
+    public int getBestScale(double target) {
+        target*=BEST_SCALE_TOLERANCE;
+        for (Integer scale : scales) {
+            if(scale>=target) {
+                return scale;
+            }
+        }
+        return scales.last();
     }
 }

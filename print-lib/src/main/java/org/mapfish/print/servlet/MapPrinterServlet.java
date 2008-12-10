@@ -17,12 +17,13 @@
  * along with MapFish Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.mapfish.print;
+package org.mapfish.print.servlet;
 
 import com.lowagie.text.DocumentException;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.pvalsecc.misc.FileUtilities;
+import org.mapfish.print.MapPrinter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -39,8 +40,8 @@ public class MapPrinterServlet extends BaseMapServlet {
     private static final String INFO_URL = "/info.json";
     private static final String PRINT_URL = "/print.pdf";
     private static final String CREATE_URL = "/create.json";
-    private static final String TEMP_FILE_PREFIX = "mapfish-print";
-    private static final String TEMP_FILE_SUFFIX = ".pdf";
+    protected static final String TEMP_FILE_PREFIX = "mapfish-print";
+    protected static final String TEMP_FILE_SUFFIX = ".pdf";
     private static final int TEMP_FILE_PURGE_SECONDS = 600;
 
     private File tempDir = null;
@@ -99,7 +100,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     /**
      * All in one method: create and returns the PDF to the client.
      */
-    private void createAndGetPDF(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+    protected void createAndGetPDF(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         //get the spec from the query
         try {
             httpServletRequest.setCharacterEncoding("UTF-8");
@@ -126,19 +127,13 @@ public class MapPrinterServlet extends BaseMapServlet {
     /**
      * Create the PDF and returns to the client (in JSON) the URL to get the PDF.
      */
-    private void createPDF(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, String basePath) throws ServletException {
+    protected void createPDF(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, String basePath) throws ServletException {
         TempFile tempFile = null;
         try {
             purgeOldTemporaryFiles();
 
-            BufferedReader data = httpServletRequest.getReader();
-            StringBuilder spec = new StringBuilder();
-            String cur;
-            while ((cur = data.readLine()) != null) {
-                spec.append(cur).append("\n");
-            }
-
-            tempFile = doCreatePDFFile(spec.toString(), httpServletRequest);
+            String spec = getSpecFromPostBody(httpServletRequest);
+            tempFile = doCreatePDFFile(spec, httpServletRequest);
             if (tempFile == null) {
                 error(httpServletResponse, "Missing 'spec' parameter", 500);
                 return;
@@ -166,15 +161,29 @@ public class MapPrinterServlet extends BaseMapServlet {
             deleteFile(tempFile);
             throw new ServletException(e);
         }
+        addTempFile(tempFile, id);
+    }
+
+    protected void addTempFile(TempFile tempFile, String id) {
         synchronized (tempFiles) {
             tempFiles.put(id, tempFile);
         }
     }
 
+    protected String getSpecFromPostBody(HttpServletRequest httpServletRequest) throws IOException {
+        BufferedReader data = httpServletRequest.getReader();
+        StringBuilder spec = new StringBuilder();
+        String cur;
+        while ((cur = data.readLine()) != null) {
+            spec.append(cur).append("\n");
+        }
+        return spec.toString();
+    }
+
     /**
      * To get the PDF created previously.
      */
-    private void getPDF(HttpServletResponse httpServletResponse, String id) throws IOException {
+    protected void getPDF(HttpServletResponse httpServletResponse, String id) throws IOException {
         final File file;
         synchronized (tempFiles) {
             file = tempFiles.get(id);
@@ -222,7 +231,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     /**
      * Do the actual work of creating the PDF temporary file.
      */
-    private TempFile doCreatePDFFile(String spec, HttpServletRequest httpServletRequest) throws IOException, DocumentException, ServletException {
+    protected TempFile doCreatePDFFile(String spec, HttpServletRequest httpServletRequest) throws IOException, DocumentException, ServletException {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Generating PDF for spec=" + spec);
         }
@@ -251,7 +260,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     /**
      * copy the PDF into the output stream
      */
-    private void sendPdfFile(HttpServletResponse httpServletResponse, File tempFile) throws IOException {
+    protected void sendPdfFile(HttpServletResponse httpServletResponse, File tempFile) throws IOException {
         FileInputStream pdf = new FileInputStream(tempFile);
         final OutputStream response = httpServletResponse.getOutputStream();
         httpServletResponse.setContentType("application/pdf");
@@ -260,7 +269,7 @@ public class MapPrinterServlet extends BaseMapServlet {
         response.close();
     }
 
-    private void error(HttpServletResponse httpServletResponse, Throwable e) {
+    protected void error(HttpServletResponse httpServletResponse, Throwable e) {
         try {
             httpServletResponse.setContentType("text/plain");
             httpServletResponse.setStatus(500);
@@ -275,7 +284,7 @@ public class MapPrinterServlet extends BaseMapServlet {
         }
     }
 
-    private void error(HttpServletResponse httpServletResponse, String message, int code) {
+    protected void error(HttpServletResponse httpServletResponse, String message, int code) {
         try {
             httpServletResponse.setContentType("text/plain");
             httpServletResponse.setStatus(code);
@@ -289,7 +298,7 @@ public class MapPrinterServlet extends BaseMapServlet {
         }
     }
 
-    private File getTempDir() {
+    protected File getTempDir() {
         if (tempDir == null) {
             tempDir = (File) getServletContext().
                     getAttribute("javax.servlet.context.tempdir");
@@ -301,7 +310,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     /**
      * If the file is defined, delete it.
      */
-    private void deleteFile(File file) {
+    protected void deleteFile(File file) {
         if (file != null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Deleting PDF file: " + file.getName());
@@ -312,14 +321,14 @@ public class MapPrinterServlet extends BaseMapServlet {
         }
     }
 
-    private String generateId(File tempFile) {
+    protected String generateId(File tempFile) {
         final String name = tempFile.getName();
         return name.substring(
                 TEMP_FILE_PREFIX.length(),
                 name.length() - TEMP_FILE_SUFFIX.length());
     }
 
-    private String getBaseUrl(HttpServletRequest httpServletRequest) {
+    protected String getBaseUrl(HttpServletRequest httpServletRequest) {
         final String additionalPath = httpServletRequest.getPathInfo();
         String fullUrl = httpServletRequest.getParameter("url");
         if (fullUrl != null) {
@@ -332,7 +341,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     /**
      * Will purge all the known temporary files older than TEMP_FILE_PURGE_SECONDS.
      */
-    private void purgeOldTemporaryFiles() {
+    protected void purgeOldTemporaryFiles() {
         final long minTime = System.currentTimeMillis() - TEMP_FILE_PURGE_SECONDS * 1000L;
         synchronized (tempFiles) {
             Iterator<Map.Entry<String, TempFile>> it = tempFiles.entrySet().iterator();
@@ -346,7 +355,7 @@ public class MapPrinterServlet extends BaseMapServlet {
         }
     }
 
-    private static class TempFile extends File {
+    protected static class TempFile extends File {
         private final long creationTime;
 
         public TempFile(File tempFile) {

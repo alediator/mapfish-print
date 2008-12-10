@@ -93,7 +93,11 @@ public class MapPrinter {
         }
     }
 
-    public void print(String spec, OutputStream outFile, String referer) throws DocumentException {
+    /**
+     * Generate the PDF using the given spec.
+     * @return The context used for printing.
+     */
+    public RenderingContext print(String spec, OutputStream outFile, String referer) throws DocumentException {
         final PJsonObject jsonSpec = parseSpec(spec);
 
         final String layoutName = jsonSpec.getString("layout");
@@ -115,6 +119,7 @@ public class MapPrinter {
 
         doc.close();
         writer.close();
+        return context;
     }
 
     public static PJsonObject parseSpec(String spec) {

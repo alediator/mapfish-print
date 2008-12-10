@@ -17,9 +17,10 @@
  * along with MapFish Server.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.mapfish.print;
+package org.mapfish.print.servlet;
 
 import org.apache.log4j.Logger;
+import org.mapfish.print.MapPrinter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

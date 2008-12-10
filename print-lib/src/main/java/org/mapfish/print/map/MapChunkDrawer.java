@@ -82,10 +82,10 @@ public class MapChunkDrawer extends ChunkDrawer {
         }
 
         transformer.setMapPos(rectangle.getLeft(), rectangle.getBottom());
-        if (Math.abs(rectangle.getWidth() - transformer.getPaperW()) > 0.2) {
+        if (rectangle.getWidth() < transformer.getPaperW() - 0.2) {
             throw new RuntimeException("The map width on the paper is wrong");
         }
-        if (Math.abs(rectangle.getHeight() - transformer.getPaperH()) > 0.2) {
+        if (rectangle.getHeight() < transformer.getPaperH() - 0.2) {
             throw new RuntimeException("The map height on the paper is wrong (" + rectangle.getHeight() + "!=" + transformer.getPaperH() + ")");
         }
 

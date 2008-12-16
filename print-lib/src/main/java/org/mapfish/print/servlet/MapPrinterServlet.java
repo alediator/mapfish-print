@@ -264,6 +264,7 @@ public class MapPrinterServlet extends BaseMapServlet {
         FileInputStream pdf = new FileInputStream(tempFile);
         final OutputStream response = httpServletResponse.getOutputStream();
         httpServletResponse.setContentType("application/pdf");
+        httpServletResponse.setHeader("Content-disposition","attachment; filename="+tempFile.getName() );
         FileUtilities.copyStream(pdf, response);
         pdf.close();
         response.close();

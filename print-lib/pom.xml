@@ -52,6 +52,7 @@
     <dependency>
       <groupId>com.lowagie</groupId>
       <artifactId>itext</artifactId>
+      <!-- if you increase this version, please check the PngImage copy is still needed -->
       <version>2.1.3</version>
     </dependency>
     <dependency>

@@ -31,7 +31,7 @@ From the command line
 This method can be used to test the layouts.
 
 Example of command (from the directory SVNROOT/server/java/print/print-standalone):
-  java -cp target/print-standalone.jar org.mapfish.print.ShellMapPrinter --config=samples/config.yaml --spec=samples/spec.json --output=$HOME/print.pdf
+  java -Djava.awt.headless=true -cp target/print-standalone.jar org.mapfish.print.ShellMapPrinter --config=samples/config.yaml --spec=samples/spec.json --output=$HOME/print.pdf
 
 Behind a pylons component
 -------------------------

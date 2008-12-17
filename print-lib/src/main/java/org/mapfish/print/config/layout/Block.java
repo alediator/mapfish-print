@@ -38,6 +38,7 @@ public abstract class Block {
     private VerticalAlign vertAlign = null;
     private String backgroundColor = null;
     private String condition = null;
+    protected double spacingAfter = 0.0;
 
     public Block() {
 
@@ -54,6 +55,7 @@ public abstract class Block {
 
     /**
      * Called just after the config has been loaded to check it is valid.
+     *
      * @throws InvalidValueException When there is a problem
      */
     public void validate() {
@@ -112,5 +114,9 @@ public abstract class Block {
 
     public void setCondition(String condition) {
         this.condition = condition;
+    }
+
+    public void setSpacingAfter(double spacingAfter) {
+        this.spacingAfter = spacingAfter;
     }
 }

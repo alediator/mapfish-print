@@ -117,6 +117,7 @@ layouts:
           spacingAfter: 30
         - !attributes
           source: data
+          spacingAfter: 30
           columnDefs:
             id:
               header: !text

@@ -33,7 +33,6 @@ import java.util.ArrayList;
 public class ColumnsBlock extends Block {
     private ArrayList<Block> items = new ArrayList<Block>();
     private int[] widths = null;
-    private double spacingAfter = 0.0f;
     private int absoluteX = Integer.MIN_VALUE;
     private int absoluteY = Integer.MIN_VALUE;
     private int width = Integer.MIN_VALUE;
@@ -77,10 +76,6 @@ public class ColumnsBlock extends Block {
         this.widths = widths;
     }
 
-    public void setSpacingAfter(double spacingAfter) {
-        this.spacingAfter = spacingAfter;
-    }
-
     public void setAbsoluteX(int absoluteX) {
         this.absoluteX = absoluteX;
     }
@@ -119,8 +114,8 @@ public class ColumnsBlock extends Block {
 
     public void validate() {
         super.validate();
-        if(items==null) throw new InvalidValueException("items", "null");
-        if(items.size()<1) throw new InvalidValueException("items", "[]");
+        if (items == null) throw new InvalidValueException("items", "null");
+        if (items.size() < 1) throw new InvalidValueException("items", "[]");
         for (int i = 0; i < items.size(); i++) {
             items.get(i).validate();
         }

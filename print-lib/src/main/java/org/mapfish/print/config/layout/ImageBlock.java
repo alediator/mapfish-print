@@ -43,7 +43,6 @@ public class ImageBlock extends Block {
     private double maxWidth = 0.0;
     private double maxHeight = 0.0;
     private String rotation = "0";
-    private double spacingAfter = 0;
 
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
         final URI url;
@@ -100,10 +99,6 @@ public class ImageBlock extends Block {
         this.rotation = rotation;
     }
 
-    public void setSpacingAfter(double spacingAfter) {
-        this.spacingAfter = spacingAfter;
-    }
-
     private class SvgDrawer extends ChunkDrawer {
         private final float rotation;
         private final PrintTranscoder pt;
@@ -146,6 +141,6 @@ public class ImageBlock extends Block {
     @Override
     public void validate() {
         super.validate();
-        if(url==null) throw new InvalidValueException("url", "null");
+        if (url == null) throw new InvalidValueException("url", "null");
     }
 }

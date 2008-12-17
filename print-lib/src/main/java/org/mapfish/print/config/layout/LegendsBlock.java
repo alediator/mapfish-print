@@ -69,7 +69,7 @@ public class LegendsBlock extends Block {
                 }
             }
         }
-
+        table.setSpacingAfter((float) spacingAfter);
         target.add(table);
     }
 

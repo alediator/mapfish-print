@@ -31,7 +31,6 @@ import org.mapfish.print.utils.PJsonObject;
 import org.mapfish.print.utils.DistanceUnit;
 
 public class MapBlock extends Block {
-    private int spacingAfter = 0;
     private int height = 453;
     private int width = 340;
     private int absoluteX = Integer.MIN_VALUE;
@@ -114,10 +113,6 @@ public class MapBlock extends Block {
 
         return new Transformer(centerX, centerY, width, height,
                 scale, dpi, unitEnum, params.optFloat("rotation", 0.0F) * Math.PI / 180.0);
-    }
-
-    public void setSpacingAfter(int spacingAfter) {
-        this.spacingAfter = spacingAfter;
     }
 
     public void setHeight(int height) {

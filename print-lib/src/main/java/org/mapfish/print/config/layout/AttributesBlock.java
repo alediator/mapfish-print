@@ -81,6 +81,8 @@ public class AttributesBlock extends Block {
                 }
             }
         }
+        table.setSpacingAfter((float) spacingAfter);
+
         target.add(table);
     }
 
@@ -99,8 +101,9 @@ public class AttributesBlock extends Block {
     @Override
     public void validate() {
         super.validate();
-        if(source==null) throw new InvalidValueException("source", "null");
-        if(columnDefs==null) throw new InvalidValueException("columnDefs", "null");
+        if (source == null) throw new InvalidValueException("source", "null");
+        if (columnDefs == null)
+            throw new InvalidValueException("columnDefs", "null");
         columnDefs.validate();
     }
 }

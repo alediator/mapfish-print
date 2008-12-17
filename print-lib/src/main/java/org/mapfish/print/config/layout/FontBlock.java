@@ -31,8 +31,6 @@ public abstract class FontBlock extends Block {
     protected Double fontSize = null;
     private String fontEncoding = BaseFont.WINANSI;
 
-    protected double spacingAfter = 0;
-
     private String fontColor = "black";
 
     public void setFont(String font) {
@@ -67,10 +65,6 @@ public abstract class FontBlock extends Block {
         Font result = FontFactory.getFont(font, fontEncoding, (float) getFontSize());
         result.setColor(getFontColorVal());
         return result;
-    }
-
-    public void setSpacingAfter(double spacingAfter) {
-        this.spacingAfter = spacingAfter;
     }
 
     public void setFontColor(String fontColor) {

@@ -184,23 +184,28 @@ public class Transformer implements Cloneable {
         return paperPosY;
     }
 
-    private AffineTransform getBaseTransform() {
+    /**
+     * @return a transformer with paper dimensions, but that takes into account
+     *         the position of the map and its rotation.
+     */
+    public AffineTransform getBaseTransform() {
         final AffineTransform result = AffineTransform.getTranslateInstance(paperPosX, paperPosY);
         if (rotation != 0.0F) {
-            result.rotate(rotation, getPaperW() / 2, getPaperH() / 2);
-            result.translate(-(getRotatedPaperW() - getPaperW()) / 2, -(getRotatedPaperH() - getPaperH()) / 2);
+            result.translate(getPaperW() / 2, getPaperH() / 2);
+            result.rotate(rotation);
+            result.translate(-getRotatedPaperW()/2, -getRotatedPaperH()/2);
         }
         return result;
     }
 
     /**
-     * @param reverse True to do the rotation in the other direction
+     * @param reverseRotation True to do the rotation in the other direction
      * @return The affine transformation to go from geographic coordinated to paper coordinates
      */
-    public AffineTransform getGeoTransform(boolean reverse) {
+    public AffineTransform getGeoTransform(boolean reverseRotation) {
         final AffineTransform result = AffineTransform.getTranslateInstance(paperPosX, paperPosY);
         if (rotation != 0.0F) {
-            result.rotate((reverse ? -1 : 1) * rotation, getPaperW() / 2, getPaperH() / 2);
+            result.rotate((reverseRotation ? -1 : 1) * rotation, getPaperW() / 2, getPaperH() / 2);
         }
         result.scale(getPaperW() / getGeoW(), getPaperH() / getGeoH());
         result.translate(-minGeoX, -minGeoY);

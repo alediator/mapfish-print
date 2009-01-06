@@ -42,11 +42,13 @@ import com.lowagie.text.pdf.PdfContentByte;
  * <li>styleProperties: Name of the property within the features to use as style name (defaults
  * to '_style'). The given property may contain a style object directly.
  * <li>styles: dictonary of styles. One style is defined as in OpenLayers.Feature.Vector.style
+ * <li>name: the layer name.
  * </ul>
  */
 public class VectorMapReader extends MapReader {
     private final MfGeo geo;
     private final RenderingContext context;
+    private final String name;
 
     public VectorMapReader(RenderingContext context, PJsonObject params) {
         super(params);
@@ -62,6 +64,7 @@ public class VectorMapReader extends MapReader {
         } catch (JSONException e) {
             throw new InvalidJsonValueException(params, "geoJson", geoJson.toString(), e);
         }
+        name = params.optString("name", "vector");
     }
 
     public static void create(List<MapReader> target, RenderingContext context, PJsonObject params) {
@@ -71,8 +74,11 @@ public class VectorMapReader extends MapReader {
     public void render(Transformer transformer, PdfContentByte dc, String srs, boolean first) {
         dc.saveState();
         try {
-            AffineTransform transform = transformer.getGeoTransform(false);
-            FeaturesRenderer.render(context, dc, transform, geo);
+            dc.transform(transformer.getGeoTransform(false));
+            float styleFactor = context.getStyleFactor();
+            context.setStyleFactor(styleFactor * transformer.getGeoW() / transformer.getPaperW());
+            FeaturesRenderer.render(context, dc, geo);
+            context.setStyleFactor(styleFactor);
         } finally {
             dc.restoreState();
         }
@@ -83,6 +89,6 @@ public class VectorMapReader extends MapReader {
     }
 
     public String toString() {
-        return "vector";
+        return name;
     }
 }

@@ -24,6 +24,7 @@ import com.lowagie.text.DocumentException;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.pdf.PdfStream;
 import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.pdf.ByteBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -44,6 +45,11 @@ public class MapPrinter {
      */
     private final Config config;
     private String configDir;
+
+    static {
+        //configure iText to use a higher precision for floats
+        ByteBuffer.HIGH_PRECISION = true;
+    }
 
     public MapPrinter(File config) throws FileNotFoundException {
         this.config = Config.fromYaml(config);
@@ -95,6 +101,7 @@ public class MapPrinter {
 
     /**
      * Generate the PDF using the given spec.
+     *
      * @return The context used for printing.
      */
     public RenderingContext print(String spec, OutputStream outFile, String referer) throws DocumentException {

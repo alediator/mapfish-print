@@ -78,7 +78,7 @@ public class MapChunkDrawer extends ChunkDrawer {
             mainTransformer = context.getLayout().getMainPage().getMap().createTransformer(context, params);
             transformer.zoom(mainTransformer, (float) (1.0 / overviewMap));
             transformer.setRotation(0);   //overview always north up!
-            context.setStyleFactor((float) (transformer.getPaperW()/mainTransformer.getPaperW()/overviewMap));
+            context.setStyleFactor((float) (transformer.getPaperW() / mainTransformer.getPaperW() / overviewMap));
         }
 
         transformer.setMapPos(rectangle.getLeft(), rectangle.getBottom());
@@ -93,7 +93,7 @@ public class MapChunkDrawer extends ChunkDrawer {
         List<MapReader> readers = new ArrayList<MapReader>(layers.size());
         for (int i = 0; i < layers.size(); ++i) {
             PJsonObject layer = layers.getJSONObject(i);
-            if(mainTransformer==null || layer.optBool("overview", true)) {
+            if (mainTransformer == null || layer.optBool("overview", true)) {
                 final String type = layer.getString("type");
                 MapReader.create(readers, type, context, layer);
             }
@@ -157,33 +157,23 @@ public class MapChunkDrawer extends ChunkDrawer {
             //in "degrees" unit, there seems to have rounding errors if I use the
             //PDF transform facility. Therefore, I do the transform by hand :-(
             transformer.setRotation(mainTransformer.getRotation());
-            AffineTransform transform = transformer.getGeoTransform(true);
+            dc.transform(transformer.getGeoTransform(true));
             transformer.setRotation(0);
 
-            Point2D.Float ll = new Point2D.Float();
-            Point2D.Float lr = new Point2D.Float();
-            Point2D.Float ur = new Point2D.Float();
-            Point2D.Float ul = new Point2D.Float();
-            transform.transform(new Point2D.Float(mainTransformer.getMinGeoX(), mainTransformer.getMinGeoY()), ll);
-            transform.transform(new Point2D.Float(mainTransformer.getMaxGeoX(), mainTransformer.getMinGeoY()), lr);
-            transform.transform(new Point2D.Float(mainTransformer.getMaxGeoX(), mainTransformer.getMaxGeoY()), ur);
-            transform.transform(new Point2D.Float(mainTransformer.getMinGeoX(), mainTransformer.getMaxGeoY()), ul);
-
-            dc.setLineWidth(1);
+            dc.setLineWidth(1 * transformer.getGeoW() / transformer.getPaperW());
             dc.setColorStroke(new Color(255, 0, 0));
-            dc.moveTo(ll.x, ll.y);
-            dc.lineTo(lr.x, lr.y);
-            dc.lineTo(ur.x, ur.y);
-            dc.lineTo(ul.x, ul.y);
-            dc.closePath();
+            dc.rectangle(mainTransformer.getMinGeoX(), mainTransformer.getMinGeoY(), mainTransformer.getGeoW(), mainTransformer.getGeoH());
             dc.stroke();
 
             if (mainTransformer.getRotation() != 0.0) {
                 //draw a little arrow
-                dc.setLineWidth(0.5F);
-                dc.moveTo((3 * ll.x + lr.x) / 4, (3 * ll.y + lr.y) / 4);
-                dc.lineTo((2 * ll.x + 2 * lr.x + ul.x + ur.x) / 6, (2 * ll.y + 2 * lr.y + ul.y + ur.y) / 6);
-                dc.lineTo((ll.x + 3 * lr.x) / 4, (ll.y + 3 * lr.y) / 4);
+                dc.setLineWidth(0.5F * transformer.getGeoW() / transformer.getPaperW());
+                dc.moveTo((3 * mainTransformer.getMinGeoX() + mainTransformer.getMaxGeoX()) / 4,
+                        mainTransformer.getMinGeoY());
+                dc.lineTo((mainTransformer.getMinGeoX() + mainTransformer.getMaxGeoX()) / 2,
+                        (mainTransformer.getMinGeoY()*2 + mainTransformer.getMaxGeoY()) / 3);
+                dc.lineTo((mainTransformer.getMinGeoX() + 3 * mainTransformer.getMaxGeoX()) / 4,
+                        mainTransformer.getMinGeoY());
                 dc.stroke();
             }
         } finally {

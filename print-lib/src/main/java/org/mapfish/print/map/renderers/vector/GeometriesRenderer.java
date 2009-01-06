@@ -48,10 +48,6 @@ public abstract class GeometriesRenderer<T extends Geometry> {
         RENDERERS.put(Point.class, new PointRenderer());
     }
 
-    public static void render(RenderingContext context, PdfContentByte dc, AffineTransform transform, PJsonObject style, Geometry geometry) {
-        render(context, dc, style, transformGeo(transform, geometry));
-    }
-
     @SuppressWarnings({"RawUseOfParameterizedType", "unchecked"})
     protected static void render(RenderingContext context, PdfContentByte dc, PJsonObject style, Geometry geometry) {
         GeometriesRenderer renderer = RENDERERS.get(geometry.getClass());
@@ -64,26 +60,6 @@ public abstract class GeometriesRenderer<T extends Geometry> {
         } finally {
             dc.restoreState();
         }
-    }
-
-    /**
-     * Apply the transformation to the geometry.
-     * Warning: changes the geometry.
-     */
-    private static Geometry transformGeo(final AffineTransform transform, Geometry geometry) {
-        final Point2D.Double tmp = new Point2D.Double();
-        final Point2D.Double dst = new Point2D.Double();
-        geometry.apply(new CoordinateFilter() {
-            public void filter(Coordinate coord) {
-                tmp.x = coord.x;
-                tmp.y = coord.y;
-                transform.transform(tmp, dst);
-                coord.x = dst.x;
-                coord.y = dst.y;
-            }
-        });
-        geometry.geometryChanged();
-        return geometry;
     }
 
     protected abstract void renderImpl(RenderingContext context, PdfContentByte dc, PJsonObject style, T geometry);

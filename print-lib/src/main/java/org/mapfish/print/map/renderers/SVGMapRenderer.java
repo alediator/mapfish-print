@@ -121,14 +121,15 @@ public class SVGMapRenderer extends MapRenderer {
     }
 
     private TranscoderInput getTranscoderInput(URL url, Transformer transformer, RenderingContext context) {
-        if (svgZoomOut != null) {
+        final float zoomFactor = transformer.getSvgFactor() * context.getStyleFactor();
+        if (svgZoomOut != null && zoomFactor != 1.0f) {
             try {
                 DOMResult transformedSvg = new DOMResult();
                 final TransformerFactory factory = TransformerFactory.newInstance();
                 javax.xml.transform.Transformer xslt = factory.newTransformer(new DOMSource(svgZoomOut));
 
                 //TODO: may want a different zoom factor in function of the layer and the type (symbol, line or font)
-                xslt.setParameter("zoomFactor", transformer.getSvgFactor() * context.getStyleFactor());
+                xslt.setParameter("zoomFactor", zoomFactor);
 
                 final URLConnection urlConnection = url.openConnection();
                 if (context.getReferer() != null) {

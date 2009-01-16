@@ -11,7 +11,7 @@
   <version>0.0-SNAPSHOT</version> <!-- this version is a fake, don't touch it -->
   <properties>
     <!-- this is the real version -->
-    <theVersion>1.1</theVersion>
+    <theVersion>1.1-SNAPSHOT</theVersion>
   </properties>
 
   <name>Print</name>

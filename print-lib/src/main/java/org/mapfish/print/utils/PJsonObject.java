@@ -108,7 +108,7 @@ public class PJsonObject extends PJsonElement {
     }
 
     public Boolean optBool(String key) {
-        if(obj.optString(key)==null) {
+        if (obj.optString(key) == null) {
             return null;
         } else {
             return obj.optBoolean(key);
@@ -146,6 +146,11 @@ public class PJsonObject extends PJsonElement {
             return null;
         }
         return new PJsonArray(this, val, key);
+    }
+
+    public PJsonArray optJSONArray(String key, PJsonArray defaultValue) {
+        PJsonArray result = optJSONArray(key);
+        return result != null ? result : defaultValue;
     }
 
     public Iterator<String> keys() {

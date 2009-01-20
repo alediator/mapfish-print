@@ -64,8 +64,8 @@ public class MapChunkDrawer extends ChunkDrawer {
     }
 
     public void renderImpl(Rectangle rectangle, PdfContentByte dc) {
-        final PJsonObject parent = (PJsonObject) params.getParent().getParent();
-        final PJsonArray layers = parent.getJSONArray("layers");
+        final PJsonObject parent = context.getGlobalParams();
+        PJsonArray layers = parent.getJSONArray("layers");
         String srs = parent.getString("srs");
 
         if (!context.getConfig().isScalePresent(transformer.getScale())) {
@@ -79,6 +79,7 @@ public class MapChunkDrawer extends ChunkDrawer {
             transformer.zoom(mainTransformer, (float) (1.0 / overviewMap));
             transformer.setRotation(0);   //overview always north up!
             context.setStyleFactor((float) (transformer.getPaperW() / mainTransformer.getPaperW() / overviewMap));
+            layers = parent.optJSONArray("overviewLayers", layers);
         }
 
         transformer.setMapPos(rectangle.getLeft(), rectangle.getBottom());
@@ -171,7 +172,7 @@ public class MapChunkDrawer extends ChunkDrawer {
                 dc.moveTo((3 * mainTransformer.getMinGeoX() + mainTransformer.getMaxGeoX()) / 4,
                         mainTransformer.getMinGeoY());
                 dc.lineTo((mainTransformer.getMinGeoX() + mainTransformer.getMaxGeoX()) / 2,
-                        (mainTransformer.getMinGeoY()*2 + mainTransformer.getMaxGeoY()) / 3);
+                        (mainTransformer.getMinGeoY() * 2 + mainTransformer.getMaxGeoY()) / 3);
                 dc.lineTo((mainTransformer.getMinGeoX() + 3 * mainTransformer.getMaxGeoX()) / 4,
                         mainTransformer.getMinGeoY());
                 dc.stroke();

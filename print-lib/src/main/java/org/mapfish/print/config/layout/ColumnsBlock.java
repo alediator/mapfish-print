@@ -29,9 +29,10 @@ import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ColumnsBlock extends Block {
-    private ArrayList<Block> items = new ArrayList<Block>();
+    private List<Block> items;
     private int[] widths = null;
     private int absoluteX = Integer.MIN_VALUE;
     private int absoluteY = Integer.MIN_VALUE;
@@ -45,30 +46,32 @@ public class ColumnsBlock extends Block {
             context.getCustomBlocks().addAbsoluteDrawer(new PDFCustomBlocks.AbsoluteDrawer() {
                 public void render(PdfContentByte dc) throws DocumentException {
                     final PdfPTable table = PDFUtils.buildTable(items, params, context, nbColumns, config);
+                    if (table != null) {
+                        table.setTotalWidth(width);
+                        table.setLockedWidth(true);
 
-                    table.setTotalWidth(width);
-                    table.setLockedWidth(true);
+                        if (widths != null) {
+                            table.setWidths(widths);
+                        }
 
-                    if (widths != null) {
-                        table.setWidths(widths);
+                        table.writeSelectedRows(0, -1, absoluteX, absoluteY, dc);
                     }
-
-                    table.writeSelectedRows(0, -1, absoluteX, absoluteY, dc);
                 }
             });
         } else {
             final PdfPTable table = PDFUtils.buildTable(items, params, context, nbColumns, config);
+            if (table != null) {
+                if (widths != null) {
+                    table.setWidths(widths);
+                }
 
-            if (widths != null) {
-                table.setWidths(widths);
+                table.setSpacingAfter((float) spacingAfter);
+                target.add(table);
             }
-
-            table.setSpacingAfter((float) spacingAfter);
-            target.add(table);
         }
     }
 
-    public void setItems(ArrayList<Block> items) {
+    public void setItems(List<Block> items) {
         this.items = items;
     }
 
@@ -92,7 +95,7 @@ public class ColumnsBlock extends Block {
         this.nbColumns = nbColumns;
     }
 
-    protected boolean isAbsolute() {
+    public boolean isAbsolute() {
         return absoluteX != Integer.MIN_VALUE &&
                 absoluteY != Integer.MIN_VALUE &&
                 width != Integer.MIN_VALUE;
@@ -116,8 +119,18 @@ public class ColumnsBlock extends Block {
         super.validate();
         if (items == null) throw new InvalidValueException("items", "null");
         if (items.size() < 1) throw new InvalidValueException("items", "[]");
+
+        if (!((absoluteX != Integer.MIN_VALUE && absoluteY != Integer.MIN_VALUE && width != Integer.MIN_VALUE) ||
+                (absoluteX == Integer.MIN_VALUE && absoluteY == Integer.MIN_VALUE && width == Integer.MIN_VALUE))) {
+            throw new InvalidValueException("absoluteX, absoluteY or width", "all of them must be defined or none");
+        }
+
         for (int i = 0; i < items.size(); i++) {
-            items.get(i).validate();
+            final Block item = items.get(i);
+            item.validate();
+            if (item.isAbsolute()) {
+                throw new InvalidValueException("items", "Cannot put an absolute block in a !columns or !table block");
+            }
         }
     }
 }

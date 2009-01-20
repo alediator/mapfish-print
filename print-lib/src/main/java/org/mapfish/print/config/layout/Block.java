@@ -61,6 +61,10 @@ public abstract class Block {
     public void validate() {
     }
 
+    public boolean isAbsolute() {
+        return false;
+    }
+
     public interface PdfElement {
         void add(com.lowagie.text.Element element) throws DocumentException;
     }

@@ -19,10 +19,10 @@
 
 package org.mapfish.print;
 
-import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfTemplate;
+import com.lowagie.text.*;
 import org.mapfish.print.config.layout.*;
 import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.FileUtilities;
@@ -33,9 +33,9 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,56 +50,56 @@ public class PDFUtils {
      * Gets an iText image with a cache that uses PdfTemplates to re-use the same
      * bitmap content multiple times in order to reduce the file size.
      */
-     public static Image getImage(RenderingContext context, URI uri, float w, float h) throws IOException, DocumentException {
-         Map<URI, PdfTemplate> cache = context.getTemplateCache();
+    public static Image getImage(RenderingContext context, URI uri, float w, float h) throws IOException, DocumentException {
+        Map<URI, PdfTemplate> cache = context.getTemplateCache();
 
-         PdfTemplate template = cache.get(uri);
-         if (template == null) {
-             Image content = getImageDirect(context, uri);
-             content.setAbsolutePosition(0, 0);
-             template = context.getDirectContent().createTemplate(content.getPlainWidth(), content.getPlainHeight());
-             template.addImage(content);
-             cache.put(uri, template);
-         }
+        PdfTemplate template = cache.get(uri);
+        if (template == null) {
+            Image content = getImageDirect(context, uri);
+            content.setAbsolutePosition(0, 0);
+            template = context.getDirectContent().createTemplate(content.getPlainWidth(), content.getPlainHeight());
+            template.addImage(content);
+            cache.put(uri, template);
+        }
 
 
         //fix the size/aspect ratio of the image in function of what is specified by the user
-         if (w == 0.0f) {
-             if (h == 0.0f) {
-                 w = template.getWidth();
-                 h = template.getHeight();
-             } else {
-                 w = h / template.getHeight() * template.getWidth();
-             }
-         } else {
-             if (h == 0.0f) {
-                 h = w / template.getWidth() * template.getHeight();
-             }
-         }
+        if (w == 0.0f) {
+            if (h == 0.0f) {
+                w = template.getWidth();
+                h = template.getHeight();
+            } else {
+                w = h / template.getHeight() * template.getWidth();
+            }
+        } else {
+            if (h == 0.0f) {
+                h = w / template.getWidth() * template.getHeight();
+            }
+        }
 
-         final Image result = Image.getInstance(template);
-         result.scaleAbsolute(w, h);
-         return result;
-     }
+        final Image result = Image.getInstance(template);
+        result.scaleAbsolute(w, h);
+        return result;
+    }
 
-     /**
-      * Gets an iText image. Avoids doing the query twice.
-      */
-     private static Image getImageDirect(RenderingContext context, URI uri) throws IOException, BadElementException {
-         if (!uri.isAbsolute()) {
-             //non-absolute URI are local, so we can use the normal iText method
-             return Image.getInstance(uri.toString());
-         } else {
-             //read the whole image content in memory, then give that to iText
-             final URLConnection urlConnection = uri.toURL().openConnection();
-             if (context.getReferer() != null) {
-                 urlConnection.setRequestProperty("Referer", context.getReferer());
-             }
-             InputStream is = urlConnection.getInputStream();
-             ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
-             try {
-                 FileUtilities.copyStream(is, imageBytes);
-             } finally {
+    /**
+     * Gets an iText image. Avoids doing the query twice.
+     */
+    private static Image getImageDirect(RenderingContext context, URI uri) throws IOException, BadElementException {
+        if (!uri.isAbsolute()) {
+            //non-absolute URI are local, so we can use the normal iText method
+            return Image.getInstance(uri.toString());
+        } else {
+            //read the whole image content in memory, then give that to iText
+            final URLConnection urlConnection = uri.toURL().openConnection();
+            if (context.getReferer() != null) {
+                urlConnection.setRequestProperty("Referer", context.getReferer());
+            }
+            InputStream is = urlConnection.getInputStream();
+            ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
+            try {
+                FileUtilities.copyStream(is, imageBytes);
+            } finally {
                 is.close();
             }
             return Image.getInstance(imageBytes.toByteArray());
@@ -257,14 +257,25 @@ public class PDFUtils {
         }
     }
 
-    public static PdfPTable buildTable(ArrayList<Block> items, PJsonObject params, RenderingContext context, int nbColumns, TableConfig tableConfig) throws DocumentException {
+    /**
+     * Creates a PDF table with the given items. Returns null if the table is empty
+     */
+    public static PdfPTable buildTable(List<Block> items, PJsonObject params, RenderingContext context, int nbColumns, TableConfig tableConfig) throws DocumentException {
         int nbCells = 0;
         for (int i = 0; i < items.size(); i++) {
             final Block block = items.get(i);
             if (block.isVisible(context, params)) {
-                nbCells++;
+                if (block.isAbsolute()) {
+                    // absolute blocks are rendered directly (special case for
+                    // header/footer containing absolute blocks; it should not
+                    // happen in other usecases).
+                    block.render(params, null, context);
+                } else {
+                    nbCells++;
+                }
             }
         }
+        if (nbCells == 0) return null;
         nbColumns = nbColumns > 0 ? nbColumns : nbCells;
         int nbRows = (nbCells + nbColumns - 1) / nbColumns;
         final PdfPTable table = new PdfPTable(nbColumns);
@@ -273,7 +284,7 @@ public class PDFUtils {
         int cellNum = 0;
         for (int i = 0; i < items.size(); i++) {
             final Block block = items.get(i);
-            if (block.isVisible(context, params)) {
+            if (block.isVisible(context, params) && !block.isAbsolute()) {
                 final PdfPCell cell = createCell(params, context, block, cellNum / nbColumns, cellNum % nbColumns, nbRows, nbColumns, tableConfig);
                 table.addCell(cell);
                 cellNum++;

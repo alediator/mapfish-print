@@ -123,7 +123,7 @@ public class MapBlock extends Block {
         this.width = width;
     }
 
-    boolean isAbsolute() {
+    public boolean isAbsolute() {
         return absoluteX != Integer.MIN_VALUE &&
                 absoluteY != Integer.MIN_VALUE;
     }
@@ -153,5 +153,25 @@ public class MapBlock extends Block {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void validate() {
+        super.validate();
+        if (absoluteX != Integer.MIN_VALUE ^
+                absoluteY != Integer.MIN_VALUE) {
+            if (absoluteX == Integer.MIN_VALUE) {
+                throw new InvalidValueException("absoluteX", "null");
+            } else {
+                throw new InvalidValueException("absoluteY", "null");
+            }
+        }
+
+        if (width <= 0) {
+            throw new InvalidValueException("width", Integer.toString(width));
+        }
+
+        if (height <= 0) {
+            throw new InvalidValueException("width", Integer.toString(height));
+        }
     }
 }

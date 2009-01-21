@@ -19,6 +19,7 @@
 
 package org.mapfish.print.map;
 
+import com.lowagie.text.DocumentException;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfLayer;
@@ -28,8 +29,6 @@ import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -124,20 +123,57 @@ public class MapChunkDrawer extends ChunkDrawer {
             }
         }
 
-        //do the rendering
+        //Do the rendering.
+        //
+        //Since we need to load tiles in parallel from the
+        //servers, what follows is not trivial. We don't write directly to the PDF's
+        //DirectContent, we always go through the ParallelMapTileLoader that will
+        //make sure that everything is added to the PDF in the correct order.
+        //
+        //All uses of the DirectContent (dc) or the PDFWriter is forbiden outside
+        //of renderOnPdf methods and when they are used, one must take a lock on
+        //the DirectContent. That is done for you when renderOnPdf is called, but not done
+        //in the readTile method. That's why PDFUtils.getImage needs to do it when
+        //creating the template.
+        //
+        //If you don't follow those rules, you risk to have random inconsistency
+        //in your PDF files.
+        ParallelMapTileLoader parallelMapTileLoader = new ParallelMapTileLoader(context, dc);
         dc.saveState();
         try {
-            PdfLayer mapLayer = new PdfLayer(name, context.getWriter());
+            final PdfLayer mapLayer = new PdfLayer(name, context.getWriter());
             transformer.setClipping(dc);
+
+            //START of the parallel world !!!!!!!!!!!!!!!!!!!!!!!!!!!
+
             for (int i = 0; i < readers.size(); i++) {
-                MapReader reader = readers.get(i);
-                PdfLayer pdfLayer = new PdfLayer(reader.toString(), context.getWriter());
-                mapLayer.addChild(pdfLayer);
-                dc.beginLayer(pdfLayer);
-                reader.render(transformer, dc, srs, i == 0);
-                dc.endLayer();
+                final MapReader reader = readers.get(i);
+
+                //mark the starting of a new PDF layer
+                parallelMapTileLoader.addTileToLoad(new MapTileTask.RenderOnly() {
+                    public void renderOnPdf(PdfContentByte dc) throws DocumentException {
+                        PdfLayer pdfLayer = new PdfLayer(reader.toString(), context.getWriter());
+                        mapLayer.addChild(pdfLayer);
+                        dc.beginLayer(pdfLayer);
+                    }
+                });
+
+                //render the layer
+                reader.render(transformer, parallelMapTileLoader, srs, i == 0);
+
+                //mark the end of the PDF layer
+                parallelMapTileLoader.addTileToLoad(new MapTileTask.RenderOnly() {
+                    public void renderOnPdf(PdfContentByte dc) throws DocumentException {
+                        dc.endLayer();
+                    }
+                });
             }
         } finally {
+            //wait for all the tiles to be loaded
+            parallelMapTileLoader.waitForCompletion();
+
+            //END of the parallel world !!!!!!!!!!!!!!!!!!!!!!!!!!
+
             dc.restoreState();
         }
 

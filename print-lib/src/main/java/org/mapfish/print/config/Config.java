@@ -19,14 +19,22 @@
 
 package org.mapfish.print.config;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.ho.yaml.CustomYamlConfig;
 import org.ho.yaml.YamlConfig;
 import org.json.JSONException;
 import org.json.JSONWriter;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.config.layout.Layout;
 import org.mapfish.print.config.layout.Layouts;
-import org.mapfish.print.InvalidValueException;
+import org.mapfish.print.map.MapTileTask;
+import org.mapfish.print.map.readers.WMSServerInfo;
+import org.pvalsecc.concurrent.OrderedResultsExecutor;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -57,11 +65,23 @@ public class Config {
 
     private List<HostMatcher> hosts = new ArrayList<HostMatcher>();
 
+    private int globalParallelFetches = 5;
+    private int perHostParallelFetches = 5;
+
+    private boolean tilecacheMerging = false;
+
     /**
      * How much of the asked map we tolerate to be outside of the printed area.
      * Used only in case of bbox printing (use by the PrintAction JS component).
      */
     private static final double BEST_SCALE_TOLERANCE = 0.98;
+
+    /**
+     * The bunch of threads that will be used to do the // fetching of the map
+     * chunks
+     */
+    private OrderedResultsExecutor<MapTileTask> mapRenderingExecutor = null;
+    private HttpClient httpClient;
 
     public Config() {
         hosts.add(new LocalHostMatcher());
@@ -178,32 +198,94 @@ public class Config {
 
     /**
      * Called just after the config has been loaded to check it is valid.
+     *
      * @throws InvalidValueException When there is a problem
      */
     public void validate() {
-        if(layouts==null) throw new InvalidValueException("layouts", "null");
+        if (layouts == null) throw new InvalidValueException("layouts", "null");
         layouts.validate();
 
-        if(dpis==null) throw new InvalidValueException("dpis", "null");
-        if(dpis.size()<1) throw new InvalidValueException("dpis", "[]");
+        if (dpis == null) throw new InvalidValueException("dpis", "null");
+        if (dpis.size() < 1) throw new InvalidValueException("dpis", "[]");
 
-        if(scales==null) throw new InvalidValueException("scales", "null");
-        if(scales.size()<1) throw new InvalidValueException("scales", "[]");
+        if (scales == null) throw new InvalidValueException("scales", "null");
+        if (scales.size() < 1) throw new InvalidValueException("scales", "[]");
 
-        if(hosts==null) throw new InvalidValueException("hosts", "null");
-        if(hosts.size()<1) throw new InvalidValueException("hosts", "[]");
+        if (hosts == null) throw new InvalidValueException("hosts", "null");
+        if (hosts.size() < 1) throw new InvalidValueException("hosts", "[]");
+
+        if (globalParallelFetches < 1) {
+            throw new InvalidValueException("globalParallelFetches", Integer.toString(globalParallelFetches));
+        }
+        if (perHostParallelFetches < 1) {
+            throw new InvalidValueException("perHostParallelFetches", Integer.toString(perHostParallelFetches));
+        }
     }
 
     /**
      * @return The first scale that is bigger or equal than the target.
      */
     public int getBestScale(double target) {
-        target*=BEST_SCALE_TOLERANCE;
+        target *= BEST_SCALE_TOLERANCE;
         for (Integer scale : scales) {
-            if(scale>=target) {
+            if (scale >= target) {
                 return scale;
             }
         }
         return scales.last();
+    }
+
+    public synchronized OrderedResultsExecutor<MapTileTask> getMapRenderingExecutor() {
+        if (mapRenderingExecutor == null && globalParallelFetches > 1) {
+            mapRenderingExecutor = new OrderedResultsExecutor<MapTileTask>(globalParallelFetches, "tilesReader");
+            mapRenderingExecutor.start();
+        }
+        return mapRenderingExecutor;
+    }
+
+    /**
+     * Stop all the threads and stuff used for this config.
+     */
+    public synchronized void stop() {
+        WMSServerInfo.clearCache();
+        if (mapRenderingExecutor != null) {
+            mapRenderingExecutor.stop();
+        }
+        if (httpClient != null) {
+            httpClient.getHttpConnectionManager().closeIdleConnections(0);
+        }
+    }
+
+    public void setGlobalParallelFetches(int globalParallelFetches) {
+        this.globalParallelFetches = globalParallelFetches;
+    }
+
+    public void setPerHostParallelFetches(int perHostParallelFetches) {
+        this.perHostParallelFetches = perHostParallelFetches;
+        System.getProperties().setProperty("http.maxConnections", Integer.toString(perHostParallelFetches));
+    }
+
+    public synchronized HttpClient getHttpClient() {
+        if (httpClient == null) {
+            MultiThreadedHttpConnectionManager connectionManager =
+                    new MultiThreadedHttpConnectionManager();
+            final HttpConnectionManagerParams params = connectionManager.getParams();
+            params.setDefaultMaxConnectionsPerHost(this.perHostParallelFetches);
+            params.setMaxTotalConnections(this.globalParallelFetches);
+            httpClient = new HttpClient(connectionManager);
+
+            //httpclient is a bit pesky about loading everything in memory...
+            //disabling the warnings.
+            Logger.getLogger(HttpMethodBase.class).setLevel(Level.ERROR);
+        }
+        return httpClient;
+    }
+
+    public void setTilecacheMerging(boolean tilecacheMerging) {
+        this.tilecacheMerging = tilecacheMerging;
+    }
+
+    public boolean isTilecacheMerging() {
+        return tilecacheMerging;
     }
 }

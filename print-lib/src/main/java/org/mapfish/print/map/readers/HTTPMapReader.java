@@ -19,12 +19,12 @@
 
 package org.mapfish.print.map.readers;
 
-import com.lowagie.text.pdf.PdfContentByte;
 import org.apache.log4j.Logger;
 import org.mapfish.print.InvalidJsonValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
-import org.mapfish.print.map.renderers.MapRenderer;
+import org.mapfish.print.map.ParallelMapTileLoader;
+import org.mapfish.print.map.renderers.TileRenderer;
 import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.MatchAllSet;
 import org.pvalsecc.misc.URIUtils;
@@ -32,11 +32,7 @@ import org.pvalsecc.misc.URIUtils;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public abstract class HTTPMapReader extends MapReader {
     public static final Logger LOGGER = Logger.getLogger(HTTPMapReader.class);
@@ -69,7 +65,7 @@ public abstract class HTTPMapReader extends MapReader {
         }
     }
 
-    public void render(Transformer transformer, PdfContentByte dc, String srs, boolean first) {
+    public void render(Transformer transformer, ParallelMapTileLoader parallelMapTileLoader, String srs, boolean first) {
         Map<String, List<String>> queryParams = new HashMap<String, List<String>>();
 
         try {
@@ -82,20 +78,20 @@ public abstract class HTTPMapReader extends MapReader {
                 }
             }
 
-            MapRenderer formater = MapRenderer.get(getFormat());
+            TileRenderer formater = TileRenderer.get(getFormat());
 
             addCommonQueryParams(queryParams, transformer, srs, first);
             final URI commonUri = URIUtils.addParams(baseUrl, queryParams, OVERRIDE_ALL);
 
-            renderTiles(formater, transformer, commonUri, dc);
+            renderTiles(formater, transformer, commonUri, parallelMapTileLoader);
         } catch (Exception e) {
             context.addError(e);
         }
     }
 
-    protected abstract void renderTiles(MapRenderer formater, Transformer transformer, URI commonUri, PdfContentByte dc) throws IOException, URISyntaxException;
+    protected abstract void renderTiles(TileRenderer formater, Transformer transformer, URI commonUri, ParallelMapTileLoader parallelMapTileLoader) throws IOException, URISyntaxException;
 
-    protected abstract MapRenderer.Format getFormat();
+    protected abstract TileRenderer.Format getFormat();
 
     /**
      * Adds the query parameters common to every tile

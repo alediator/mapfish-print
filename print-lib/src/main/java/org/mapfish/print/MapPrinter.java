@@ -22,9 +22,9 @@ package org.mapfish.print;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.FontFactory;
+import com.lowagie.text.pdf.ByteBuffer;
 import com.lowagie.text.pdf.PdfStream;
 import com.lowagie.text.pdf.PdfWriter;
-import com.lowagie.text.pdf.ByteBuffer;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONWriter;
@@ -141,5 +141,9 @@ public class MapPrinter {
 
     public void printClientConfig(JSONWriter json) throws JSONException {
         config.printClientConfig(json);
+    }
+
+    public void stop() {
+        config.stop();
     }
 }

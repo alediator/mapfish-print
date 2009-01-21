@@ -59,8 +59,9 @@ public abstract class BaseMapServlet extends HttpServlet {
 
         if (printer != null && configFile.lastModified() != lastModified) {
             //file modified, reload it
-            printer = null;
             LOGGER.info("Configuration file modified. Reloading...");
+            printer.stop();
+            printer = null;
         }
 
         if (printer == null) {
@@ -73,5 +74,11 @@ public abstract class BaseMapServlet extends HttpServlet {
             }
         }
         return printer;
+    }
+
+    @Override
+    public void destroy() {
+        printer.stop();
+        super.destroy();
     }
 }

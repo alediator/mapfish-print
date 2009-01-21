@@ -21,7 +21,7 @@ package org.mapfish.print.map.readers;
 
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
-import org.mapfish.print.map.renderers.MapRenderer;
+import org.mapfish.print.map.renderers.TileRenderer;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.StringUtils;
@@ -40,27 +40,26 @@ import java.util.Map;
  * (TileCache).
  */
 public class WMSMapReader extends TileableMapReader {
-    private final List<String> layers = new ArrayList<String>();
-
     private final String format;
+    protected final List<String> layers = new ArrayList<String>();
 
     private final List<String> styles = new ArrayList<String>();
 
     private WMSMapReader(String layer, String style, RenderingContext context, PJsonObject params) {
         super(context, params);
-        tileCacheLayerInfo = WMSServerInfo.getInfo(baseUrl, context).getTileCacheLayer(layer);
         layers.add(layer);
+        tileCacheLayerInfo = WMSServerInfo.getInfo(baseUrl, context).getTileCacheLayer(layer);
         styles.add(style);
         format = params.getString("format");
     }
 
-    protected MapRenderer.Format getFormat() {
+    protected TileRenderer.Format getFormat() {
         if (format.equals("image/svg+xml")) {
-            return MapRenderer.Format.SVG;
+            return TileRenderer.Format.SVG;
         } else if (format.equals("application/x-pdf")) {
-            return MapRenderer.Format.PDF;
+            return TileRenderer.Format.PDF;
         } else {
-            return MapRenderer.Format.BITMAP;
+            return TileRenderer.Format.BITMAP;
         }
     }
 
@@ -107,17 +106,32 @@ public class WMSMapReader extends TileableMapReader {
             return false;
         }
 
-        if (tileCacheLayerInfo != null) {
-            //no layer merge when tilecache is here...
-            return false;  //TODO: the new versions of tilecache do support layer merge, but there is curently no mean to know what version of tilecache we are dealing with
+        if (tileCacheLayerInfo != null && !context.getConfig().isTilecacheMerging()) {
+            //no layer merge when tilecache is here and we are not configured to support it...
+            return false;
         }
 
         if (other instanceof WMSMapReader) {
             WMSMapReader wms = (WMSMapReader) other;
-            return format.equals(wms.format);
+            if (!format.equals(wms.format)) {
+                return false;
+            }
+
+            if (tileCacheLayerInfo != null && wms.tileCacheLayerInfo != null) {
+                if (!tileCacheLayerInfo.equals(wms.tileCacheLayerInfo)) {
+                    //not the same tilecache config
+                    return false;
+                }
+            } else if ((tileCacheLayerInfo == null) != (wms.tileCacheLayerInfo == null)) {
+                //one layer has a tilecache config and not the other?!?!? Weird...
+                LOGGER.warn("Between [" + this + "] and [" + wms + "], one has a tilecache config and not the other");
+                return false;
+            }
         } else {
             return false;
         }
+
+        return true;
     }
 
     protected URI getTileUri(URI commonUri, Transformer transformer, float minGeoX, float minGeoY, float maxGeoX, float maxGeoY, long w, long h) throws URISyntaxException, UnsupportedEncodingException {

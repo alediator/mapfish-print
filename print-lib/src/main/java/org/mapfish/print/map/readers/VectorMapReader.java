@@ -19,19 +19,21 @@
 
 package org.mapfish.print.map.readers;
 
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfContentByte;
+import org.json.JSONException;
+import org.mapfish.geo.MfGeo;
+import org.mapfish.geo.MfGeoJSONReader;
+import org.mapfish.print.InvalidJsonValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
-import org.mapfish.print.InvalidJsonValueException;
+import org.mapfish.print.map.MapTileTask;
+import org.mapfish.print.map.ParallelMapTileLoader;
 import org.mapfish.print.map.renderers.vector.FeaturesRenderer;
 import org.mapfish.print.map.renderers.vector.StyledMfGeoFactory;
 import org.mapfish.print.utils.PJsonObject;
-import org.mapfish.geo.*;
-import org.json.JSONException;
 
 import java.util.List;
-import java.awt.geom.AffineTransform;
-
-import com.lowagie.text.pdf.PdfContentByte;
 
 /**
  * Render vector layers. The geometries and the styling comes directly from the spec JSON.
@@ -71,17 +73,16 @@ public class VectorMapReader extends MapReader {
         target.add(new VectorMapReader(context, params));
     }
 
-    public void render(Transformer transformer, PdfContentByte dc, String srs, boolean first) {
-        dc.saveState();
-        try {
-            dc.transform(transformer.getGeoTransform(false));
-            float styleFactor = context.getStyleFactor();
-            context.setStyleFactor(styleFactor * transformer.getGeoW() / transformer.getPaperW());
-            FeaturesRenderer.render(context, dc, geo);
-            context.setStyleFactor(styleFactor);
-        } finally {
-            dc.restoreState();
-        }
+    public void render(final Transformer transformer, ParallelMapTileLoader parallelMapTileLoader, String srs, boolean first) {
+        parallelMapTileLoader.addTileToLoad(new MapTileTask.RenderOnly() {
+            public void renderOnPdf(PdfContentByte dc) throws DocumentException {
+                dc.transform(transformer.getGeoTransform(false));
+                float styleFactor = context.getStyleFactor();
+                context.setStyleFactor(styleFactor * transformer.getGeoW() / transformer.getPaperW());
+                FeaturesRenderer.render(context, dc, geo);
+                context.setStyleFactor(styleFactor);
+            }
+        });
     }
 
     public boolean testMerge(MapReader other) {

@@ -19,6 +19,7 @@
 
 package org.mapfish.print.map.renderers;
 
+import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfGState;
 import org.apache.batik.ext.awt.RenderingHintsKeyExt;
@@ -31,6 +32,8 @@ import org.apache.xml.serialize.XMLSerializer;
 import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
+import org.mapfish.print.map.MapTileTask;
+import org.mapfish.print.map.ParallelMapTileLoader;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -49,15 +52,15 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 
-public class SVGMapRenderer extends MapRenderer {
-    public static final Logger LOGGER = Logger.getLogger(SVGMapRenderer.class);
+public class SVGTileRenderer extends TileRenderer {
+    public static final Logger LOGGER = Logger.getLogger(SVGTileRenderer.class);
 
     private static final Document svgZoomOut;
 
     static {
         DOMParser parser = new DOMParser();
         try {
-            final InputStream stream = SVGMapRenderer.class.getResourceAsStream("/org/mapfish/print/map/renderers/svgZoomOut.xsl");
+            final InputStream stream = SVGTileRenderer.class.getResourceAsStream("/org/mapfish/print/map/renderers/svgZoomOut.xsl");
             if (stream == null) {
                 throw new RuntimeException("Cannot find the SVG transformation XSLT");
             }
@@ -74,50 +77,55 @@ public class SVGMapRenderer extends MapRenderer {
         }
     }
 
-    public void render(Transformer transformer, java.util.List<URI> uris, PdfContentByte dc, RenderingContext context, float opacity, int nbTilesHorizontal, float offsetX, float offsetY, long bitmapTileW, long bitmapTileH) throws IOException {
+    public void render(final Transformer transformer, java.util.List<URI> uris, ParallelMapTileLoader parallelMapTileLoader, final RenderingContext context, final float opacity, int nbTilesHorizontal, float offsetX, float offsetY, long bitmapTileW, long bitmapTileH) throws IOException {
         if (uris.size() != 1) {
             //tiling not supported in SVG
             throw new InvalidValueException("format", "application/x-pdf");
         }
 
-        dc.saveState();
-        try {
-            dc.transform(transformer.getSvgTransform());
+        final URI uri = uris.get(0);
 
-            if (opacity < 1.0) {
-                PdfGState gs = new PdfGState();
-                gs.setFillOpacity(opacity);
-                gs.setStrokeOpacity(opacity);
-                //gs.setBlendMode(PdfGState.BM_SOFTLIGHT);
-                dc.setGState(gs);
+        parallelMapTileLoader.addTileToLoad(new MapTileTask() {
+            public PrintTranscoder pt;
+
+            @Override
+            protected void readTile() throws IOException, DocumentException {
+                LOGGER.debug(uri);
+                final TranscoderInput ti = getTranscoderInput(uri.toURL(), transformer, context);
+                if (ti != null) {
+                    pt = new PrintTranscoder();
+                    pt.transcode(ti, null);
+                }
             }
 
-            Graphics2D g2 = dc.createGraphics(transformer.getRotatedSvgW(), transformer.getRotatedSvgH());
+            @Override
+            protected void renderOnPdf(PdfContentByte dc) throws DocumentException {
+                dc.transform(transformer.getSvgTransform());
 
-            //avoid a warning from Batik
-            System.setProperty("org.apache.batik.warn_destination", "false");
-            g2.setRenderingHint(RenderingHintsKeyExt.KEY_TRANSCODING, RenderingHintsKeyExt.VALUE_TRANSCODING_PRINTING);
-            g2.setRenderingHint(RenderingHintsKeyExt.KEY_AVOID_TILE_PAINTING, RenderingHintsKeyExt.VALUE_AVOID_TILE_PAINTING_ON);
+                if (opacity < 1.0) {
+                    PdfGState gs = new PdfGState();
+                    gs.setFillOpacity(opacity);
+                    gs.setStrokeOpacity(opacity);
+                    //gs.setBlendMode(PdfGState.BM_SOFTLIGHT);
+                    dc.setGState(gs);
+                }
 
-            final URI uri = uris.get(0);
-            LOGGER.debug(uri);
-            final TranscoderInput ti = getTranscoderInput(uri.toURL(), transformer, context);
-            if (ti != null) {
-                PrintTranscoder pt = new PrintTranscoder();
-                pt.transcode(ti, null);
+                Graphics2D g2 = dc.createGraphics(transformer.getRotatedSvgW(), transformer.getRotatedSvgH());
+
+                //avoid a warning from Batik
+                System.setProperty("org.apache.batik.warn_destination", "false");
+                g2.setRenderingHint(RenderingHintsKeyExt.KEY_TRANSCODING, RenderingHintsKeyExt.VALUE_TRANSCODING_PRINTING);
+                g2.setRenderingHint(RenderingHintsKeyExt.KEY_AVOID_TILE_PAINTING, RenderingHintsKeyExt.VALUE_AVOID_TILE_PAINTING_ON);
+
                 Paper paper = new Paper();
                 paper.setSize(transformer.getRotatedSvgW(), transformer.getRotatedSvgH());
                 paper.setImageableArea(0, 0, transformer.getRotatedSvgW(), transformer.getRotatedSvgH());
                 PageFormat pf = new PageFormat();
                 pf.setPaper(paper);
                 pt.print(g2, pf, 0);
+                g2.dispose();
             }
-
-            g2.dispose();
-        } finally {
-            dc.restoreState();
-        }
-
+        });
     }
 
     private TranscoderInput getTranscoderInput(URL url, Transformer transformer, RenderingContext context) {

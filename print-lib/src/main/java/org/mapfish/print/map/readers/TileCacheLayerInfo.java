@@ -22,9 +22,9 @@ package org.mapfish.print.map.readers;
 import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonArray;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Arrays;
 
 /**
  * Holds the information we need to manage a tilecache layer.
@@ -199,5 +199,24 @@ public class TileCacheLayerInfo {
             this.resolutions[left] = this.resolutions[right];
             this.resolutions[right] = temp;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TileCacheLayerInfo that = (TileCacheLayerInfo) o;
+
+        if (height != that.height) return false;
+        if (Float.compare(that.maxX, maxX) != 0) return false;
+        if (Float.compare(that.maxY, maxY) != 0) return false;
+        if (Float.compare(that.minX, minX) != 0) return false;
+        if (Float.compare(that.minY, minY) != 0) return false;
+        if (width != that.width) return false;
+        if (!extension.equals(that.extension)) return false;
+        if (!Arrays.equals(resolutions, that.resolutions)) return false;
+
+        return true;
     }
 }

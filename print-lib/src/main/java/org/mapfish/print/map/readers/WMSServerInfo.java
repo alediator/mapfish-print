@@ -19,6 +19,7 @@
 
 package org.mapfish.print.map.readers;
 
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.util.DOMUtil;
@@ -29,9 +30,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -39,7 +40,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -59,12 +59,17 @@ public class WMSServerInfo {
     static {
         documentBuilderFactory.setValidating(false);  //doesn't work?!?!?
     }
+
     /**
      * Not null if we actually use a TileCache server.
      */
     private Map<String, TileCacheLayerInfo> tileCacheLayers = null;
 
     public WMSServerInfo() {
+    }
+
+    public static synchronized void clearCache() {
+        cache.clear();
     }
 
     public static synchronized WMSServerInfo getInfo(URI uri, RenderingContext context) {
@@ -89,17 +94,18 @@ public class WMSServerInfo {
         URIUtils.addParamOverride(queryParams, "REQUEST", "GetCapabilities");
         URIUtils.addParamOverride(queryParams, "VERSION", "1.1.1");
         URL url = URIUtils.addParams(baseUrl, queryParams, HTTPMapReader.OVERRIDE_ALL).toURL();
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+        GetMethod method = new GetMethod(url.toString());
+        if (context.getReferer() != null) {
+            method.setRequestHeader("Referer", context.getReferer());
+        }
         try {
-            if (context.getReferer() != null) {
-                con.setRequestProperty("Referer", context.getReferer());
-            }
-            con.connect();
-            int code = con.getResponseCode();
+            context.getConfig().getHttpClient().executeMethod(method);
+            int code = method.getStatusCode();
             if (code < 200 || code >= 300) {
-                throw new IOException("Error " + code + " while reading the Capabilities from " + url + ": " + con.getResponseMessage());
+                throw new IOException("Error " + code + " while reading the Capabilities from " + url + ": " + method.getStatusText());
             }
-            InputStream stream = con.getInputStream();
+            InputStream stream = method.getResponseBodyAsStream();
             final WMSServerInfo result;
             try {
                 result = parseCapabilities(stream);
@@ -108,7 +114,7 @@ public class WMSServerInfo {
             }
             return result;
         } finally {
-            con.disconnect();
+            method.releaseConnection();
         }
     }
 
@@ -121,7 +127,7 @@ public class WMSServerInfo {
                 return new InputSource(new StringReader(""));
             }
         });
-        
+
         Document doc = documentBuilder.parse(stream);
 
         NodeList tileSets = doc.getElementsByTagName("TileSet");

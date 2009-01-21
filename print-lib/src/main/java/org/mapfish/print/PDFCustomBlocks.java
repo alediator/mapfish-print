@@ -19,22 +19,15 @@
 
 package org.mapfish.print;
 
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.Chunk;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Font;
-import com.lowagie.text.Rectangle;
+import com.lowagie.text.*;
 import com.lowagie.text.pdf.*;
 import org.apache.log4j.Logger;
 import org.mapfish.print.config.layout.HeaderFooter;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Listen to events from the PDF document in order to render the
@@ -51,7 +44,7 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
     private HeaderFooter footer;
     private PJsonObject footerParams;
     private String backgroundPdf;
-    private final List<Exception> errors = new ArrayList<Exception>();
+    private final List<Exception> errors = Collections.synchronizedList(new ArrayList<Exception>());
 
     /**
      * cache of background PDF pages
@@ -193,7 +186,11 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
 
     public void addError(Exception e) {
         errors.add(e);
-        LOGGER.warn("Error while adding a PDF element", e);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.warn("Error while adding a PDF element", e);
+        } else {
+            LOGGER.warn("Error while adding a PDF element" + e.toString());
+        }
     }
 
     public Chunk getOrCreateTotalPagesBlock(Font font) throws BadElementException {

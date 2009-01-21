@@ -19,10 +19,10 @@
 
 package org.mapfish.print.map.readers;
 
-import com.lowagie.text.pdf.PdfContentByte;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
-import org.mapfish.print.map.renderers.MapRenderer;
+import org.mapfish.print.map.ParallelMapTileLoader;
+import org.mapfish.print.map.renderers.TileRenderer;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
 import org.pvalsecc.misc.StringUtils;
@@ -35,9 +35,8 @@ import java.util.List;
 import java.util.Map;
 
 public class MapServerMapReader extends HTTPMapReader {
-    private final List<String> layers = new ArrayList<String>();
-
     private final String format;
+    protected final List<String> layers = new ArrayList<String>();
 
     private MapServerMapReader(String layer, RenderingContext context, PJsonObject params) {
         super(context, params);
@@ -45,21 +44,21 @@ public class MapServerMapReader extends HTTPMapReader {
         format = params.getString("format");
     }
 
-    protected void renderTiles(MapRenderer formater, Transformer transformer, URI commonUri, PdfContentByte dc) throws IOException {
-        //tiling not supported for MapServer protocol...
+    protected void renderTiles(TileRenderer formater, Transformer transformer, URI commonUri, ParallelMapTileLoader parallelMapTileLoader) throws IOException {
+        //tiling not supported and not really needed (tilecache doesn't support this protocol) for MapServer protocol...
         List<URI> uris = new ArrayList<URI>(1);
         uris.add(commonUri);
-        formater.render(transformer, uris, dc, context, opacity, 1, 0, 0,
+        formater.render(transformer, uris, parallelMapTileLoader, context, opacity, 1, 0, 0,
                 transformer.getRotatedBitmapW(), transformer.getRotatedBitmapH());
     }
 
-    protected MapRenderer.Format getFormat() {
+    protected TileRenderer.Format getFormat() {
         if (format.equals("image/svg+xml")) {
-            return MapRenderer.Format.SVG;
+            return TileRenderer.Format.SVG;
         } else if (format.equals("application/x-pdf")) {
-            return MapRenderer.Format.PDF;
+            return TileRenderer.Format.PDF;
         } else {
-            return MapRenderer.Format.BITMAP;
+            return TileRenderer.Format.BITMAP;
         }
     }
 
@@ -99,8 +98,8 @@ public class MapServerMapReader extends HTTPMapReader {
 
     public boolean testMerge(MapReader other) {
         if (canMerge(other)) {
-            MapServerMapReader wms = (MapServerMapReader) other;
-            layers.addAll(wms.layers);
+            MapServerMapReader ms = (MapServerMapReader) other;
+            layers.addAll(ms.layers);
             return true;
         }
         return false;

@@ -20,27 +20,16 @@
 package org.mapfish.print;
 
 import com.lowagie.text.DocumentException;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.*;
 import org.json.JSONException;
 import org.json.JSONWriter;
 import org.pvalsecc.misc.FileUtilities;
+import org.pvalsecc.misc.UnitUtilities;
 import org.pvalsecc.opts.GetOptions;
 import org.pvalsecc.opts.InvalidOption;
 import org.pvalsecc.opts.Option;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 
 /**
@@ -99,6 +88,8 @@ public class ShellMapPrinter {
     }
 
     public void run() throws IOException, JSONException, DocumentException {
+        long startTime = System.currentTimeMillis();
+
         final OutputStream outFile = getOutputStream();
         if (clientConfig) {
             final OutputStreamWriter writer = new OutputStreamWriter(outFile, Charset.forName("UTF-8"));
@@ -115,6 +106,9 @@ public class ShellMapPrinter {
             final InputStream inFile = getInputStream();
             printer.print(FileUtilities.readWholeTextStream(inFile, "UTF-8"), outFile, referer);
         }
+        printer.stop();
+
+        LOGGER.info("Time for rendering the PDF: " + UnitUtilities.toElapsedTime(System.currentTimeMillis() - startTime));
     }
 
     private void configureLogs() {
@@ -135,6 +129,8 @@ public class ShellMapPrinter {
                     break;
                 case 2:
                     level = Level.DEBUG;
+                    Logger.getLogger("httpclient").setLevel(Level.INFO);
+                    Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.INFO);
                     break;
                 default:
                     level = Level.TRACE;

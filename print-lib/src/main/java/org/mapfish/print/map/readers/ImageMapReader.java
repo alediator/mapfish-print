@@ -19,23 +19,28 @@
 
 package org.mapfish.print.map.readers;
 
-import org.mapfish.print.Transformer;
-import org.mapfish.print.RenderingContext;
-import org.mapfish.print.PDFUtils;
-import org.mapfish.print.InvalidJsonValueException;
-import org.mapfish.print.utils.PJsonObject;
-import org.mapfish.print.utils.PJsonArray;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Image;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfGState;
-import com.lowagie.text.Image;
-import com.lowagie.text.DocumentException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mapfish.print.InvalidJsonValueException;
+import org.mapfish.print.PDFUtils;
+import org.mapfish.print.RenderingContext;
+import org.mapfish.print.Transformer;
+import org.mapfish.print.map.MapTileTask;
+import org.mapfish.print.map.ParallelMapTileLoader;
+import org.mapfish.print.utils.PJsonArray;
+import org.mapfish.print.utils.PJsonObject;
 
+import java.awt.geom.AffineTransform;
 import java.net.URI;
 import java.util.List;
-import java.awt.geom.AffineTransform;
 
+/**
+ * Renders using a georeferenced image directly.
+ */
 public class ImageMapReader extends MapReader {
     private static final Log LOGGER = LogFactory.getLog(ImageMapReader.class);
 
@@ -80,38 +85,31 @@ public class ImageMapReader extends MapReader {
         }
     }
 
-    public void render(Transformer transformer, PdfContentByte dc, String srs, boolean first) {
+    public void render(final Transformer transformer, ParallelMapTileLoader parallelMapTileLoader, String srs, boolean first) {
         LOGGER.debug(baseUrl);
 
 
-        //create an image scaled and positioned according to the geographical coordinates
-        final Image image;
-        try {
-            image = PDFUtils.createImage(context, extentMaxX - extentMinX, extentMaxY - extentMinY, baseUrl, 0);
-            image.setAbsolutePosition(extentMinX, extentMinY);
-        } catch (DocumentException e) {
-            context.addError(e);
-            return;
-        }
+        parallelMapTileLoader.addTileToLoad(new MapTileTask() {
+            public Image image;
 
-        final AffineTransform geoTransform = transformer.getGeoTransform(false);
-
-        //add the image using a geo->paper transformer
-        try {
-            dc.saveState();
-            dc.transform(geoTransform);
-            if (opacity < 1.0) {
-                PdfGState gs = new PdfGState();
-                gs.setFillOpacity(opacity);
-                gs.setStrokeOpacity(opacity);
-                dc.setGState(gs);
+            public void readTile() throws DocumentException {
+                image = PDFUtils.createImage(context, extentMaxX - extentMinX, extentMaxY - extentMinY, baseUrl, 0);
+                image.setAbsolutePosition(extentMinX, extentMinY);
             }
-            dc.addImage(image);
-        } catch (DocumentException e) {
-            context.addError(e);
-        } finally {
-            dc.restoreState();
-        }
+
+            public void renderOnPdf(PdfContentByte dc) throws DocumentException {
+                //add the image using a geo->paper transformer
+                final AffineTransform geoTransform = transformer.getGeoTransform(false);
+                dc.transform(geoTransform);
+                if (opacity < 1.0) {
+                    PdfGState gs = new PdfGState();
+                    gs.setFillOpacity(opacity);
+                    gs.setStrokeOpacity(opacity);
+                    dc.setGState(gs);
+                }
+                dc.addImage(image);
+            }
+        });
     }
 
     public boolean testMerge(MapReader other) {

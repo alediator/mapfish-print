@@ -19,27 +19,28 @@
 
 package org.mapfish.print;
 
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfTemplate;
-import com.lowagie.text.*;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.log4j.Logger;
 import org.mapfish.print.config.layout.*;
 import org.mapfish.print.utils.PJsonObject;
-import org.pvalsecc.misc.FileUtilities;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PDFUtils {
+    public static Logger LOGGER = Logger.getLogger(PDFUtils.class);
+
     public static Image createEmptyImage(double width, double height) throws BadElementException {
         Image background = Image.getInstance(1, 1, 1, 1, new byte[]{0}, new int[]{0, 0});
         background.scaleAbsolute((float) width, (float) height);
@@ -51,14 +52,21 @@ public class PDFUtils {
      * bitmap content multiple times in order to reduce the file size.
      */
     public static Image getImage(RenderingContext context, URI uri, float w, float h) throws IOException, DocumentException {
+        //Check the image is not already used in the PDF file.
+        //
+        //This part is not protected against multi-threads... worst case, a single image can
+        //be twice in the PDF, if used more than one time. But since only one !map
+        //block is dealed with at a time, this should not happen
         Map<URI, PdfTemplate> cache = context.getTemplateCache();
-
         PdfTemplate template = cache.get(uri);
         if (template == null) {
             Image content = getImageDirect(context, uri);
             content.setAbsolutePosition(0, 0);
-            template = context.getDirectContent().createTemplate(content.getPlainWidth(), content.getPlainHeight());
-            template.addImage(content);
+            final PdfContentByte dc = context.getDirectContent();
+            synchronized (dc) {  //protect against parallel writing on the PDF file
+                template = dc.createTemplate(content.getPlainWidth(), content.getPlainHeight());
+                template.addImage(content);
+            }
             cache.put(uri, template);
         }
 
@@ -91,18 +99,20 @@ public class PDFUtils {
             return Image.getInstance(uri.toString());
         } else {
             //read the whole image content in memory, then give that to iText
-            final URLConnection urlConnection = uri.toURL().openConnection();
-            if (context.getReferer() != null) {
-                urlConnection.setRequestProperty("Referer", context.getReferer());
-            }
-            InputStream is = urlConnection.getInputStream();
-            ByteArrayOutputStream imageBytes = new ByteArrayOutputStream();
+            GetMethod method = new GetMethod(uri.toString());
             try {
-                FileUtilities.copyStream(is, imageBytes);
+                if (context.getReferer() != null) {
+                    method.setRequestHeader("Referer", context.getReferer());
+                }
+                context.getConfig().getHttpClient().executeMethod(method);
+                int code = method.getStatusCode();
+                if (code < 200 || code >= 300) {
+                    throw new IOException("Error " + code + " while reading the Capabilities from " + uri + ": " + method.getStatusText());
+                }
+                return Image.getInstance(method.getResponseBody());
             } finally {
-                is.close();
+                method.releaseConnection();
             }
-            return Image.getInstance(imageBytes.toByteArray());
         }
     }
 

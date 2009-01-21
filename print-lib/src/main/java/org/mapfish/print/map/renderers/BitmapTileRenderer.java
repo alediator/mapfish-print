@@ -28,9 +28,11 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
-import org.mapfish.print.PDFUtils;
+import org.mapfish.print.map.MapTileTask;
+import org.mapfish.print.map.ParallelMapTileLoader;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
@@ -38,50 +40,51 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-public class BitmapMapRenderer extends MapRenderer {
-    private static final Log LOGGER = LogFactory.getLog(BitmapMapRenderer.class);
+public class BitmapTileRenderer extends TileRenderer {
+    private static final Log LOGGER = LogFactory.getLog(BitmapTileRenderer.class);
 
-    public void render(Transformer transformer, List<URI> uris, PdfContentByte dc, RenderingContext context, float opacity, int nbTilesHorizontal, float offsetX, float offsetY, long bitmapTileW, long bitmapTileH) throws IOException {
-        dc.saveState();
-        try {
-            final AffineTransform bitmapTransformer = transformer.getBitmapTransform();
-            dc.transform(bitmapTransformer);
-            final double rotation = transformer.getRotation();
+    public void render(Transformer transformer, List<URI> uris, ParallelMapTileLoader parallelMapTileLoader, final RenderingContext context, final float opacity, int nbTilesHorizontal, float offsetX, float offsetY, final long bitmapTileW, final long bitmapTileH) throws IOException {
+        final AffineTransform bitmapTransformer = transformer.getBitmapTransform();
+        final double rotation = transformer.getRotation();
 
-            for (int i = 0; i < uris.size(); i++) {
-                URI uri = uris.get(i);
-                if (uri == null) {
-                    continue;
-                }
-
-                final int line = i / nbTilesHorizontal;
-                final int col = i % nbTilesHorizontal;
-                final float posX = 0 - offsetX + col * bitmapTileW;
-                final float posY = 0 - offsetY + line * bitmapTileH;
-
-                if (rotation != 0.0 && !isTileVisible(posX, posY, bitmapTileW, bitmapTileH, bitmapTransformer, transformer)) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Not needed: " + uri);
-                    }
-                    continue;
-                }
-
-                LOGGER.debug(uri);
-                final Image map = PDFUtils.getImage(context, uri, bitmapTileW, bitmapTileH);
-                map.setAbsolutePosition(posX, posY);
-
-                if (opacity < 1.0) {
-                    PdfGState gs = new PdfGState();
-                    gs.setFillOpacity(opacity);
-                    gs.setStrokeOpacity(opacity);
-                    dc.setGState(gs);
-                }
-                dc.addImage(map);
+        for (int i = 0; i < uris.size(); i++) {
+            final URI uri = uris.get(i);
+            if (uri == null) {
+                continue;
             }
-        } catch (DocumentException e) {
-            context.addError(e);
-        } finally {
-            dc.restoreState();
+
+            final int line = i / nbTilesHorizontal;
+            final int col = i % nbTilesHorizontal;
+            final float posX = 0 - offsetX + col * bitmapTileW;
+            final float posY = 0 - offsetY + line * bitmapTileH;
+
+            if (rotation != 0.0 && !isTileVisible(posX, posY, bitmapTileW, bitmapTileH, bitmapTransformer, transformer)) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Not needed: " + uri);
+                }
+                continue;
+            }
+
+            parallelMapTileLoader.addTileToLoad(new MapTileTask() {
+                public Image map;
+
+                protected void readTile() throws IOException, DocumentException {
+                    LOGGER.debug(uri);
+                    map = PDFUtils.getImage(context, uri, bitmapTileW, bitmapTileH);
+                    map.setAbsolutePosition(posX, posY);
+                }
+
+                protected void renderOnPdf(PdfContentByte dc) throws DocumentException {
+                    dc.transform(bitmapTransformer);
+                    if (opacity < 1.0) {
+                        PdfGState gs = new PdfGState();
+                        gs.setFillOpacity(opacity);
+                        gs.setStrokeOpacity(opacity);
+                        dc.setGState(gs);
+                    }
+                    dc.addImage(map);
+                }
+            });
         }
     }
 

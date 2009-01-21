@@ -21,15 +21,16 @@ package org.mapfish.print;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.pdf.PdfTemplate;
+import com.lowagie.text.pdf.PdfWriter;
 import org.mapfish.print.config.Config;
 import org.mapfish.print.config.layout.Layout;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.net.URI;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Holds some "per rendering request" information.
@@ -53,7 +54,7 @@ public class RenderingContext {
     /**
      * Cache of PDF images.
      */
-    private Map<URI, PdfTemplate> templateCache =new HashMap<URI, PdfTemplate>();
+    private Map<URI, PdfTemplate> templateCache = Collections.synchronizedMap(new HashMap<URI, PdfTemplate>());
 
     public RenderingContext(Document document, PdfWriter writer, Config config,
                             PJsonObject globalParams, String configDir, Layout layout, String referer) {

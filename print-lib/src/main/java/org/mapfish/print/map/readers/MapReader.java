@@ -19,11 +19,10 @@
 
 package org.mapfish.print.map.readers;
 
-import com.lowagie.text.pdf.PdfContentByte;
 import org.mapfish.print.InvalidJsonValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
-import org.mapfish.print.map.readers.VectorMapReader;
+import org.mapfish.print.map.ParallelMapTileLoader;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.util.List;
@@ -38,7 +37,10 @@ public abstract class MapReader {
         opacity = params.optFloat("opacity", 1.0F);
     }
 
-    public abstract void render(Transformer transformer, PdfContentByte dc, String srs, boolean first);
+    /**
+     * Method called to render a whole layer
+     */
+    public abstract void render(Transformer transformer, ParallelMapTileLoader parallelMapTileLoader, String srs, boolean first);
 
     public static void create(List<MapReader> target, String type, RenderingContext context, PJsonObject params) {
         if ("WMS".equalsIgnoreCase(type)) {

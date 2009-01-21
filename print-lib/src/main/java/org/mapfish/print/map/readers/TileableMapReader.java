@@ -19,10 +19,10 @@
 
 package org.mapfish.print.map.readers;
 
-import com.lowagie.text.pdf.PdfContentByte;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
-import org.mapfish.print.map.renderers.MapRenderer;
+import org.mapfish.print.map.ParallelMapTileLoader;
+import org.mapfish.print.map.renderers.TileRenderer;
 import org.mapfish.print.utils.PJsonObject;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public abstract class TileableMapReader extends HTTPMapReader {
         super(context, params);
     }
 
-    protected void renderTiles(MapRenderer formater, Transformer transformer, URI commonUri, PdfContentByte dc) throws IOException, URISyntaxException {
+    protected void renderTiles(TileRenderer formater, Transformer transformer, URI commonUri, ParallelMapTileLoader parallelMapTileLoader) throws IOException, URISyntaxException {
         final List<URI> urls = new ArrayList<URI>(1);
         final float offsetX;
         final float offsetY;
@@ -88,7 +88,7 @@ public abstract class TileableMapReader extends HTTPMapReader {
             bitmapTileH = transformer.getRotatedBitmapH();
             urls.add(getTileUri(commonUri, transformer, minGeoX, minGeoY, maxGeoX, maxGeoY, bitmapTileW, bitmapTileH));
         }
-        formater.render(transformer, urls, dc, context, opacity, nbTilesW, offsetX, offsetY, bitmapTileW, bitmapTileH);
+        formater.render(transformer, urls, parallelMapTileLoader, context, opacity, nbTilesW, offsetX, offsetY, bitmapTileW, bitmapTileH);
     }
 
     /**

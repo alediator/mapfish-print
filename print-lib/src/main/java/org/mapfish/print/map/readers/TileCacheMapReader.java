@@ -21,7 +21,7 @@ package org.mapfish.print.map.readers;
 
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.Transformer;
-import org.mapfish.print.map.renderers.MapRenderer;
+import org.mapfish.print.map.renderers.TileRenderer;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
 
@@ -37,19 +37,20 @@ import java.util.Map;
 public class TileCacheMapReader extends TileableMapReader {
     private final String layer;
 
-    private TileCacheMapReader(RenderingContext context, PJsonObject params) {
+    private TileCacheMapReader(String layer, RenderingContext context, PJsonObject params) {
         super(context, params);
-        this.layer = params.getString("layer");
+        this.layer = layer;
         PJsonArray maxExtent = params.getJSONArray("maxExtent");
         PJsonArray tileSize = params.getJSONArray("tileSize");
         tileCacheLayerInfo = new TileCacheLayerInfo(params.getJSONArray("resolutions"), tileSize.getInt(0), tileSize.getInt(1), maxExtent.getFloat(0), maxExtent.getFloat(1), maxExtent.getFloat(2), maxExtent.getFloat(3), params.getString("extension"));
     }
 
-    protected MapRenderer.Format getFormat() {
-        return MapRenderer.Format.BITMAP;
+    protected TileRenderer.Format getFormat() {
+        return TileRenderer.Format.BITMAP;
     }
 
     protected void addCommonQueryParams(Map<String, List<String>> result, Transformer transformer, String srs, boolean first) {
+        //not much query params for this protocol...
     }
 
     protected URI getTileUri(URI commonUri, Transformer transformer, float minGeoX, float minGeoY, float maxGeoX, float maxGeoY, long w, long h) throws URISyntaxException, UnsupportedEncodingException {
@@ -77,7 +78,8 @@ public class TileCacheMapReader extends TileableMapReader {
     }
 
     protected static void create(List<MapReader> target, RenderingContext context, PJsonObject params) {
-        target.add(new TileCacheMapReader(context, params));
+        String layer = params.getString("layer");
+        target.add(new TileCacheMapReader(layer, context, params));
     }
 
     public boolean testMerge(MapReader other) {

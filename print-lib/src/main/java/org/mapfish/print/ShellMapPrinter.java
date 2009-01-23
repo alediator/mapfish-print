@@ -88,8 +88,6 @@ public class ShellMapPrinter {
     }
 
     public void run() throws IOException, JSONException, DocumentException {
-        long startTime = System.currentTimeMillis();
-
         final OutputStream outFile = getOutputStream();
         if (clientConfig) {
             final OutputStreamWriter writer = new OutputStreamWriter(outFile, Charset.forName("UTF-8"));
@@ -107,8 +105,6 @@ public class ShellMapPrinter {
             printer.print(FileUtilities.readWholeTextStream(inFile, "UTF-8"), outFile, referer);
         }
         printer.stop();
-
-        LOGGER.info("Time for rendering the PDF: " + UnitUtilities.toElapsedTime(System.currentTimeMillis() - startTime));
     }
 
     private void configureLogs() {

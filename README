@@ -78,3 +78,6 @@ To install it, deploy the WAR file located in this directory:
 
 Eventually, edit the web.xml and log4j.properties files. The config.yaml file
 is located in the webapp's root directory.
+
+If your web pages are not served from the same host and port, make sure to setup
+proxy in order to respect the "same origin policy".

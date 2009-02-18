@@ -319,7 +319,7 @@ public class PDFUtils {
                 cell[0].setBorder(PdfPCell.NO_BORDER);
                 cell[0].setPadding(0);
                 if (tableConfig != null) {
-                    tableConfig.apply(cell[0], row, col, nbRows, nbCols);
+                    tableConfig.apply(cell[0], row, col, nbRows, nbCols, context, params);
                 }
                 if (block.getAlign() != null)
                     cell[0].setHorizontalAlignment(block.getAlign().getCode());

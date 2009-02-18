@@ -120,18 +120,28 @@ layouts:
           spacingAfter: 30
           columnDefs:
             id:
+              columnWeight: 2
               header: !text
                 text: ID
                 backgroundColor: #A0A0A0
               cell: !text
                 text: '${id}'
             name:
+              columnWeight: 5
               header: !text
                 text: Name
                 backgroundColor: #A0A0A0
-              cell: !text
-                text: '${name}'
+              cell: !columns
+                config:
+                  cells:
+                    - backgroundColor: '${nameBackgroundColor}'
+                      borderWidth: 1
+                      borderColor: '${nameBorderColor}'
+                items:
+                  - !text
+                    text: '${name}'
             icon:
+              columnWeight: 2
               header: !text
                 text: Symbol
                 backgroundColor: #A0A0A0

@@ -20,16 +20,18 @@
 package org.mapfish.print.config.layout;
 
 import com.lowagie.text.pdf.PdfPCell;
+import org.mapfish.print.RenderingContext;
+import org.mapfish.print.utils.PJsonObject;
 
 public class TableConfig extends BorderConfig {
     private Exceptions cells;
 
-    public void apply(PdfPCell cell, int row, int col, int nbRows, int nbCols) {
+    public void apply(PdfPCell cell, int row, int col, int nbRows, int nbCols, RenderingContext context, PJsonObject params) {
         if (cells != null) {
             for (int i = 0; i < cells.size(); i++) {
                 CellException cellException = cells.get(i);
                 if (cellException.matches(row, col)) {
-                    cellException.apply(cell);
+                    cellException.apply(cell, context, params);
                 }
             }
         }
@@ -37,28 +39,29 @@ public class TableConfig extends BorderConfig {
         if (row == 0) {
             if (borderWidthTop != null)
                 cell.setBorderWidthTop(borderWidthTop.floatValue());
-            if (borderColorTop != null) cell.setBorderColorTop(borderColorTop);
+            if (getBorderColorTopVal(context, params) != null)
+                cell.setBorderColorTop(getBorderColorTopVal(context, params));
         }
 
         if (col == 0) {
             if (borderWidthLeft != null)
                 cell.setBorderWidthLeft(borderWidthLeft.floatValue());
-            if (borderColorLeft != null)
-                cell.setBorderColorLeft(borderColorLeft);
+            if (getBorderColorLeftVal(context, params) != null)
+                cell.setBorderColorLeft(getBorderColorLeftVal(context, params));
         }
 
         if (row == nbRows - 1) {
             if (borderWidthBottom != null)
                 cell.setBorderWidthBottom(borderWidthBottom.floatValue());
-            if (borderColorBottom != null)
-                cell.setBorderColorBottom(borderColorBottom);
+            if (getBorderColorBottomVal(context, params) != null)
+                cell.setBorderColorBottom(getBorderColorBottomVal(context, params));
         }
 
         if (col == nbCols - 1) {
             if (borderWidthRight != null)
                 cell.setBorderWidthRight(borderWidthRight.floatValue());
-            if (borderColorRight != null)
-                cell.setBorderColorRight(borderColorRight);
+            if (getBorderColorRightVal(context, params) != null)
+                cell.setBorderColorRight(getBorderColorRightVal(context, params));
         }
 
     }

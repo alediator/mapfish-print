@@ -19,6 +19,11 @@
 
 package org.mapfish.print.config.layout;
 
+import org.mapfish.print.PDFUtils;
+import org.mapfish.print.RenderingContext;
+import org.mapfish.print.config.ColorWrapper;
+import org.mapfish.print.utils.PJsonObject;
+
 import java.awt.*;
 
 public class BorderConfig {
@@ -26,12 +31,12 @@ public class BorderConfig {
     protected Double borderWidthRight = null;
     protected Double borderWidthTop = null;
     protected Double borderWidthBottom = null;
-    protected Color borderColorLeft = null;
-    protected Color borderColorRight = null;
-    protected Color borderColorTop = null;
-    protected Color borderColorBottom = null;
+    private String borderColorLeft = null;
+    private String borderColorRight = null;
+    private String borderColorTop = null;
+    private String borderColorBottom = null;
 
-    public void setBorderColor(Color color) {
+    public void setBorderColor(String color) {
         setBorderColorLeft(color);
         setBorderColorRight(color);
         setBorderColorTop(color);
@@ -61,19 +66,35 @@ public class BorderConfig {
         this.borderWidthBottom = borderWidthBottom;
     }
 
-    public void setBorderColorLeft(Color borderColorLeft) {
+    public void setBorderColorLeft(String borderColorLeft) {
         this.borderColorLeft = borderColorLeft;
     }
 
-    public void setBorderColorRight(Color borderColorRight) {
+    public void setBorderColorRight(String borderColorRight) {
         this.borderColorRight = borderColorRight;
     }
 
-    public void setBorderColorTop(Color borderColorTop) {
+    public void setBorderColorTop(String borderColorTop) {
         this.borderColorTop = borderColorTop;
     }
 
-    public void setBorderColorBottom(Color borderColorBottom) {
+    public void setBorderColorBottom(String borderColorBottom) {
         this.borderColorBottom = borderColorBottom;
+    }
+
+    public Color getBorderColorLeftVal(RenderingContext context, PJsonObject params) {
+        return ColorWrapper.convertColor(PDFUtils.evalString(context, params, borderColorLeft));
+    }
+
+    public Color getBorderColorTopVal(RenderingContext context, PJsonObject params) {
+        return ColorWrapper.convertColor(PDFUtils.evalString(context, params, borderColorTop));
+    }
+
+    public Color getBorderColorRightVal(RenderingContext context, PJsonObject params) {
+        return ColorWrapper.convertColor(PDFUtils.evalString(context, params, borderColorRight));
+    }
+
+    public Color getBorderColorBottomVal(RenderingContext context, PJsonObject params) {
+        return ColorWrapper.convertColor(PDFUtils.evalString(context, params, borderColorBottom));
     }
 }

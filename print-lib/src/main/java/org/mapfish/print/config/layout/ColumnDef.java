@@ -21,12 +21,13 @@ package org.mapfish.print.config.layout;
 
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfPCell;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
-import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonObject;
 
 public class ColumnDef {
+    private int columnWeight = 0;
     private Block header;
     private Block cell;
 
@@ -51,9 +52,19 @@ public class ColumnDef {
     }
 
     public void validate() {
-        if(header==null) throw new InvalidValueException("header", "null");
-        if(cell==null) throw new InvalidValueException("header", "null");
+        if (header == null) throw new InvalidValueException("header", "null");
+        if (cell == null) throw new InvalidValueException("header", "null");
+        if (columnWeight < 0)
+            throw new InvalidValueException("columnWeight", Integer.toString(columnWeight));
         header.validate();
         cell.validate();
+    }
+
+    public void setColumnWeight(int columnWeight) {
+        this.columnWeight = columnWeight;
+    }
+
+    public int getColumnWeight() {
+        return columnWeight;
     }
 }

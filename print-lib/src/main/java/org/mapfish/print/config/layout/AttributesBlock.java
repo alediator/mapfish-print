@@ -22,10 +22,13 @@ package org.mapfish.print.config.layout;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.InvalidJsonValueException;
-import org.mapfish.print.RenderingContext;
 import org.mapfish.print.InvalidValueException;
+import org.mapfish.print.RenderingContext;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AttributesBlock extends Block {
     private String source;
@@ -44,12 +47,23 @@ public class AttributesBlock extends Block {
         PJsonArray data = sourceJson.optJSONArray("data");
         PJsonArray firstLine = sourceJson.getJSONArray("columns");
 
+        final List<Integer> columnWidths;
+        if (columnDefs.values().iterator().next().getColumnWeight() > 0) {
+            columnWidths = new ArrayList<Integer>();
+        } else {
+            columnWidths = null;
+        }
+
+        //Compute the actual number of columns
         int nbCols = 0;
         for (int colNum = 0; colNum < firstLine.size(); ++colNum) {
             String name = firstLine.getString(colNum);
             ColumnDef colDef = columnDefs.get(name);
             if (colDef != null && colDef.isVisible(context, params)) {
                 nbCols++;
+                if (columnWidths != null) {
+                    columnWidths.add(colDef.getColumnWeight());
+                }
             } else {
                 //noinspection ThrowableInstanceNeverThrown
                 context.addError(new InvalidJsonValueException(firstLine, name, "Unknown column"));
@@ -59,6 +73,16 @@ public class AttributesBlock extends Block {
         final PdfPTable table = new PdfPTable(nbCols);
         table.setWidthPercentage(100f);
 
+        //deal with the weigths for the column widths, if specified 
+        if (columnWidths != null) {
+            int[] array = new int[columnWidths.size()];
+            for (int i = 0; i < columnWidths.size(); i++) {
+                array[i] = columnWidths.get(i);
+            }
+            table.setWidths(array);
+        }
+
+        //add the header
         int nbRows = data.size() + 1;
         for (int colNum = 0; colNum < firstLine.size(); ++colNum) {
             String name = firstLine.getString(colNum);
@@ -69,6 +93,7 @@ public class AttributesBlock extends Block {
         }
         table.setHeaderRows(1);
 
+        //add the content
         for (int rowNum = 0; rowNum < data.size(); ++rowNum) {
             PJsonObject row = data.getJSONObject(rowNum);
             int realColNum = 0;

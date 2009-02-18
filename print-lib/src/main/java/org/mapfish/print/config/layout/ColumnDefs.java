@@ -30,12 +30,18 @@ import java.util.HashMap;
 public class ColumnDefs extends HashMap<String, ColumnDef> {
     /**
      * Called just after the config has been loaded to check it is valid.
+     *
      * @throws InvalidValueException When there is a problem
      */
     public void validate() {
-        if(size()<1) throw new InvalidValueException("columnDefs", "[]");
+        if (size() < 1) throw new InvalidValueException("columnDefs", "[]");
+        int nbColumnWidth = 0;
         for (ColumnDef columnDef : values()) {
             columnDef.validate();
+            if (columnDef.getColumnWeight() > 0) nbColumnWidth++;
+        }
+        if (nbColumnWidth > 0 && size() != nbColumnWidth) {
+            throw new InvalidValueException("columnDefs[*].columnWeight", "All or none must be specified");
         }
     }
 

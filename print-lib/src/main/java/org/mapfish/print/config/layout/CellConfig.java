@@ -20,6 +20,10 @@
 package org.mapfish.print.config.layout;
 
 import com.lowagie.text.pdf.PdfPCell;
+import org.mapfish.print.PDFUtils;
+import org.mapfish.print.RenderingContext;
+import org.mapfish.print.config.ColorWrapper;
+import org.mapfish.print.utils.PJsonObject;
 
 import java.awt.*;
 
@@ -30,12 +34,12 @@ public class CellConfig extends BorderConfig {
     private Double paddingTop = null;
     private Double paddingBottom = null;
 
-    private Color backgroundColor = null;
+    private String backgroundColor = null;
 
     private HorizontalAlign align = null;
     private VerticalAlign vertAlign = null;
 
-    protected void apply(PdfPCell cell) {
+    protected void apply(PdfPCell cell, RenderingContext context, PJsonObject params) {
         if (paddingLeft != null) cell.setPaddingLeft(paddingLeft.floatValue());
         if (paddingRight != null)
             cell.setPaddingRight(paddingRight.floatValue());
@@ -52,14 +56,17 @@ public class CellConfig extends BorderConfig {
         if (borderWidthBottom != null)
             cell.setBorderWidthBottom(borderWidthBottom.floatValue());
 
-        if (borderColorLeft != null) cell.setBorderColorLeft(borderColorLeft);
-        if (borderColorRight != null)
-            cell.setBorderColorRight(borderColorRight);
-        if (borderColorTop != null) cell.setBorderColorTop(borderColorTop);
-        if (borderColorBottom != null)
-            cell.setBorderColorBottom(borderColorBottom);
+        if (getBorderColorLeftVal(context, params) != null)
+            cell.setBorderColorLeft(getBorderColorLeftVal(context, params));
+        if (getBorderColorRightVal(context, params) != null)
+            cell.setBorderColorRight(getBorderColorRightVal(context, params));
+        if (getBorderColorTopVal(context, params) != null)
+            cell.setBorderColorTop(getBorderColorTopVal(context, params));
+        if (getBorderColorBottomVal(context, params) != null)
+            cell.setBorderColorBottom(getBorderColorBottomVal(context, params));
 
-        if (backgroundColor != null) cell.setBackgroundColor(backgroundColor);
+        if (getBackgroundColorVal(context, params) != null)
+            cell.setBackgroundColor(getBackgroundColorVal(context, params));
 
         if (align != null) cell.setHorizontalAlignment(align.getCode());
         if (vertAlign != null) cell.setVerticalAlignment(vertAlign.getCode());
@@ -89,8 +96,12 @@ public class CellConfig extends BorderConfig {
         this.paddingBottom = paddingBottom;
     }
 
-    public void setBackgroundColor(Color backgroundColor) {
+    public void setBackgroundColor(String backgroundColor) {
         this.backgroundColor = backgroundColor;
+    }
+
+    public Color getBackgroundColorVal(RenderingContext context, PJsonObject params) {
+        return ColorWrapper.convertColor(PDFUtils.evalString(context, params, backgroundColor));
     }
 
     public void setAlign(HorizontalAlign align) {

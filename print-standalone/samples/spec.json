@@ -27,8 +27,8 @@
             rotation: 0,
             data: {
                 data: [
-                    {id:1, name: 'blah', icon: 'icon_pan'},
-                    {id:2, name: 'blip', icon: 'icon_zoomin'}
+                    {id:1, name: 'blah', icon: 'icon_pan', nameBackgroundColor: 'red', nameBorderColor: 'blue'},
+                    {id:2, name: 'blip', icon: 'icon_zoomin', nameBackgroundColor: 'yellow', nameBorderColor: 'green'}
                 ],
                 columns: ['id', 'name', 'icon']
             }
@@ -42,8 +42,8 @@
             rotation: 30,
             data: {
                 data: [
-                    {id:1, name: 'blah', icon: 'icon_pan'},
-                    {id:2, name: 'blip', icon: 'icon_zoomin'}
+                    {id:1, name: 'blah', icon: 'icon_pan', nameBackgroundColor: 'red', nameBorderColor: 'blue'},
+                    {id:2, name: 'blip', icon: 'icon_zoomin', nameBackgroundColor: 'yellow', nameBorderColor: 'green'}
                 ],
                 columns: ['id', 'icon', 'name']
             }

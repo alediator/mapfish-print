@@ -48,7 +48,7 @@ public class LocalHostMatcherTest extends PrintTestCase {
                 InetAddress inetAddress = addrs.nextElement();
                 if (inetAddress instanceof Inet4Address) {
                     final URI uri = new URI("http://" + inetAddress.getCanonicalHostName() + "/cgi-bin/mapserv");
-                    assertTrue(matcher.validate(uri));
+                    assertTrue("testing " + uri, matcher.validate(uri));
                 }
             }
         }

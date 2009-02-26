@@ -54,6 +54,7 @@ public abstract class InetHostMatcher extends HostMatcher {
                 return true;
             }
         }
+        LOGGER.debug("Address not in the authorizeds: " + requestedIP);
         return false;
     }
 

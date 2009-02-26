@@ -36,13 +36,15 @@ public abstract class InetHostMatcher extends HostMatcher {
         } catch (UnknownHostException ex) {
             return false;
         }
+        boolean oneMatching = false;
         for (int i = 0; i < requestedIPs.length; ++i) {
             InetAddress requestedIP = requestedIPs[i];
-            if (!isInAuthorized(requestedIP, maskAddress)) {
-                return false;
+            if (isInAuthorized(requestedIP, maskAddress)) {
+                oneMatching = true;
+                break;
             }
         }
-        return super.validate(uri);
+        return oneMatching && super.validate(uri);
     }
 
     private boolean isInAuthorized(InetAddress requestedIP, InetAddress mask) throws UnknownHostException, SocketException {

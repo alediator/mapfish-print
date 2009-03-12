@@ -19,6 +19,12 @@
 
 package org.mapfish.print.config.layout;
 
+/**
+ * Bean to configure the static page added at the beginning of the document.
+ * It's "titlePage" in in the layout definition.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#ServersideConfiguration
+ */
 public class TitlePage extends Page {
 
 }

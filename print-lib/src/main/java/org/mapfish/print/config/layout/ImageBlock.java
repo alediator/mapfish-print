@@ -36,7 +36,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- * Configuration and logic to add an image block.
+ * Configuration and logic to add an !image block.
  */
 public class ImageBlock extends Block {
     private String url = null;

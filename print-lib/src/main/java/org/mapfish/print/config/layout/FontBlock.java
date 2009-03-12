@@ -26,6 +26,9 @@ import org.mapfish.print.config.ColorWrapper;
 
 import java.awt.*;
 
+/**
+ * Base class for block having font specifications
+ */
 public abstract class FontBlock extends Block {
     private String font = "Helvetica";
     protected Double fontSize = null;

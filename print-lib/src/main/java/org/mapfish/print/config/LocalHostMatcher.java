@@ -26,6 +26,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+/**
+ * Allows to check that a given URL is served by one of the local network
+ * interface or one of its alias.
+ */
 public class LocalHostMatcher extends InetHostMatcher {
 
     protected byte[][] getAuthorizedIPs(InetAddress mask) throws UnknownHostException, SocketException {

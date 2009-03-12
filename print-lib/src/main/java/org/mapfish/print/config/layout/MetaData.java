@@ -24,6 +24,11 @@ import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.utils.PJsonObject;
 
+/**
+ * Bean to configure the metaData part of a layout.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Metadatadefinition
+ */
 public class MetaData {
     private String title;
     private String author;

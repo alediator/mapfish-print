@@ -19,6 +19,7 @@
 
 package org.mapfish.print.config.layout;
 
+import com.lowagie.text.*;
 import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
@@ -26,11 +27,9 @@ import org.mapfish.print.utils.PJsonObject;
 
 import java.util.List;
 
-import com.lowagie.text.*;
-
 
 /**
- * Holds the config of a page and knows how to do it.
+ * Holds the config of a page and knows how to print it.
  */
 public class Page {
     protected List<Block> items;

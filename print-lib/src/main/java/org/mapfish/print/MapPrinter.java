@@ -37,13 +37,17 @@ import java.util.TreeSet;
 
 /**
  * The main class for printing maps. Will parse the spec, create the PDF
- * document and generate if
+ * document and generate it.
  */
 public class MapPrinter {
     /**
      * The parsed configuration file.
      */
     private final Config config;
+
+    /**
+     * The directory where the configuration file sits (used for ${configDir})
+     */
     private String configDir;
 
     static {
@@ -79,6 +83,9 @@ public class MapPrinter {
         initFonts();
     }
 
+    /**
+     * Register the user specified fonts in iText.
+     */
     private void initFonts() {
         //we don't do that since it takes ages and that would hurt the perfs for
         //the python controller:
@@ -102,7 +109,7 @@ public class MapPrinter {
     /**
      * Generate the PDF using the given spec.
      *
-     * @return The context used for printing.
+     * @return The context that was used for printing.
      */
     public RenderingContext print(String spec, OutputStream outFile, String referer) throws DocumentException {
         final PJsonObject jsonSpec = parseSpec(spec);
@@ -139,10 +146,16 @@ public class MapPrinter {
         return new PJsonObject(jsonSpec, "spec");
     }
 
+    /**
+     * Use by /info.json to generate its returned content.
+     */
     public void printClientConfig(JSONWriter json) throws JSONException {
         config.printClientConfig(json);
     }
 
+    /**
+     * Stop the thread pool or others.
+     */
     public void stop() {
         config.stop();
     }

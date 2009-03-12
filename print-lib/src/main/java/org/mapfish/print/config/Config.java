@@ -183,6 +183,9 @@ public class Config {
         return fonts;
     }
 
+    /**
+     * Make sure an URI is authorized
+     */
     public boolean validateUri(URI uri) throws UnknownHostException, SocketException, MalformedURLException {
         for (int i = 0; i < hosts.size(); i++) {
             HostMatcher matcher = hosts.get(i);
@@ -265,6 +268,9 @@ public class Config {
         System.getProperties().setProperty("http.maxConnections", Integer.toString(perHostParallelFetches));
     }
 
+    /**
+     * Get or create the http client to be used to fetch all the map data.
+     */
     public synchronized HttpClient getHttpClient() {
         if (httpClient == null) {
             MultiThreadedHttpConnectionManager connectionManager =

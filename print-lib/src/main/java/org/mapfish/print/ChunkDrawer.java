@@ -19,17 +19,21 @@
 
 package org.mapfish.print;
 
-import com.lowagie.text.pdf.PdfPTableEvent;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.Rectangle;
 import com.lowagie.text.DocumentException;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfPTableEvent;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
-     * Base class for the chunk drawers
+ * Base class for the chunk drawers. It's for parts of the page that needs direct
+ * access to the PDF for rendering (usage of the {@link com.lowagie.text.pdf.PdfContentByte}).
+ * <p/>
+ * Those are scheduled for rendering and will be invoqued ({@link #renderImpl(com.lowagie.text.Rectangle, com.lowagie.text.pdf.PdfContentByte)})
+ * when iText is actually rendering the corresponding block.
  */
 public abstract class ChunkDrawer implements PdfPTableEvent {
     private final List<PDFCustomBlocks.AbsoluteDrawer> others = new ArrayList<PDFCustomBlocks.AbsoluteDrawer>();

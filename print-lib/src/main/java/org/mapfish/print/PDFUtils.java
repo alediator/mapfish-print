@@ -38,14 +38,11 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Some utility functions for iText.
+ */
 public class PDFUtils {
     public static Logger LOGGER = Logger.getLogger(PDFUtils.class);
-
-    public static Image createEmptyImage(double width, double height) throws BadElementException {
-        Image background = Image.getInstance(1, 1, 1, 1, new byte[]{0}, new int[]{0, 0});
-        background.scaleAbsolute((float) width, (float) height);
-        return background;
-    }
 
     /**
      * Gets an iText image with a cache that uses PdfTemplates to re-use the same
@@ -304,6 +301,9 @@ public class PDFUtils {
         return table;
     }
 
+    /**
+     * Create a PDF table cell with support for styling using the {@link org.mapfish.print.config.layout.CellConfig} stuff.
+     */
     public static PdfPCell createCell(final PJsonObject params, final RenderingContext context, final Block block, final int row,
                                       final int col, final int nbRows, final int nbCols, final TableConfig tableConfig) throws DocumentException {
         final PdfPCell[] cell = new PdfPCell[1];

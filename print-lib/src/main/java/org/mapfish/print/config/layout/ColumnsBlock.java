@@ -22,15 +22,17 @@ package org.mapfish.print.config.layout;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfPTable;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.PDFCustomBlocks;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
-import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Bean to configure a !columns or a !table block.
+ */
 public class ColumnsBlock extends Block {
     private List<Block> items;
     private int[] widths = null;

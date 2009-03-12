@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * Listen to events from the PDF document in order to render the
- * custom {@link com.lowagie.text.Chunk}s.
+ * custom {@link org.mapfish.print.ChunkDrawer}s, the header/footer and the background.
  */
 public class PDFCustomBlocks extends PdfPageEventHelper {
     public static final Logger LOGGER = Logger.getLogger(PDFCustomBlocks.class);

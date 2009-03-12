@@ -19,7 +19,10 @@
 
 package org.mapfish.print.config.layout;
 
-import com.lowagie.text.*;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.Paragraph;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
@@ -30,6 +33,11 @@ import org.mapfish.print.utils.PJsonObject;
 
 import java.net.URI;
 
+/**
+ * Bean to configure a !legends block.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Legendsblock
+ */
 public class LegendsBlock extends Block {
     private double maxIconWidth = 8f;
     private double maxIconHeight = 8f;

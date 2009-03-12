@@ -21,15 +21,18 @@ package org.mapfish.print.config.layout;
 
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
 import com.lowagie.text.Paragraph;
 import com.lowagie.text.Phrase;
-import com.lowagie.text.pdf.BaseFont;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
-import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonObject;
 
+/**
+ * Bean to configure a !text block.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Textblock
+ */
 public class TextBlock extends FontBlock {
     private String text = "";
 
@@ -57,6 +60,6 @@ public class TextBlock extends FontBlock {
 
     public void validate() {
         super.validate();
-        if(text==null) throw new InvalidValueException("text", "null");
+        if (text == null) throw new InvalidValueException("text", "null");
     }
 }

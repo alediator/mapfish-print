@@ -26,10 +26,15 @@ import org.json.JSONException;
 import org.json.JSONWriter;
 import org.mapfish.print.*;
 import org.mapfish.print.map.MapChunkDrawer;
+import org.mapfish.print.utils.DistanceUnit;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
-import org.mapfish.print.utils.DistanceUnit;
 
+/**
+ * Bean to configure the !map blocks.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Mapblock
+ */
 public class MapBlock extends Block {
     private int height = 453;
     private int width = 340;

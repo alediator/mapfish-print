@@ -24,6 +24,9 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.UnknownHostException;
 
+/**
+ * Allows to check that a given URL matches a DNS address (textual format).
+ */
 public class DnsHostMatcher extends HostMatcher {
     private String host = null;
 

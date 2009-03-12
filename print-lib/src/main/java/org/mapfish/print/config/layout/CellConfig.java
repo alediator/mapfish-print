@@ -27,6 +27,9 @@ import org.mapfish.print.utils.PJsonObject;
 
 import java.awt.*;
 
+/**
+ * Bean for configuring a cell's borders, paddings and background color.
+ */
 public class CellConfig extends BorderConfig {
 
     private Double paddingLeft = null;

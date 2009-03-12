@@ -26,6 +26,12 @@ import org.mapfish.print.InvalidJsonValueException;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.utils.PJsonObject;
 
+/**
+ * Bean to configure the pages added for each requested maps.
+ * It's "mainPage" in in the layout definition.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#ServersideConfiguration
+ */
 public class MainPage extends Page {
     private boolean rotation = false;
 

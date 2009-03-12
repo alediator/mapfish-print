@@ -30,6 +30,11 @@ import org.mapfish.print.utils.PJsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Bean to configure an !attributes block
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Attributesblock
+ */
 public class AttributesBlock extends Block {
     private String source;
     private ColumnDefs columnDefs = new ColumnDefs();

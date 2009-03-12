@@ -24,6 +24,10 @@ import org.mapfish.print.utils.DistanceUnit;
 
 import java.awt.geom.AffineTransform;
 
+/**
+ * Class that deals with the geometric tranformation between the geographic,
+ * bitmap, and paper space for a map rendering.
+ */
 public class Transformer implements Cloneable {
     private int svgFactor;
     public float minGeoX;
@@ -193,7 +197,7 @@ public class Transformer implements Cloneable {
         if (rotation != 0.0F) {
             result.translate(getPaperW() / 2, getPaperH() / 2);
             result.rotate(rotation);
-            result.translate(-getRotatedPaperW()/2, -getRotatedPaperH()/2);
+            result.translate(-getRotatedPaperW() / 2, -getRotatedPaperH() / 2);
         }
         return result;
     }

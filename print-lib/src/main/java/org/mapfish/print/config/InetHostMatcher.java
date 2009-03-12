@@ -23,6 +23,9 @@ import org.apache.log4j.Logger;
 
 import java.net.*;
 
+/**
+ * Allows to check that a given URL matches an IP address (numeric format)
+ */
 public abstract class InetHostMatcher extends HostMatcher {
     public static final Logger LOGGER = Logger.getLogger(InetHostMatcher.class);
 

@@ -21,15 +21,14 @@ package org.mapfish.print.scalebar;
 
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.PdfContentByte;
-import org.mapfish.print.config.layout.ScalebarBlock;
 import org.mapfish.print.PDFCustomBlocks;
+import org.mapfish.print.config.layout.ScalebarBlock;
 
 import java.util.List;
 
 /**
  * Draw a simple line with ticks.
  */
-
 public class LineScalebarDrawer extends ScalebarDrawer {
     public LineScalebarDrawer(PDFCustomBlocks customBlocks, ScalebarBlock block, List<Label> labels, int barSize,
                               int labelDistance, int subIntervals, float intervalWidth, Font pdfFont,

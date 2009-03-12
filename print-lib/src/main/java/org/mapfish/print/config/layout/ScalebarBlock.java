@@ -36,7 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Block for drawing a scale bar
+ * Block for drawing a !scalebar block.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Scalebarblock
  */
 public class ScalebarBlock extends FontBlock {
     private int maxSize = 150;

@@ -22,8 +22,8 @@ package org.mapfish.print.servlet;
 import com.lowagie.text.DocumentException;
 import org.json.JSONException;
 import org.json.JSONWriter;
-import org.pvalsecc.misc.FileUtilities;
 import org.mapfish.print.MapPrinter;
+import org.pvalsecc.misc.FileUtilities;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -52,6 +52,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     private final Map<String, TempFile> tempFiles = new HashMap<String, TempFile>();
 
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
+        //do the routing in function of the actual URL
         final String additionalPath = httpServletRequest.getPathInfo();
         if (additionalPath.equals(PRINT_URL)) {
             createAndGetPDF(httpServletRequest, httpServletResponse);
@@ -98,7 +99,8 @@ public class MapPrinterServlet extends BaseMapServlet {
     }
 
     /**
-     * All in one method: create and returns the PDF to the client.
+     * All in one method: create and returns the PDF to the client. Avoid to use
+     * it, the accents in the spec are not all supported.
      */
     protected void createAndGetPDF(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         //get the spec from the query
@@ -236,7 +238,7 @@ public class MapPrinterServlet extends BaseMapServlet {
             LOGGER.debug("Generating PDF for spec=" + spec);
         }
 
-        String referer=httpServletRequest.getHeader("Referer");
+        String referer = httpServletRequest.getHeader("Referer");
         //create a temporary file that will contain the PDF
         TempFile tempFile = new TempFile(File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX, getTempDir()));
         try {
@@ -264,12 +266,15 @@ public class MapPrinterServlet extends BaseMapServlet {
         FileInputStream pdf = new FileInputStream(tempFile);
         final OutputStream response = httpServletResponse.getOutputStream();
         httpServletResponse.setContentType("application/pdf");
-        httpServletResponse.setHeader("Content-disposition","attachment; filename="+tempFile.getName() );
+        httpServletResponse.setHeader("Content-disposition", "attachment; filename=" + tempFile.getName());
         FileUtilities.copyStream(pdf, response);
         pdf.close();
         response.close();
     }
 
+    /**
+     * Send an error 500 to the client with a message
+     */
     protected void error(HttpServletResponse httpServletResponse, Throwable e) {
         try {
             httpServletResponse.setContentType("text/plain");
@@ -285,6 +290,9 @@ public class MapPrinterServlet extends BaseMapServlet {
         }
     }
 
+    /**
+     * Send an error XXX to the client with an exception
+     */
     protected void error(HttpServletResponse httpServletResponse, String message, int code) {
         try {
             httpServletResponse.setContentType("text/plain");
@@ -299,6 +307,9 @@ public class MapPrinterServlet extends BaseMapServlet {
         }
     }
 
+    /**
+     * Get and cache the temporary directory to use for saving the generated PDF files.
+     */
     protected File getTempDir() {
         if (tempDir == null) {
             tempDir = (File) getServletContext().
@@ -322,6 +333,9 @@ public class MapPrinterServlet extends BaseMapServlet {
         }
     }
 
+    /**
+     * Get the ID to use in function of the filename (filename without the prefix and the extension).
+     */
     protected String generateId(File tempFile) {
         final String name = tempFile.getName();
         return name.substring(

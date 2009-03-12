@@ -23,6 +23,11 @@ import com.lowagie.text.pdf.PdfPCell;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.utils.PJsonObject;
 
+/**
+ * Bean for configuring a table's outer border and its cells.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Tableconfiguration
+ */
 public class TableConfig extends BorderConfig {
     private Exceptions cells;
 

@@ -26,6 +26,9 @@ import org.mapfish.print.utils.PJsonObject;
 
 import java.awt.*;
 
+/**
+ * Bean for configuring a cell's borders.
+ */
 public class BorderConfig {
     protected Double borderWidthLeft = null;
     protected Double borderWidthRight = null;

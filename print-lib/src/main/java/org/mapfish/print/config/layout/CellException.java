@@ -19,9 +19,15 @@
 
 package org.mapfish.print.config.layout;
 
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+/**
+ * Bean for configuring a cell's borders, paddings and background color.
+ * Includes the mean to put rules to specify to what cell this configuration applys.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Tableconfiguration
+ */
 public class CellException extends CellConfig {
     private CoordMatcher row;
     private CoordMatcher col;

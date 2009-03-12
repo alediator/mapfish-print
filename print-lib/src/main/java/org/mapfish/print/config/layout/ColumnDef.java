@@ -26,6 +26,11 @@ import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
 import org.mapfish.print.utils.PJsonObject;
 
+/**
+ * Bean to configure an attributes block's column.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Attributesblock
+ */
 public class ColumnDef {
     private int columnWeight = 0;
     private Block header;

@@ -158,7 +158,7 @@ public class PDFCustomBlocks extends PdfPageEventHelper {
     }
 
     /**
-     * Schedule a absolute block.
+     * Schedule a absolute block (like a !columns or a !map).
      */
     public void addAbsoluteDrawer(AbsoluteDrawer chunkDrawer) throws DocumentException {
         if (last != null) {

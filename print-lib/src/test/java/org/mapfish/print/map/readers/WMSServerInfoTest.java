@@ -378,7 +378,380 @@ public class WMSServerInfoTest extends PrintTestCase {
                 "</Capability>\n" +
                 "</WMT_MS_Capabilities>";
 
-        InputStream stream = new ByteArrayInputStream(response.getBytes("ISO-8859-1"));
+        InputStream stream = new ByteArrayInputStream(response.getBytes("UTF-8"));
+        WMSServerInfo info = WMSServerInfo.parseCapabilities(stream);
+        assertEquals(false, info.isTileCache());
+    }
+
+    public void testParseGeoServer() throws IOException, SAXException, ParserConfigurationException {
+        String response = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<!DOCTYPE WMT_MS_Capabilities SYSTEM \"http://wms.example.com:8080/geoserver/schemas/wms/1.1.1/WMS_MS_Capabilities.dtd\">\n" +
+                "<WMT_MS_Capabilities version=\"1.1.1\">\n" +
+                "  <Service>\n" +
+                "    <Name>OGC:WMS</Name>\n" +
+                "    <Title>GeoNetwork opensource embedded Web Map Server</Title>\n" +
+                "    <Abstract>\n" +
+                "Web Map Services provided by GeoServer for GeoNetwork opensource.\n" +
+                "     </Abstract>\n" +
+                "    <KeywordList>\n" +
+                "      <Keyword>WFS</Keyword>\n" +
+                "      <Keyword>WMS</Keyword>\n" +
+                "      <Keyword>GEOSERVER</Keyword>\n" +
+                "      <Keyword>GEONETWORK</Keyword>\n" +
+                "      <Keyword>OSGeo</Keyword>\n" +
+                "    </KeywordList>\n" +
+                "    <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://geonetwork-opensource.org/\"/>\n" +
+                "    <ContactInformation>\n" +
+                "      <ContactPersonPrimary>\n" +
+                "        <ContactPerson/>\n" +
+                "        <ContactOrganization/>\n" +
+                "      </ContactPersonPrimary>\n" +
+                "      <ContactPosition/>\n" +
+                "      <ContactAddress>\n" +
+                "        <AddressType/>\n" +
+                "        <Address/>\n" +
+                "        <City/>\n" +
+                "        <StateOrProvince/>\n" +
+                "        <PostCode/>\n" +
+                "        <Country/>\n" +
+                "      </ContactAddress>\n" +
+                "      <ContactVoiceTelephone/>\n" +
+                "      <ContactFacsimileTelephone/>\n" +
+                "      <ContactElectronicMailAddress/>\n" +
+                "    </ContactInformation>\n" +
+                "    <Fees>NONE</Fees>\n" +
+                "    <AccessConstraints>NONE</AccessConstraints>\n" +
+                "  </Service>\n" +
+                "  <Capability>\n" +
+                "    <Request>\n" +
+                "      <GetCapabilities>\n" +
+                "        <Format>application/vnd.ogc.wms_xml</Format>\n" +
+                "        <DCPType>\n" +
+                "          <HTTP>\n" +
+                "            <Get>\n" +
+                "              <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms?SERVICE=WMS&amp;\"/>\n" +
+                "            </Get>\n" +
+                "            <Post>\n" +
+                "              <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms?SERVICE=WMS&amp;\"/>\n" +
+                "            </Post>\n" +
+                "          </HTTP>\n" +
+                "        </DCPType>\n" +
+                "      </GetCapabilities>\n" +
+                "      <GetMap>\n" +
+                "        <Format>image/png</Format>\n" +
+                "        <Format>application/atom+xml</Format>\n" +
+                "        <Format>application/openlayers</Format>\n" +
+                "        <Format>application/pdf</Format>\n" +
+                "        <Format>application/rss+xml</Format>\n" +
+                "        <Format>application/vnd.google-earth.kml+xml</Format>\n" +
+                "        <Format>application/vnd.google-earth.kmz</Format>\n" +
+                "        <Format>image/geotiff</Format>\n" +
+                "        <Format>image/geotiff8</Format>\n" +
+                "        <Format>image/gif</Format>\n" +
+                "        <Format>image/jpeg</Format>\n" +
+                "        <Format>image/png8</Format>\n" +
+                "        <Format>image/svg+xml</Format>\n" +
+                "        <Format>image/tiff</Format>\n" +
+                "        <Format>image/tiff8</Format>\n" +
+                "        <DCPType>\n" +
+                "          <HTTP>\n" +
+                "            <Get>\n" +
+                "              <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms?SERVICE=WMS&amp;\"/>\n" +
+                "            </Get>\n" +
+                "          </HTTP>\n" +
+                "        </DCPType>\n" +
+                "      </GetMap>\n" +
+                "      <GetFeatureInfo>\n" +
+                "        <Format>text/plain</Format>\n" +
+                "        <Format>text/html</Format>\n" +
+                "        <Format>application/vnd.ogc.gml</Format>\n" +
+                "        <DCPType>\n" +
+                "          <HTTP>\n" +
+                "            <Get>\n" +
+                "              <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms?SERVICE=WMS&amp;\"/>\n" +
+                "            </Get>\n" +
+                "            <Post>\n" +
+                "              <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms?SERVICE=WMS&amp;\"/>\n" +
+                "            </Post>\n" +
+                "          </HTTP>\n" +
+                "        </DCPType>\n" +
+                "      </GetFeatureInfo>\n" +
+                "      <DescribeLayer>\n" +
+                "        <Format>application/vnd.ogc.wms_xml</Format>\n" +
+                "        <DCPType>\n" +
+                "          <HTTP>\n" +
+                "            <Get>\n" +
+                "              <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms?SERVICE=WMS&amp;\"/>\n" +
+                "            </Get>\n" +
+                "          </HTTP>\n" +
+                "        </DCPType>\n" +
+                "      </DescribeLayer>\n" +
+                "      <GetLegendGraphic>\n" +
+                "        <Format>image/png</Format>\n" +
+                "        <Format>image/jpeg</Format>\n" +
+                "        <Format>image/gif</Format>\n" +
+                "        <DCPType>\n" +
+                "          <HTTP>\n" +
+                "            <Get>\n" +
+                "              <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms?SERVICE=WMS&amp;\"/>\n" +
+                "            </Get>\n" +
+                "          </HTTP>\n" +
+                "        </DCPType>\n" +
+                "      </GetLegendGraphic>\n" +
+                "    </Request>\n" +
+                "    <Exception>\n" +
+                "      <Format>application/vnd.ogc.se_xml</Format>\n" +
+                "    </Exception>\n" +
+                "    <UserDefinedSymbolization SupportSLD=\"1\" UserLayer=\"1\" UserStyle=\"1\" RemoteWFS=\"0\"/>\n" +
+                "    <Layer>\n" +
+                "      <Title>GeoNetwork opensource embedded Web Map Server</Title>\n" +
+                "      <Abstract>\n" +
+                "Web Map Services provided by GeoServer for GeoNetwork opensource.\n" +
+                "     </Abstract>\n" +
+                "      <!--common SRS:-->\n" +
+                "      <SRS>EPSG:21781</SRS>\n" +
+                "      <!--All supported EPSG projections:-->\n" +
+                "      <SRS>EPSG:2000</SRS>\n" +
+                "      <SRS>EPSG:2001</SRS>\n" +
+                "      <SRS>EPSG:2002</SRS>  <!-- ...cut... -->\n" +
+                "      <SRS>EPSG:42304</SRS>\n" +
+                "      <SRS>EPSG:42303</SRS>\n" +
+                "      <LatLonBoundingBox minx=\"-180.0\" miny=\"45.78874927621686\" maxx=\"10.558901428148609\" maxy=\"180.0\"/>\n" +
+                "      <Layer queryable=\"1\">\n" +
+                "        <Name>gn:countries</Name>\n" +
+                "        <Title>countries_Type</Title>\n" +
+                "        <Abstract>Generated from countries</Abstract>\n" +
+                "        <KeywordList>\n" +
+                "          <Keyword>countries</Keyword>\n" +
+                "        </KeywordList>\n" +
+                "        <SRS>EPSG:21781</SRS>\n" +
+                "        <!--WKT definition of this CRS:\n" +
+                "PROJCS[\"CH1903 / LV03\", \n" +
+                "  GEOGCS[\"CH1903\", \n" +
+                "    DATUM[\"CH1903\", \n" +
+                "      SPHEROID[\"Bessel 1841\", 6377397.155, 299.1528128, AUTHORITY[\"EPSG\",\"7004\"]], \n" +
+                "      TOWGS84[674.4, 15.1, 405.3, 0.0, 0.0, 0.0, 0.0], \n" +
+                "      AUTHORITY[\"EPSG\",\"6149\"]], \n" +
+                "    PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], \n" +
+                "    UNIT[\"degree\", 0.017453292519943295], \n" +
+                "    AXIS[\"Geodetic longitude\", EAST], \n" +
+                "    AXIS[\"Geodetic latitude\", NORTH], \n" +
+                "    AUTHORITY[\"EPSG\",\"4149\"]], \n" +
+                "  PROJECTION[\"Oblique Mercator\", AUTHORITY[\"EPSG\",\"9815\"]], \n" +
+                "  PARAMETER[\"longitude_of_center\", 7.439583333333333], \n" +
+                "  PARAMETER[\"latitude_of_center\", 46.952405555555565], \n" +
+                "  PARAMETER[\"azimuth\", 90.0], \n" +
+                "  PARAMETER[\"scale_factor\", 1.0], \n" +
+                "  PARAMETER[\"false_easting\", 600000.0], \n" +
+                "  PARAMETER[\"false_northing\", 200000.0], \n" +
+                "  PARAMETER[\"rectified_grid_angle\", 90.0], \n" +
+                "  UNIT[\"m\", 1.0], \n" +
+                "  AXIS[\"Easting\", EAST], \n" +
+                "  AXIS[\"Northing\", NORTH], \n" +
+                "  AUTHORITY[\"EPSG\",\"21781\"]]-->\n" +
+                "        <LatLonBoundingBox minx=\"5.956640769345093\" miny=\"45.81975202969038\" maxx=\"10.493459252966687\" maxy=\"47.810475823557454\"/>\n" +
+                "        <BoundingBox SRS=\"EPSG:21781\" minx=\"5.956640769345093\" miny=\"45.81975202969038\" maxx=\"10.493459252966687\" maxy=\"47.810475823557454\"/>\n" +
+                "        <Style>\n" +
+                "          <Name>Selection</Name>\n" +
+                "          <Title>A style to show the selected feature</Title>\n" +
+                "          <Abstract>A yellow line with a 2 pixel width</Abstract>\n" +
+                "          <LegendURL width=\"20\" height=\"20\">\n" +
+                "            <Format>image/png</Format>\n" +
+                "            <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms/GetLegendGraphic?VERSION=1.0.0&amp;FORMAT=image/png&amp;WIDTH=20&amp;HEIGHT=20&amp;LAYER=gn:countries\"/>\n" +
+                "          </LegendURL>\n" +
+                "        </Style>\n" +
+                "        <Style>\n" +
+                "          <Name>Selection</Name>\n" +
+                "          <Title>A style to show the selected feature</Title>\n" +
+                "          <Abstract>A yellow line with a 2 pixel width</Abstract>\n" +
+                "          <LegendURL width=\"20\" height=\"20\">\n" +
+                "            <Format>image/png</Format>\n" +
+                "            <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms/GetLegendGraphic?VERSION=1.0.0&amp;FORMAT=image/png&amp;WIDTH=20&amp;HEIGHT=20&amp;LAYER=gn:countries\"/>\n" +
+                "          </LegendURL>\n" +
+                "        </Style>\n" +
+                "      </Layer>\n" +
+                "      <Layer queryable=\"1\">\n" +
+                "        <Name>gn:gemeindenBB</Name>\n" +
+                "        <Title>gemeindenBB_Type</Title>\n" +
+                "        <Abstract>Generated from gemeindenBB</Abstract>\n" +
+                "        <KeywordList>\n" +
+                "          <Keyword>gemeindenBB</Keyword>\n" +
+                "        </KeywordList>\n" +
+                "        <SRS>EPSG:21781</SRS>\n" +
+                "        <!--WKT definition of this CRS:\n" +
+                "PROJCS[\"CH1903 / LV03\", \n" +
+                "  GEOGCS[\"CH1903\", \n" +
+                "    DATUM[\"CH1903\", \n" +
+                "      SPHEROID[\"Bessel 1841\", 6377397.155, 299.1528128, AUTHORITY[\"EPSG\",\"7004\"]], \n" +
+                "      TOWGS84[674.4, 15.1, 405.3, 0.0, 0.0, 0.0, 0.0], \n" +
+                "      AUTHORITY[\"EPSG\",\"6149\"]], \n" +
+                "    PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], \n" +
+                "    UNIT[\"degree\", 0.017453292519943295], \n" +
+                "    AXIS[\"Geodetic longitude\", EAST], \n" +
+                "    AXIS[\"Geodetic latitude\", NORTH], \n" +
+                "    AUTHORITY[\"EPSG\",\"4149\"]], \n" +
+                "  PROJECTION[\"Oblique Mercator\", AUTHORITY[\"EPSG\",\"9815\"]], \n" +
+                "  PARAMETER[\"longitude_of_center\", 7.439583333333333], \n" +
+                "  PARAMETER[\"latitude_of_center\", 46.952405555555565], \n" +
+                "  PARAMETER[\"azimuth\", 90.0], \n" +
+                "  PARAMETER[\"scale_factor\", 1.0], \n" +
+                "  PARAMETER[\"false_easting\", 600000.0], \n" +
+                "  PARAMETER[\"false_northing\", 200000.0], \n" +
+                "  PARAMETER[\"rectified_grid_angle\", 90.0], \n" +
+                "  UNIT[\"m\", 1.0], \n" +
+                "  AXIS[\"Easting\", EAST], \n" +
+                "  AXIS[\"Northing\", NORTH], \n" +
+                "  AUTHORITY[\"EPSG\",\"21781\"]]-->\n" +
+                "        <LatLonBoundingBox minx=\"5.956610444770297\" miny=\"45.81975202969038\" maxx=\"10.493459252966687\" maxy=\"47.810475823557454\"/>\n" +
+                "        <BoundingBox SRS=\"EPSG:21781\" minx=\"484807.6327910628\" miny=\"74247.28126117215\" maxx=\"837389.5575765288\" maxy=\"300004.7975591116\"/>\n" +
+                "        <Style>\n" +
+                "          <Name>Selection</Name>\n" +
+                "          <Title>A style to show the selected feature</Title>\n" +
+                "          <Abstract>A yellow line with a 2 pixel width</Abstract>\n" +
+                "          <LegendURL width=\"20\" height=\"20\">\n" +
+                "            <Format>image/png</Format>\n" +
+                "            <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms/GetLegendGraphic?VERSION=1.0.0&amp;FORMAT=image/png&amp;WIDTH=20&amp;HEIGHT=20&amp;LAYER=gn:gemeindenBB\"/>\n" +
+                "          </LegendURL>\n" +
+                "        </Style>\n" +
+                "      </Layer>\n" +
+                "      <Layer queryable=\"1\">\n" +
+                "        <Name>gn:kantoneBB</Name>\n" +
+                "        <Title>kantoneBB_Type</Title>\n" +
+                "        <Abstract>Generated from kantoneBB</Abstract>\n" +
+                "        <KeywordList>\n" +
+                "          <Keyword>kantoneBB</Keyword>\n" +
+                "        </KeywordList>\n" +
+                "        <SRS>EPSG:21781</SRS>\n" +
+                "        <!--WKT definition of this CRS:\n" +
+                "PROJCS[\"CH1903 / LV03\", \n" +
+                "  GEOGCS[\"CH1903\", \n" +
+                "    DATUM[\"CH1903\", \n" +
+                "      SPHEROID[\"Bessel 1841\", 6377397.155, 299.1528128, AUTHORITY[\"EPSG\",\"7004\"]], \n" +
+                "      TOWGS84[674.4, 15.1, 405.3, 0.0, 0.0, 0.0, 0.0], \n" +
+                "      AUTHORITY[\"EPSG\",\"6149\"]], \n" +
+                "    PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], \n" +
+                "    UNIT[\"degree\", 0.017453292519943295], \n" +
+                "    AXIS[\"Geodetic longitude\", EAST], \n" +
+                "    AXIS[\"Geodetic latitude\", NORTH], \n" +
+                "    AUTHORITY[\"EPSG\",\"4149\"]], \n" +
+                "  PROJECTION[\"Oblique Mercator\", AUTHORITY[\"EPSG\",\"9815\"]], \n" +
+                "  PARAMETER[\"longitude_of_center\", 7.439583333333333], \n" +
+                "  PARAMETER[\"latitude_of_center\", 46.952405555555565], \n" +
+                "  PARAMETER[\"azimuth\", 90.0], \n" +
+                "  PARAMETER[\"scale_factor\", 1.0], \n" +
+                "  PARAMETER[\"false_easting\", 600000.0], \n" +
+                "  PARAMETER[\"false_northing\", 200000.0], \n" +
+                "  PARAMETER[\"rectified_grid_angle\", 90.0], \n" +
+                "  UNIT[\"m\", 1.0], \n" +
+                "  AXIS[\"Easting\", EAST], \n" +
+                "  AXIS[\"Northing\", NORTH], \n" +
+                "  AUTHORITY[\"EPSG\",\"21781\"]]-->\n" +
+                "        <LatLonBoundingBox minx=\"5.908953517650008\" miny=\"45.78874927621686\" maxx=\"10.558901428148609\" maxy=\"47.81382548271046\"/>\n" +
+                "        <BoundingBox SRS=\"EPSG:21781\" minx=\"485410.0\" miny=\"75270.0\" maxx=\"833840.7\" maxy=\"295935.0\"/>\n" +
+                "        <Style>\n" +
+                "          <Name>Selection</Name>\n" +
+                "          <Title>A style to show the selected feature</Title>\n" +
+                "          <Abstract>A yellow line with a 2 pixel width</Abstract>\n" +
+                "          <LegendURL width=\"20\" height=\"20\">\n" +
+                "            <Format>image/png</Format>\n" +
+                "            <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms/GetLegendGraphic?VERSION=1.0.0&amp;FORMAT=image/png&amp;WIDTH=20&amp;HEIGHT=20&amp;LAYER=gn:kantoneBB\"/>\n" +
+                "          </LegendURL>\n" +
+                "        </Style>\n" +
+                "        <Style>\n" +
+                "          <Name>Selection</Name>\n" +
+                "          <Title>A style to show the selected feature</Title>\n" +
+                "          <Abstract>A yellow line with a 2 pixel width</Abstract>\n" +
+                "          <LegendURL width=\"20\" height=\"20\">\n" +
+                "            <Format>image/png</Format>\n" +
+                "            <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms/GetLegendGraphic?VERSION=1.0.0&amp;FORMAT=image/png&amp;WIDTH=20&amp;HEIGHT=20&amp;LAYER=gn:kantoneBB\"/>\n" +
+                "          </LegendURL>\n" +
+                "        </Style>\n" +
+                "      </Layer>\n" +
+                "      <Layer queryable=\"1\">\n" +
+                "        <Name>gn:xlinks</Name>\n" +
+                "        <Title>xlinks</Title>\n" +
+                "        <Abstract>xlinks</Abstract>\n" +
+                "        <KeywordList>\n" +
+                "          <Keyword>xlinks</Keyword>\n" +
+                "        </KeywordList>\n" +
+                "        <SRS>EPSG:21781</SRS>\n" +
+                "        <!--WKT definition of this CRS:\n" +
+                "PROJCS[\"CH1903 / LV03\", \n" +
+                "  GEOGCS[\"CH1903\", \n" +
+                "    DATUM[\"CH1903\", \n" +
+                "      SPHEROID[\"Bessel 1841\", 6377397.155, 299.1528128, AUTHORITY[\"EPSG\",\"7004\"]], \n" +
+                "      TOWGS84[674.4, 15.1, 405.3, 0.0, 0.0, 0.0, 0.0], \n" +
+                "      AUTHORITY[\"EPSG\",\"6149\"]], \n" +
+                "    PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], \n" +
+                "    UNIT[\"degree\", 0.017453292519943295], \n" +
+                "    AXIS[\"Geodetic longitude\", EAST], \n" +
+                "    AXIS[\"Geodetic latitude\", NORTH], \n" +
+                "    AUTHORITY[\"EPSG\",\"4149\"]], \n" +
+                "  PROJECTION[\"Oblique Mercator\", AUTHORITY[\"EPSG\",\"9815\"]], \n" +
+                "  PARAMETER[\"longitude_of_center\", 7.439583333333333], \n" +
+                "  PARAMETER[\"latitude_of_center\", 46.952405555555565], \n" +
+                "  PARAMETER[\"azimuth\", 90.0], \n" +
+                "  PARAMETER[\"scale_factor\", 1.0], \n" +
+                "  PARAMETER[\"false_easting\", 600000.0], \n" +
+                "  PARAMETER[\"false_northing\", 200000.0], \n" +
+                "  PARAMETER[\"rectified_grid_angle\", 90.0], \n" +
+                "  UNIT[\"m\", 1.0], \n" +
+                "  AXIS[\"Easting\", EAST], \n" +
+                "  AXIS[\"Northing\", NORTH], \n" +
+                "  AUTHORITY[\"EPSG\",\"21781\"]]-->\n" +
+                "        <LatLonBoundingBox minx=\"-180.0\" miny=\"90.0\" maxx=\"-90.0\" maxy=\"180.0\"/>\n" +
+                "        <BoundingBox SRS=\"EPSG:21781\" minx=\"9.626899504917674\" miny=\"47.12853893946158\" maxx=\"9.82825134054292\" maxy=\"47.24631077121012\"/>\n" +
+                "        <Style>\n" +
+                "          <Name>polygon</Name>\n" +
+                "          <Title>A boring default style</Title>\n" +
+                "          <Abstract>A sample style that just prints out a transparent red interior with a red outline</Abstract>\n" +
+                "          <LegendURL width=\"20\" height=\"20\">\n" +
+                "            <Format>image/png</Format>\n" +
+                "            <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms/GetLegendGraphic?VERSION=1.0.0&amp;FORMAT=image/png&amp;WIDTH=20&amp;HEIGHT=20&amp;LAYER=gn:xlinks\"/>\n" +
+                "          </LegendURL>\n" +
+                "        </Style>\n" +
+                "      </Layer>\n" +
+                "      <Layer queryable=\"0\">\n" +
+                "        <Name>gn:world</Name>\n" +
+                "        <Title>Blue Marble world image</Title>\n" +
+                "        <Abstract>Blue Marble world image</Abstract>\n" +
+                "        <KeywordList>\n" +
+                "          <Keyword>Blue</Keyword>\n" +
+                "          <Keyword>Marble</Keyword>\n" +
+                "          <Keyword>world</Keyword>\n" +
+                "          <Keyword>topography</Keyword>\n" +
+                "          <Keyword>bathymetry</Keyword>\n" +
+                "          <Keyword>200407</Keyword>\n" +
+                "        </KeywordList>\n" +
+                "        <!--WKT definition of this CRS:\n" +
+                "GEOGCS[\"WGS 84\", \n" +
+                "  DATUM[\"World Geodetic System 1984\", \n" +
+                "    SPHEROID[\"WGS 84\", 6378137.0, 298.257223563, AUTHORITY[\"EPSG\",\"7030\"]], \n" +
+                "    AUTHORITY[\"EPSG\",\"6326\"]], \n" +
+                "  PRIMEM[\"Greenwich\", 0.0, AUTHORITY[\"EPSG\",\"8901\"]], \n" +
+                "  UNIT[\"degree\", 0.017453292519943295], \n" +
+                "  AXIS[\"Geodetic longitude\", EAST], \n" +
+                "  AXIS[\"Geodetic latitude\", NORTH], \n" +
+                "  AUTHORITY[\"EPSG\",\"4326\"]]-->\n" +
+                "        <SRS>EPSG:4326</SRS>\n" +
+                "        <LatLonBoundingBox minx=\"-180.0\" miny=\"-90.0\" maxx=\"180.0\" maxy=\"90.0\"/>\n" +
+                "        <BoundingBox SRS=\"EPSG:4326\" minx=\"-180.0\" miny=\"-90.0\" maxx=\"180.0\" maxy=\"90.0\"/>\n" +
+                "        <Style>\n" +
+                "          <Name>raster</Name>\n" +
+                "          <Title>A boring default style</Title>\n" +
+                "          <Abstract>A sample style for rasters</Abstract>\n" +
+                "          <LegendURL width=\"20\" height=\"20\">\n" +
+                "            <Format>image/png</Format>\n" +
+                "            <OnlineResource xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:type=\"simple\" xlink:href=\"http://wms.example.com:8080/geoserver/wms/GetLegendGraphic?VERSION=1.0.0&amp;FORMAT=image/png&amp;WIDTH=20&amp;HEIGHT=20&amp;LAYER=gn:world\"/>\n" +
+                "          </LegendURL>\n" +
+                "        </Style>\n" +
+                "      </Layer>\n" +
+                "    </Layer>\n" +
+                "  </Capability>\n" +
+                "\n" +
+                "</WMT_MS_Capabilities>";
+
+        InputStream stream = new ByteArrayInputStream(response.getBytes("UTF-8"));
         WMSServerInfo info = WMSServerInfo.parseCapabilities(stream);
         assertEquals(false, info.isTileCache());
     }

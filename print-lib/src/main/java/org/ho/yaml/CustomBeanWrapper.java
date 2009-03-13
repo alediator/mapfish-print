@@ -27,7 +27,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 /**
- * Fix a few bug in the original class.
+ * Fix a few bugs in the original class.
  * See https://sourceforge.net/tracker/index.php?func=detail&aid=1954096&group_id=153924&atid=789717
  */
 public class CustomBeanWrapper extends DefaultBeanWrapper {

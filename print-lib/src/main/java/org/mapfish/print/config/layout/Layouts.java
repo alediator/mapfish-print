@@ -40,10 +40,11 @@ public class Layouts extends HashMap<String, Layout> {
 
     /**
      * Called just after the config has been loaded to check it is valid.
+     *
      * @throws InvalidValueException When there is a problem
      */
     public void validate() {
-        if(size()<1) throw new InvalidValueException("layouts", "[]");
+        if (size() < 1) throw new InvalidValueException("layouts", "[]");
         for (Layout layout : values()) {
             layout.validate();
         }

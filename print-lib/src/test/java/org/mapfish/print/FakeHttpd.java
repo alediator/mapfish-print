@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2009  Camptocamp
+ *
+ * This file is part of MapFish Server
+ *
+ * MapFish Server is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * MapFish Server is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with MapFish Server.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.mapfish.print;
 
 import org.apache.commons.httpclient.HttpClient;
@@ -27,7 +46,7 @@ public class FakeHttpd extends Thread {
     private static final HttpAnswerer STOP = new HttpAnswerer(200, "STOPPING", "text/plain", "stopping", true);
     private final AtomicBoolean starting = new AtomicBoolean(false);
 
-    FakeHttpd(int port, Map<String, HttpAnswerer> routings) {
+    public FakeHttpd(int port, Map<String, HttpAnswerer> routings) {
         super("FakeHttpd(" + port + ")");
         this.port = port;
         routings.put("/stop", STOP);
@@ -131,7 +150,7 @@ public class FakeHttpd extends Thread {
             this.stop = stop;
         }
 
-        public boolean answer(PrintStream output) {
+        protected boolean answer(PrintStream output) {
             output.println("HTTP/1.0 " + status + " " + statusTxt);
             output.println("Content-Type: " + contentType);
             output.println("");

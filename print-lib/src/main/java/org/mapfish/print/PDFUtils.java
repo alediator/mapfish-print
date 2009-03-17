@@ -90,7 +90,7 @@ public class PDFUtils {
     /**
      * Gets an iText image. Avoids doing the query twice.
      */
-    private static Image getImageDirect(RenderingContext context, URI uri) throws IOException, BadElementException {
+    protected static Image getImageDirect(RenderingContext context, URI uri) throws IOException, BadElementException {
         if (!uri.isAbsolute()) {
             //non-absolute URI are local, so we can use the normal iText method
             return Image.getInstance(uri.toString());
@@ -103,8 +103,14 @@ public class PDFUtils {
                 }
                 context.getConfig().getHttpClient().executeMethod(method);
                 int code = method.getStatusCode();
-                if (code < 200 || code >= 300) {
-                    throw new IOException("Error " + code + " while reading the Capabilities from " + uri + ": " + method.getStatusText());
+                final String contentType = method.getResponseHeader("Content-Type").getValue();
+                if (code < 200 || code >= 300 || contentType.startsWith("text/") || contentType.equals("application/vnd.ogc.se_xml")) {
+                    LOGGER.debug("Server returned an error for " + uri + ": " + method.getResponseBodyAsString());
+                    if (code < 200 || code >= 300) {
+                        throw new IOException("Error (status=" + code + ") while reading the image from " + uri + ": " + method.getStatusText());
+                    } else {
+                        throw new IOException("Didn't receive an image while reading: " + uri);
+                    }
                 }
                 return Image.getInstance(method.getResponseBody());
             } finally {

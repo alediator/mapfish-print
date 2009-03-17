@@ -22,47 +22,26 @@ package org.mapfish.print;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.pdf.PdfWriter;
 import org.json.JSONException;
-import org.mapfish.print.config.layout.*;
-import org.mapfish.print.config.Config;
+import org.mapfish.print.config.layout.Block;
+import org.mapfish.print.config.layout.ScalebarBlock;
 import org.mapfish.print.scalebar.Direction;
 import org.mapfish.print.scalebar.Type;
 import org.mapfish.print.utils.DistanceUnit;
 import org.mapfish.print.utils.PJsonObject;
-import org.pvalsecc.misc.FileUtilities;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.TreeSet;
 
 /**
  * This is not an automated test. You have to look at the generated PDF file.
  */
-public class ScalebarTest extends PrintTestCase {
-    private static final int MARGIN = 40;
-
+public class ScalebarTest extends PdfTestCase {
     public ScalebarTest(String name) {
         super(name);
     }
 
     public void testBars() throws IOException, DocumentException, JSONException {
-        PJsonObject spec = MapPrinter.parseSpec(FileUtilities.readWholeTextFile(new File("../print-standalone/samples/spec.json")));
-        PJsonObject page1 = spec.getJSONArray("pages").getJSONObject(0);
-        spec.getInternalObj().put("units", "meters");
-
-        final Document doc = new Document(PageSize.A4);
-        OutputStream outFile = new FileOutputStream("target/testScalebar.pdf");
-        PdfWriter writer = PdfWriter.getInstance(doc, outFile);
-        writer.setFullCompression();
-        RenderingContext context = createContext(spec, doc, writer);
-        doc.setMargins(MARGIN, MARGIN, MARGIN, MARGIN * 3);
-        doc.open();
+        PJsonObject page1 = context.getGlobalParams().getJSONArray("pages").getJSONObject(0);
 
         /*final PdfContentByte dc = writer.getDirectContent();
         float height = writer.getPageSize().getHeight();
@@ -185,22 +164,6 @@ public class ScalebarTest extends PrintTestCase {
         draw(page1, doc, context, block);
 
 
-        doc.close();
-        writer.close();
-        outFile.close();
-    }
-
-    private RenderingContext createContext(PJsonObject spec, Document doc, PdfWriter writer) {
-        Layout layout=new Layout();
-        MainPage mainPage=new MainPage();
-        final MapBlock mapBlock = new MapBlock();
-        mainPage.setItems(new ArrayList<Block>(Arrays.asList(mapBlock)));
-        layout.setMainPage(mainPage);
-        Config config=new Config();
-        config.setDpis(new TreeSet<Integer>(Arrays.asList(96,190)));
-        config.setScales(new TreeSet<Integer>(Arrays.asList(20000,25000,100000,500000,4000000)));
-        RenderingContext context = new RenderingContext(doc, writer, config, spec, null, layout, null);
-        return context;
     }
 
     private ScalebarBlock createSmallBlock() {

@@ -25,7 +25,7 @@ public class FakeHttpd extends Thread {
     private final Map<String, HttpAnswerer> routings;
     private static final HttpAnswerer NOT_FOUND = new HttpAnswerer(404, "Not found", "text/plain", "Not found");
     private static final HttpAnswerer STOP = new HttpAnswerer(200, "STOPPING", "text/plain", "stopping", true);
-    private AtomicBoolean starting = new AtomicBoolean(false);
+    private final AtomicBoolean starting = new AtomicBoolean(false);
 
     FakeHttpd(int port, Map<String, HttpAnswerer> routings) {
         super("FakeHttpd(" + port + ")");
@@ -43,6 +43,7 @@ public class FakeHttpd extends Thread {
                 try {
                     starting.wait();
                 } catch (InterruptedException e) {
+                    //ignored
                 }
             }
         }

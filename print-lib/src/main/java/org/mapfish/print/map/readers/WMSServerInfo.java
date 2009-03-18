@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008  Camptocamp
+ * Copyright (C) 2009  Camptocamp
  *
  * This file is part of MapFish Server
  *
@@ -78,7 +78,8 @@ public class WMSServerInfo {
             try {
                 result = requestInfo(uri, context);
             } catch (Exception e) {
-                throw new InvalidValueException("baseUrl", uri.toString(), e);
+                LOGGER.info("Error while getting capabilities for "+uri+". The print module will assume it's a standard WMS.");
+                result = new WMSServerInfo();
             }
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("GetCapabilities " + uri + ": " + result);

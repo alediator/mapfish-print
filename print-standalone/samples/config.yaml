@@ -1,11 +1,7 @@
 #===========================================================================
 # allowed DPIs
 #===========================================================================
-dpis:
-  - 254
-  - 190
-  - 127
-  - 56
+dpis: [254, 190, 127, 56]
 
 #===========================================================================
 # the allowed scales
@@ -30,6 +26,9 @@ hosts:
     ip: www.camptocamp.org
   - !dnsMatch
     host: labs.metacarta.com
+    port: 80
+  - !dnsMatch
+    host: terraservice.net
     port: 80
 
 layouts:
@@ -74,6 +73,9 @@ layouts:
         height: 30
         items:
           - !columns
+            config:
+              cells:
+                - paddingBottom: 5   
             items:
               - !text
                 backgroundColor: #FF0000

@@ -51,12 +51,6 @@
                 <exclude>org/w3c/dom/events/**</exclude>
               </excludes>
             </filter>
-            <filter>
-              <artifact>com.lowagie:itext</artifact>
-              <excludes>
-                <exclude>com/lowagie/text/pdf/codec/PngImage*</exclude>
-              </excludes>
-            </filter>
           </filters>
         </configuration>
         <executions>

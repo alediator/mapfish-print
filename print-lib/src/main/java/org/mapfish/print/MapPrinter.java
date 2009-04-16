@@ -96,6 +96,7 @@ public class MapPrinter {
         final TreeSet<String> fontPaths = config.getFonts();
         if (fontPaths != null) {
             for (String fontPath : fontPaths) {
+                fontPath = fontPath.replaceAll("\\$\\{configDir\\}", configDir);
                 File fontFile = new File(fontPath);
                 if (fontFile.isDirectory()) {
                     FontFactory.registerDirectory(fontPath, true);

@@ -72,15 +72,11 @@ public class Page {
     }
 
     public Rectangle getPageSizeRect() {
-        try {
-            final Rectangle result = PageSize.getRectangle(pageSize);
-            if (landscape) {
-                return result.rotate();
-            } else {
-                return result;
-            }
-        } catch (RuntimeException e) {
-            throw new InvalidValueException("pageSize", pageSize);
+        final Rectangle result = PageSize.getRectangle(pageSize);
+        if (landscape) {
+            return result.rotate();
+        } else {
+            return result;
         }
     }
 
@@ -98,6 +94,11 @@ public class Page {
 
     public void setPageSize(String pageSize) {
         this.pageSize = pageSize;
+        try {
+            PageSize.getRectangle(pageSize);
+        } catch (RuntimeException e) {
+            throw new InvalidValueException("pageSize", pageSize);
+        }
     }
 
     public void setHeader(HeaderFooter header) {
@@ -143,5 +144,8 @@ public class Page {
         for (int i = 0; i < items.size(); i++) {
             items.get(i).validate();
         }
+
+        if (header != null) header.validate(); 
+        if (footer != null) footer.validate();
     }
 }

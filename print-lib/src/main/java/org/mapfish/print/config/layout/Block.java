@@ -118,9 +118,13 @@ public abstract class Block {
 
     public void setCondition(String condition) {
         this.condition = condition;
+        if (condition != null && !CONDITION_REGEXP.matcher(condition).matches()) {
+            throw new InvalidValueException("condition", condition);
+        }
     }
 
     public void setSpacingAfter(double spacingAfter) {
         this.spacingAfter = spacingAfter;
+        if (spacingAfter < 0.0) throw new InvalidValueException("spacingAfter", spacingAfter);
     }
 }

@@ -51,16 +51,16 @@ public class PDFTileRenderer extends TileRenderer {
             protected void readTile() throws IOException, DocumentException {
                 LOGGER.debug(uri);
                 PdfReader reader = new PdfReader(uri.toURL());
-                synchronized (context.getDirectContent()) {
+                synchronized (context.getPdfLock()) {
                     pdfMap = context.getWriter().getImportedPage(reader, 1);
-                }
 
-                if (opacity < 1.0) {
-                    PdfGState gs = new PdfGState();
-                    gs.setFillOpacity(opacity);
-                    gs.setStrokeOpacity(opacity);
-                    //gs.setBlendMode(PdfGState.BM_SOFTLIGHT);
-                    pdfMap.setGState(gs);
+                    if (opacity < 1.0) {
+                        PdfGState gs = new PdfGState();
+                        gs.setFillOpacity(opacity);
+                        gs.setStrokeOpacity(opacity);
+                        //gs.setBlendMode(PdfGState.BM_SOFTLIGHT);
+                        pdfMap.setGState(gs);
+                    }
                 }
             }
 

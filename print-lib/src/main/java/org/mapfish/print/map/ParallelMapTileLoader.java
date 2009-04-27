@@ -31,7 +31,7 @@ import org.pvalsecc.concurrent.OrderedResultsExecutor;
  * <p/>
  * Since a lot of stuff is done in //, a lot of care has to be put on protecting
  * the shared resources. One of the big ones is the DirectContent (dc) or the
- * PDFWriter. For those, a lock on the dc is used.
+ * PDFWriter. For those, a lock on context.getPdfLock() is used.
  * <p/>
  * This class uses a global {@link org.pvalsecc.concurrent.OrderedResultsExecutor} to
  * do the things in // and a {@link org.pvalsecc.concurrent.BlockingSimpleTarget} to
@@ -90,7 +90,7 @@ public class ParallelMapTileLoader implements OrderedResultsExecutor.ResultColle
      */
     public void handle(MapTileTask mapTileTaskResult) {
         if (!mapTileTaskResult.handleException(context)) {
-            synchronized (dc) {  //tiles may be currently loading in another thread
+            synchronized (context.getPdfLock()) {  //tiles may be currently loading in another thread
                 dc.saveState();
                 try {
                     mapTileTaskResult.renderOnPdf(dc);

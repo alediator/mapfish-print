@@ -30,4 +30,12 @@ public class InvalidValueException extends PrintException {
     public InvalidValueException(String name, String value, Throwable e) {
         super(name + " has an invalid value: " + value, e);
     }
+
+    public InvalidValueException(String name, int value) {
+        this(name, Integer.toString(value));
+    }
+
+    public InvalidValueException(String name, double value) {
+        this(name, Double.toString(value));
+    }
 }

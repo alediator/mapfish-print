@@ -59,14 +59,14 @@ public class ColumnDef {
     public void validate() {
         if (header == null) throw new InvalidValueException("header", "null");
         if (cell == null) throw new InvalidValueException("header", "null");
-        if (columnWeight < 0)
-            throw new InvalidValueException("columnWeight", Integer.toString(columnWeight));
         header.validate();
         cell.validate();
     }
 
     public void setColumnWeight(int columnWeight) {
         this.columnWeight = columnWeight;
+        if (columnWeight < 0)
+            throw new InvalidValueException("columnWeight", columnWeight);
     }
 
     public int getColumnWeight() {

@@ -32,6 +32,8 @@ import java.util.List;
 
 /**
  * Bean to configure a !columns or a !table block.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Columnsblock
  */
 public class ColumnsBlock extends Block {
     private List<Block> items;
@@ -134,5 +136,7 @@ public class ColumnsBlock extends Block {
                 throw new InvalidValueException("items", "Cannot put an absolute block in a !columns or !table block");
             }
         }
+
+        if (config != null) config.validate();
     }
 }

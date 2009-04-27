@@ -28,6 +28,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.utils.PJsonArray;
 import org.mapfish.print.utils.PJsonObject;
 
@@ -107,14 +108,17 @@ public class LegendsBlock extends Block {
 
     public void setMaxIconWidth(double maxIconWidth) {
         this.maxIconWidth = maxIconWidth;
+        if (maxIconWidth < 0.0) throw new InvalidValueException("maxIconWidth", maxIconWidth);
     }
 
     public void setMaxIconHeight(double maxIconHeight) {
         this.maxIconHeight = maxIconHeight;
+        if (maxIconHeight < 0.0) throw new InvalidValueException("maxIconHeight", maxIconHeight);
     }
 
     public void setClassIndentation(double classIndentation) {
         this.classIndentation = classIndentation;
+        if (classIndentation < 0.0) throw new InvalidValueException("classIndentation", classIndentation);
     }
 
     public void setClassFont(String classFont) {
@@ -123,6 +127,7 @@ public class LegendsBlock extends Block {
 
     public void setClassFontSize(double classFontSize) {
         this.classFontSize = classFontSize;
+        if (classFontSize < 0.0) throw new InvalidValueException("classFontSize", classFontSize);
     }
 
     public String getClassFont() {
@@ -139,10 +144,12 @@ public class LegendsBlock extends Block {
 
     public void setLayerSpace(double layerSpace) {
         this.layerSpace = layerSpace;
+        if (layerSpace < 0.0) throw new InvalidValueException("layerSpace", layerSpace);
     }
 
     public void setClassSpace(double classSpace) {
         this.classSpace = classSpace;
+        if (classSpace < 0.0) throw new InvalidValueException("classSpace", classSpace);
     }
 
     public void setLayerFont(String layerFont) {
@@ -151,6 +158,7 @@ public class LegendsBlock extends Block {
 
     public void setLayerFontSize(double layerFontSize) {
         this.layerFontSize = layerFontSize;
+        if (layerFontSize < 0.0) throw new InvalidValueException("layerFontSize", layerFontSize);
     }
 
     public void setFontEncoding(String fontEncoding) {

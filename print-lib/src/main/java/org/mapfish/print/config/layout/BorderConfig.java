@@ -21,6 +21,7 @@ package org.mapfish.print.config.layout;
 
 import org.mapfish.print.PDFUtils;
 import org.mapfish.print.RenderingContext;
+import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.config.ColorWrapper;
 import org.mapfish.print.utils.PJsonObject;
 
@@ -55,18 +56,22 @@ public class BorderConfig {
 
     public void setBorderWidthLeft(double borderWidthLeft) {
         this.borderWidthLeft = borderWidthLeft;
+        if (borderWidthLeft < 0.0) throw new InvalidValueException("borderWidthLeft", borderWidthLeft);
     }
 
     public void setBorderWidthRight(double borderWidthRight) {
         this.borderWidthRight = borderWidthRight;
+        if (borderWidthRight < 0.0) throw new InvalidValueException("borderWidthRight", borderWidthRight);
     }
 
     public void setBorderWidthTop(double borderWidthTop) {
         this.borderWidthTop = borderWidthTop;
+        if (borderWidthTop < 0.0) throw new InvalidValueException("borderWidthTop", borderWidthTop);
     }
 
     public void setBorderWidthBottom(double borderWidthBottom) {
         this.borderWidthBottom = borderWidthBottom;
+        if (borderWidthBottom < 0.0) throw new InvalidValueException("borderWidthBottom", borderWidthBottom);
     }
 
     public void setBorderColorLeft(String borderColorLeft) {
@@ -99,5 +104,8 @@ public class BorderConfig {
 
     public Color getBorderColorBottomVal(RenderingContext context, PJsonObject params) {
         return ColorWrapper.convertColor(PDFUtils.evalString(context, params, borderColorBottom));
+    }
+
+    public void validate() {
     }
 }

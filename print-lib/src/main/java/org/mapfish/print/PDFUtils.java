@@ -25,6 +25,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfTemplate;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.log4j.Logger;
 import org.mapfish.print.config.layout.*;
 import org.mapfish.print.utils.PJsonObject;
@@ -42,7 +43,7 @@ import java.util.regex.Pattern;
  * Some utility functions for iText.
  */
 public class PDFUtils {
-    public static Logger LOGGER = Logger.getLogger(PDFUtils.class);
+    public static final Logger LOGGER = Logger.getLogger(PDFUtils.class);
 
     /**
      * Gets an iText image with a cache that uses PdfTemplates to re-use the same
@@ -60,7 +61,7 @@ public class PDFUtils {
             Image content = getImageDirect(context, uri);
             content.setAbsolutePosition(0, 0);
             final PdfContentByte dc = context.getDirectContent();
-            synchronized (dc) {  //protect against parallel writing on the PDF file
+            synchronized (context.getPdfLock()) {  //protect against parallel writing on the PDF file
                 template = dc.createTemplate(content.getPlainWidth(), content.getPlainHeight());
                 template.addImage(content);
             }
@@ -97,22 +98,29 @@ public class PDFUtils {
         } else {
             //read the whole image content in memory, then give that to iText
             GetMethod method = new GetMethod(uri.toString());
+            method.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
             try {
                 if (context.getReferer() != null) {
                     method.setRequestHeader("Referer", context.getReferer());
                 }
+                if(LOGGER.isDebugEnabled()) LOGGER.debug("loading image: "+uri);
                 context.getConfig().getHttpClient().executeMethod(method);
                 int code = method.getStatusCode();
                 final String contentType = method.getResponseHeader("Content-Type").getValue();
                 if (code < 200 || code >= 300 || contentType.startsWith("text/") || contentType.equals("application/vnd.ogc.se_xml")) {
-                    LOGGER.debug("Server returned an error for " + uri + ": " + method.getResponseBodyAsString());
+                    if(LOGGER.isDebugEnabled()) LOGGER.debug("Server returned an error for " + uri + ": " + method.getResponseBodyAsString());
                     if (code < 200 || code >= 300) {
                         throw new IOException("Error (status=" + code + ") while reading the image from " + uri + ": " + method.getStatusText());
                     } else {
                         throw new IOException("Didn't receive an image while reading: " + uri);
                     }
                 }
-                return Image.getInstance(method.getResponseBody());
+                final Image result = Image.getInstance(method.getResponseBody());
+                if(LOGGER.isDebugEnabled()) LOGGER.debug("loaded image: "+uri);
+                return result;
+            } catch(IOException e) {
+                LOGGER.warn("Server returned an error for " + uri + ": " + e.getMessage());
+                throw e;
             } finally {
                 method.releaseConnection();
             }
@@ -203,7 +211,7 @@ public class PDFUtils {
         return result.toString();
     }
 
-    private static Pattern FORMAT_PATTERN = Pattern.compile("^format\\s+(%[-+# 0,(]*\\d*(\\.\\d*)?(d))\\s+(.*)$");
+    private static final Pattern FORMAT_PATTERN = Pattern.compile("^format\\s+(%[-+# 0,(]*\\d*(\\.\\d*)?(d))\\s+(.*)$");
 
     private static String getContextValue(RenderingContext context, PJsonObject params, String key) {
         Matcher matcher;

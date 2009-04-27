@@ -46,7 +46,7 @@ public class CustomXPath {
     }
 
 
-    private static Pattern NUMBER_UNIT = Pattern.compile("^(\\d*(\\.\\d*)?)(.*)$");
+    private static final Pattern NUMBER_UNIT = Pattern.compile("^(\\d*(\\.\\d*)?)(.*)$");
 
     public String factorValue(String valTxt, int factor) {
         Matcher matcher = NUMBER_UNIT.matcher(valTxt);

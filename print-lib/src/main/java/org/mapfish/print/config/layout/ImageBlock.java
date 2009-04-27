@@ -37,6 +37,8 @@ import java.net.URISyntaxException;
 
 /**
  * Configuration and logic to add an !image block.
+ * <p/>
+ * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Imageblock
  */
 public class ImageBlock extends Block {
     private String url = null;
@@ -89,10 +91,12 @@ public class ImageBlock extends Block {
 
     public void setMaxWidth(double maxWidth) {
         this.maxWidth = maxWidth;
+        if (maxWidth < 0.0) throw new InvalidValueException("maxWidth", maxWidth);
     }
 
     public void setMaxHeight(double maxHeight) {
         this.maxHeight = maxHeight;
+        if (maxHeight < 0.0) throw new InvalidValueException("maxHeight", maxHeight);
     }
 
     public void setRotation(String rotation) {

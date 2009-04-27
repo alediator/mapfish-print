@@ -135,5 +135,6 @@ public class AttributesBlock extends Block {
         if (columnDefs == null)
             throw new InvalidValueException("columnDefs", "null");
         columnDefs.validate();
+        if (tableConfig != null) tableConfig.validate();
     }
 }

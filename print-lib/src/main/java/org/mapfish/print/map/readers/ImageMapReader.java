@@ -88,7 +88,6 @@ public class ImageMapReader extends MapReader {
     public void render(final Transformer transformer, ParallelMapTileLoader parallelMapTileLoader, String srs, boolean first) {
         LOGGER.debug(baseUrl);
 
-
         parallelMapTileLoader.addTileToLoad(new MapTileTask() {
             public Image image;
 

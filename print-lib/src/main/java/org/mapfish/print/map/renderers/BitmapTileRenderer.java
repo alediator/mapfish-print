@@ -69,7 +69,6 @@ public class BitmapTileRenderer extends TileRenderer {
                 public Image map;
 
                 protected void readTile() throws IOException, DocumentException {
-                    LOGGER.debug(uri);
                     map = PDFUtils.getImage(context, uri, bitmapTileW, bitmapTileH);
                     map.setAbsolutePosition(posX, posY);
                 }

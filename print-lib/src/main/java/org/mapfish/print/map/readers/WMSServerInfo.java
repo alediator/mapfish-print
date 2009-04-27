@@ -23,7 +23,6 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.util.DOMUtil;
-import org.mapfish.print.InvalidValueException;
 import org.mapfish.print.RenderingContext;
 import org.pvalsecc.misc.URIUtils;
 import org.w3c.dom.Document;
@@ -46,13 +45,14 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Use to get information about a WMS server. Caches the results.
  */
 public class WMSServerInfo {
     private static final Log LOGGER = LogFactory.getLog(WMSServerInfo.class);
-    private static Map<URI, WMSServerInfo> cache = new HashMap<URI, WMSServerInfo>();
+    private static final Map<URI, WMSServerInfo> cache = Collections.synchronizedMap(new HashMap<URI, WMSServerInfo>());
 
     private static DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 
@@ -72,7 +72,15 @@ public class WMSServerInfo {
         cache.clear();
     }
 
-    public static synchronized WMSServerInfo getInfo(URI uri, RenderingContext context) {
+    public static WMSServerInfo getInfo(URI uri, RenderingContext context) {
+        WMSServerInfo result = cache.get(uri);
+        if (result == null) {
+            return getInfoImpl(uri, context);
+        }
+        return result;
+    }
+
+    private static synchronized WMSServerInfo getInfoImpl(URI uri, RenderingContext context) {
         WMSServerInfo result = cache.get(uri);
         if (result == null) {
             try {
@@ -169,7 +177,6 @@ public class WMSServerInfo {
     public TileCacheLayerInfo getTileCacheLayer(String layerName) {
         return tileCacheLayers != null ? tileCacheLayers.get(layerName) : null;
     }
-
 
     public String toString() {
         final StringBuilder sb = new StringBuilder();

@@ -91,7 +91,7 @@ public class ScalebarBlock extends FontBlock {
     private void tryLayout(RenderingContext context, PdfElement target, Font pdfFont, DistanceUnit scaleUnit, int scale, double intervalDistance, int tryNumber) throws DocumentException {
         if (tryNumber > 3) {
             //noinspection ThrowableInstanceNeverThrown
-            context.addError(new InvalidValueException("maxSize too small", Integer.toString(maxSize)));
+            context.addError(new InvalidValueException("maxSize too small", maxSize));
             return;
         }
 
@@ -239,6 +239,7 @@ public class ScalebarBlock extends FontBlock {
 
     public void setMaxSize(int maxSize) {
         this.maxSize = maxSize;
+        if (maxSize <= 0) throw new InvalidValueException("maxSize", maxSize);
     }
 
     public void setType(Type type) {
@@ -247,7 +248,7 @@ public class ScalebarBlock extends FontBlock {
 
     public void setIntervals(int intervals) {
         if (intervals < 1) {
-            throw new InvalidValueException("intervals", Integer.toString(intervals));
+            throw new InvalidValueException("intervals", intervals);
         }
         this.intervals = intervals;
     }
@@ -262,6 +263,7 @@ public class ScalebarBlock extends FontBlock {
 
     public void setBarSize(int barSize) {
         this.barSize = barSize;
+        if (barSize < 0) throw new InvalidValueException("barSize", barSize);
     }
 
     public void setBarDirection(Direction barDirection) {
@@ -286,6 +288,7 @@ public class ScalebarBlock extends FontBlock {
 
     public void setLineWidth(double lineWidth) {
         this.lineWidth = lineWidth;
+        if (lineWidth < 0) throw new InvalidValueException("lineWidth", lineWidth);
     }
 
     public int getBarSize() {

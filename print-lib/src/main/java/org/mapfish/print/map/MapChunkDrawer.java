@@ -132,12 +132,12 @@ public class MapChunkDrawer extends ChunkDrawer {
         //
         //All uses of the DirectContent (dc) or the PDFWriter is forbiden outside
         //of renderOnPdf methods and when they are used, one must take a lock on
-        //the DirectContent. That is done for you when renderOnPdf is called, but not done
+        //context.getPdfLock(). That is done for you when renderOnPdf is called, but not done
         //in the readTile method. That's why PDFUtils.getImage needs to do it when
         //creating the template.
         //
         //If you don't follow those rules, you risk to have random inconsistency
-        //in your PDF files.
+        //in your PDF files and/or infinite loops in iText.
         ParallelMapTileLoader parallelMapTileLoader = new ParallelMapTileLoader(context, dc);
         dc.saveState();
         try {

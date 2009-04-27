@@ -74,4 +74,13 @@ public class TableConfig extends BorderConfig {
     public void setCells(Exceptions cells) {
         this.cells = cells;
     }
+
+    public void validate() {
+        super.validate();
+        if (cells != null) {
+            for (int i = 0; i < cells.size(); i++) {
+                cells.get(i).validate();
+            }
+        }
+    }
 }

@@ -101,9 +101,9 @@ public class MapBlock extends Block {
             float maxY = bbox.getFloat(3);
 
             if (minX >= maxX)
-                throw new InvalidValueException("maxX", Float.toString(maxX));
+                throw new InvalidValueException("maxX", maxX);
             if (minY >= maxY)
-                throw new InvalidValueException("maxY", Float.toString(maxY));
+                throw new InvalidValueException("maxY", maxY);
 
             centerX = (minX + maxX) / 2.0F;
             centerY = (minY + maxY) / 2.0F;
@@ -172,11 +172,11 @@ public class MapBlock extends Block {
         }
 
         if (width <= 0) {
-            throw new InvalidValueException("width", Integer.toString(width));
+            throw new InvalidValueException("width", width);
         }
 
         if (height <= 0) {
-            throw new InvalidValueException("width", Integer.toString(height));
+            throw new InvalidValueException("width", height);
         }
     }
 }

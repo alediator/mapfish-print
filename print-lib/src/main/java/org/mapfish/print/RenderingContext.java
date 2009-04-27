@@ -56,6 +56,14 @@ public class RenderingContext {
      */
     private Map<URI, PdfTemplate> templateCache = Collections.synchronizedMap(new HashMap<URI, PdfTemplate>());
 
+    /**
+     * Simple object on which we can synchronize to protect the PDF against parallel writing.
+     *
+     * Before, we were using the DirectContent for the locking, but it seems to
+     * be problematic (had infinite loops in iText).
+     */
+    private final Object pdfLock=new Object();
+
     public RenderingContext(Document document, PdfWriter writer, Config config,
                             PJsonObject globalParams, String configDir, Layout layout, String referer) {
         this.document = document;
@@ -118,5 +126,9 @@ public class RenderingContext {
 
     public String getReferer() {
         return referer;
+    }
+
+    public Object getPdfLock() {
+        return pdfLock;
     }
 }

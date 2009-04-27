@@ -23,6 +23,7 @@ import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.pdf.BaseFont;
 import org.mapfish.print.config.ColorWrapper;
+import org.mapfish.print.InvalidValueException;
 
 import java.awt.*;
 
@@ -46,6 +47,7 @@ public abstract class FontBlock extends Block {
 
     public void setFontSize(double fontSize) {
         this.fontSize = fontSize;
+        if (fontSize < 0.0) throw new InvalidValueException("fontSize", fontSize);
     }
 
     public String getFont() {

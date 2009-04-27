@@ -32,6 +32,7 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Main print servlet.
@@ -42,9 +43,14 @@ public class MapPrinterServlet extends BaseMapServlet {
     private static final String CREATE_URL = "/create.json";
     protected static final String TEMP_FILE_PREFIX = "mapfish-print";
     protected static final String TEMP_FILE_SUFFIX = ".pdf";
-    private static final int TEMP_FILE_PURGE_SECONDS = 600;
+    private static final int TEMP_FILE_PURGE_SECONDS = 10 * 60;
 
     private File tempDir = null;
+
+    /**
+     * Tells if a thread is alread purging the old temporary files or not.
+     */
+    private AtomicBoolean purging = new AtomicBoolean(false);
 
     /**
      * Map of temporary files.
@@ -75,7 +81,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     }
 
     public void init() throws ServletException {
-        //get rid of the temporary files that where present before the applet was started.
+        //get rid of the temporary files that were present before the applet was started.
         File dir = getTempDir();
         File[] files = dir.listFiles();
         for (int i = 0; i < files.length; ++i) {
@@ -273,7 +279,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     }
 
     /**
-     * Send an error 500 to the client with a message
+     * Send an error XXX to the client with an exception
      */
     protected void error(HttpServletResponse httpServletResponse, Throwable e) {
         try {
@@ -291,7 +297,7 @@ public class MapPrinterServlet extends BaseMapServlet {
     }
 
     /**
-     * Send an error XXX to the client with an exception
+     * Send an error XXX to the client with a message
      */
     protected void error(HttpServletResponse httpServletResponse, String message, int code) {
         try {
@@ -357,16 +363,19 @@ public class MapPrinterServlet extends BaseMapServlet {
      * Will purge all the known temporary files older than TEMP_FILE_PURGE_SECONDS.
      */
     protected void purgeOldTemporaryFiles() {
-        final long minTime = System.currentTimeMillis() - TEMP_FILE_PURGE_SECONDS * 1000L;
-        synchronized (tempFiles) {
-            Iterator<Map.Entry<String, TempFile>> it = tempFiles.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<String, TempFile> entry = it.next();
-                if (entry.getValue().creationTime < minTime) {
-                    deleteFile(entry.getValue());
-                    it.remove();
+        if (!purging.getAndSet(true)) {
+            final long minTime = System.currentTimeMillis() - TEMP_FILE_PURGE_SECONDS * 1000L;
+            synchronized (tempFiles) {
+                Iterator<Map.Entry<String, TempFile>> it = tempFiles.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<String, TempFile> entry = it.next();
+                    if (entry.getValue().creationTime < minTime) {
+                        deleteFile(entry.getValue());
+                        it.remove();
+                    }
                 }
             }
+            purging.set(false);
         }
     }
 

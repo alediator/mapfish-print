@@ -108,7 +108,8 @@ public class HeavyLoad {
 
             final ServerStats server;
             synchronized (servers) {
-                server = servers.pollFirst();
+                server = servers.first();
+                servers.remove(server);
                 server.addUsage();
                 servers.add(server);
             }

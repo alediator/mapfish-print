@@ -54,11 +54,11 @@ public class MapBlock extends Block {
 
         if (isAbsolute()) {
             final int absX = getAbsoluteX(context, params);
-            final int absY =  getAbsoluteY(context, params);
+            final int absY = getAbsoluteY(context, params);
             context.getCustomBlocks().addAbsoluteDrawer(new PDFCustomBlocks.AbsoluteDrawer() {
                 public void render(PdfContentByte dc) {
-                    final Rectangle rectangle = new Rectangle(absX, absY - transformer.getPaperH(), 
-                        absX + transformer.getPaperW(), absY);
+                    final Rectangle rectangle = new Rectangle(absX, absY - transformer.getPaperH(),
+                            absX + transformer.getPaperW(), absY);
                     drawer.render(rectangle, dc);
                 }
             });
@@ -89,6 +89,8 @@ public class MapBlock extends Block {
         final float centerX;
         final float centerY;
 
+        final int width = getWidth(context, params);
+        final int height = getHeight(context, params);
         final PJsonArray center = params.optJSONArray("center");
         if (center != null) {
             //normal mode
@@ -103,23 +105,25 @@ public class MapBlock extends Block {
             float maxX = bbox.getFloat(2);
             float maxY = bbox.getFloat(3);
 
-            if (minX >= maxX)
+            if (minX >= maxX) {
                 throw new InvalidValueException("maxX", maxX);
-            if (minY >= maxY)
+            }
+            if (minY >= maxY) {
                 throw new InvalidValueException("maxY", maxY);
+            }
 
             centerX = (minX + maxX) / 2.0F;
             centerY = (minY + maxY) / 2.0F;
             scale = context.getConfig().getBestScale(Math.max(
-                    (maxX - minX) / (DistanceUnit.PT.convertTo(getWidth(context, params), unitEnum)),
-                    (maxY - minY) / (DistanceUnit.PT.convertTo(getHeight(context, params), unitEnum))));
+                    (maxX - minX) / (DistanceUnit.PT.convertTo(width, unitEnum)),
+                    (maxY - minY) / (DistanceUnit.PT.convertTo(height, unitEnum))));
         }
 
         if (!context.getConfig().isScalePresent(scale)) {
             throw new InvalidJsonValueException(params, "scale", scale);
         }
 
-        return new Transformer(centerX, centerY, getWidth(context, params), getHeight(context, params),
+        return new Transformer(centerX, centerY, width, height,
                 scale, dpi, unitEnum, params.optFloat("rotation", 0.0F) * Math.PI / 180.0);
     }
 
@@ -142,7 +146,7 @@ public class MapBlock extends Block {
     }
 
     public boolean isAbsolute() {
-        return absoluteX != null&&
+        return absoluteX != null &&
                 absoluteY != null;
     }
 
@@ -168,14 +172,20 @@ public class MapBlock extends Block {
 
     public void printClientConfig(JSONWriter json) throws JSONException {
         json.object();
-        int w,h;
+        int w;
         try {
             w = Integer.parseInt(width);
-            h = Integer.parseInt(height);
-        } catch(NumberFormatException e) {
-            w=h=0;
+        } catch (NumberFormatException e) {
+            w = 0;
         }
         json.key("width").value(w);
+
+        int h;
+        try {
+            h = Integer.parseInt(height);
+        } catch (NumberFormatException e) {
+            h = 0;
+        }
         json.key("height").value(h);
         json.endObject();
     }

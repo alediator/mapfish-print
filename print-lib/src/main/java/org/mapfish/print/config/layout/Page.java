@@ -124,7 +124,7 @@ public class Page {
     public int getMarginBottom(RenderingContext context, PJsonObject params) {
         return Integer.parseInt(PDFUtils.evalString(context, params, marginBottom));
     }
-    
+
     public void setMarginLeft(String marginLeft) {
         this.marginLeft = marginLeft;
     }
@@ -161,7 +161,7 @@ public class Page {
             items.get(i).validate();
         }
 
-        if (header != null) header.validate(); 
+        if (header != null) header.validate();
         if (footer != null) footer.validate();
     }
 }

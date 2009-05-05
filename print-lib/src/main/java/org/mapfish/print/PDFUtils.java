@@ -24,8 +24,8 @@ import com.lowagie.text.pdf.PdfContentByte;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfTemplate;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.log4j.Logger;
 import org.mapfish.print.config.layout.*;
 import org.mapfish.print.utils.PJsonObject;
@@ -103,12 +103,12 @@ public class PDFUtils {
                 if (context.getReferer() != null) {
                     method.setRequestHeader("Referer", context.getReferer());
                 }
-                if(LOGGER.isDebugEnabled()) LOGGER.debug("loading image: "+uri);
+                if (LOGGER.isDebugEnabled()) LOGGER.debug("loading image: "+uri);
                 context.getConfig().getHttpClient().executeMethod(method);
                 int code = method.getStatusCode();
                 final String contentType = method.getResponseHeader("Content-Type").getValue();
                 if (code < 200 || code >= 300 || contentType.startsWith("text/") || contentType.equals("application/vnd.ogc.se_xml")) {
-                    if(LOGGER.isDebugEnabled()) LOGGER.debug("Server returned an error for " + uri + ": " + method.getResponseBodyAsString());
+                    if (LOGGER.isDebugEnabled()) LOGGER.debug("Server returned an error for " + uri + ": " + method.getResponseBodyAsString());
                     if (code < 200 || code >= 300) {
                         throw new IOException("Error (status=" + code + ") while reading the image from " + uri + ": " + method.getStatusText());
                     } else {
@@ -116,9 +116,9 @@ public class PDFUtils {
                     }
                 }
                 final Image result = Image.getInstance(method.getResponseBody());
-                if(LOGGER.isDebugEnabled()) LOGGER.debug("loaded image: "+uri);
+                if (LOGGER.isDebugEnabled()) LOGGER.debug("loaded image: "+uri);
                 return result;
-            } catch(IOException e) {
+            } catch (IOException e) {
                 LOGGER.warn("Server returned an error for " + uri + ": " + e.getMessage());
                 throw e;
             } finally {
@@ -215,7 +215,7 @@ public class PDFUtils {
 
     private static String getContextValue(RenderingContext context, PJsonObject params, String key) {
         String result = null;
-        if(context !=null) {
+        if (context != null) {
             Matcher matcher;
             if (key.equals("pageNum")) {
                 return Integer.toString(context.getWriter().getPageNumber());
@@ -337,10 +337,12 @@ public class PDFUtils {
                 if (tableConfig != null) {
                     tableConfig.apply(cell[0], row, col, nbRows, nbCols, context, params);
                 }
-                if (block.getAlign() != null)
+                if (block.getAlign() != null) {
                     cell[0].setHorizontalAlignment(block.getAlign().getCode());
-                if (block.getVertAlign() != null)
+                }
+                if (block.getVertAlign() != null) {
                     cell[0].setVerticalAlignment(block.getVertAlign().getCode());
+                }
                 if (!(block instanceof MapBlock) && !(block instanceof ScalebarBlock) && block.getBackgroundColorVal(context, params) != null) {
                     cell[0].setBackgroundColor(block.getBackgroundColorVal(context, params));
                 }

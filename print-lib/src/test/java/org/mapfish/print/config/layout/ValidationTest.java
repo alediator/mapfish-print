@@ -19,13 +19,12 @@
 
 package org.mapfish.print.config.layout;
 
-import org.mapfish.print.PrintTestCase;
 import org.mapfish.print.InvalidValueException;
-import org.pvalsecc.misc.CollectionUtils;
+import org.mapfish.print.PrintTestCase;
 
-import java.util.List;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * A few test around the {@link org.mapfish.print.config.layout.Block#validate()} method.
@@ -103,7 +102,7 @@ public class ValidationTest extends PrintTestCase {
         }
 
         map.validate();
-        
+
         map.setAbsoluteX("100");
         try {
             map.validate();

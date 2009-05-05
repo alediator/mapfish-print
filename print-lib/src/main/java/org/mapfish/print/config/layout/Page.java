@@ -36,19 +36,19 @@ public class Page {
     private String pageSize = "A4";
     private HeaderFooter header = null;
     private HeaderFooter footer = null;
-    private int marginLeft = 40;
-    private int marginRight = 40;
-    private int marginTop = 20;
-    private int marginBottom = 20;
+    private String marginLeft = "40";
+    private String marginRight = "40";
+    private String marginTop = "20";
+    private String marginBottom = "20";
     private String backgroundPdf = null;
     private boolean landscape = false;
 
     public void render(PJsonObject params, RenderingContext context) throws DocumentException {
         final Document doc = context.getDocument();
-        doc.setPageSize(getPageSizeRect());
-        doc.setMargins(marginLeft, marginRight,
-                marginTop + (header != null ? header.getHeight() : 0),
-                marginBottom + (footer != null ? footer.getHeight() : 0));
+        doc.setPageSize(getPageSizeRect(context, params));
+        doc.setMargins(getMarginLeft(context, params), getMarginRight(context, params),
+                getMarginTop(context, params) + (header != null ? header.getHeight() : 0),
+                getMarginBottom(context, params) + (footer != null ? footer.getHeight() : 0));
 
         context.getCustomBlocks().setBackgroundPdf(PDFUtils.evalString(context, params, backgroundPdf));
         if (doc.isOpen()) {
@@ -71,8 +71,8 @@ public class Page {
         }
     }
 
-    public Rectangle getPageSizeRect() {
-        final Rectangle result = PageSize.getRectangle(pageSize);
+    public Rectangle getPageSizeRect(RenderingContext context, PJsonObject params) {
+        final Rectangle result = PageSize.getRectangle(getPageSize(context, params));
         if (landscape) {
             return result.rotate();
         } else {
@@ -88,8 +88,8 @@ public class Page {
         this.items = items;
     }
 
-    public String getPageSize() {
-        return pageSize;
+    public String getPageSize(RenderingContext context, PJsonObject params) {
+        return PDFUtils.evalString(context, params, pageSize);
     }
 
     public void setPageSize(String pageSize) {
@@ -109,19 +109,35 @@ public class Page {
         this.footer = footer;
     }
 
-    public void setMarginLeft(int marginLeft) {
+    public int getMarginLeft(RenderingContext context, PJsonObject params) {
+        return Integer.parseInt(PDFUtils.evalString(context, params, marginLeft));
+    }
+
+    public int getMarginRight(RenderingContext context, PJsonObject params) {
+        return Integer.parseInt(PDFUtils.evalString(context, params, marginRight));
+    }
+
+    public int getMarginTop(RenderingContext context, PJsonObject params) {
+        return Integer.parseInt(PDFUtils.evalString(context, params, marginTop));
+    }
+
+    public int getMarginBottom(RenderingContext context, PJsonObject params) {
+        return Integer.parseInt(PDFUtils.evalString(context, params, marginBottom));
+    }
+    
+    public void setMarginLeft(String marginLeft) {
         this.marginLeft = marginLeft;
     }
 
-    public void setMarginRight(int marginRight) {
+    public void setMarginRight(String marginRight) {
         this.marginRight = marginRight;
     }
 
-    public void setMarginTop(int marginTop) {
+    public void setMarginTop(String marginTop) {
         this.marginTop = marginTop;
     }
 
-    public void setMarginBottom(int marginBottom) {
+    public void setMarginBottom(String marginBottom) {
         this.marginBottom = marginBottom;
     }
 

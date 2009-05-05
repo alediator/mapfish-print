@@ -121,7 +121,7 @@ public class MapPrinter {
             throw new RuntimeException("Unknown layout '" + layoutName + "'");
         }
 
-        Document doc = new Document(layout.getFirstPageSize());
+        Document doc = new Document(layout.getFirstPageSize(null,jsonSpec));
         PdfWriter writer = PdfWriter.getInstance(doc, outFile);
         if (!layout.isSupportLegacyReader()) {
             writer.setFullCompression();

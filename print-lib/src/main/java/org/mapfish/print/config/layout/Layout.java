@@ -82,11 +82,11 @@ public class Layout {
         this.metaData = metaData;
     }
 
-    public Rectangle getFirstPageSize() {
+    public Rectangle getFirstPageSize(RenderingContext context, PJsonObject params) {
         if (titlePage != null) {
-            return titlePage.getPageSizeRect();
+            return titlePage.getPageSizeRect(context, params);
         } else {
-            return mainPage.getPageSizeRect();
+            return mainPage.getPageSizeRect(context, params);
         }
     }
 

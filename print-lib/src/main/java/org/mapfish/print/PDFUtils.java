@@ -214,22 +214,24 @@ public class PDFUtils {
     private static final Pattern FORMAT_PATTERN = Pattern.compile("^format\\s+(%[-+# 0,(]*\\d*(\\.\\d*)?(d))\\s+(.*)$");
 
     private static String getContextValue(RenderingContext context, PJsonObject params, String key) {
-        Matcher matcher;
-        if (key.equals("pageNum")) {
-            return Integer.toString(context.getWriter().getPageNumber());
-        } else if (key.equals("now")) {
-            return new Date().toString();
-        } else if (key.startsWith("now ")) {
-            return formatTime(context, key);
-        } else if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
-            return format(context, params, matcher);
-        } else if (key.equals("configDir")) {
-            return context.getConfigDir().replace('\\', '/');
-        } else if (key.equals("scale")) {
-            return Integer.toString(context.getLayout().getMainPage().getMap().createTransformer(context, params).getScale());
+        String result = null;
+        if(context !=null) {
+            Matcher matcher;
+            if (key.equals("pageNum")) {
+                return Integer.toString(context.getWriter().getPageNumber());
+            } else if (key.equals("now")) {
+                return new Date().toString();
+            } else if (key.startsWith("now ")) {
+                return formatTime(context, key);
+            } else if ((matcher = FORMAT_PATTERN.matcher(key)) != null && matcher.matches()) {
+                return format(context, params, matcher);
+            } else if (key.equals("configDir")) {
+                return context.getConfigDir().replace('\\', '/');
+            } else if (key.equals("scale")) {
+                return Integer.toString(context.getLayout().getMainPage().getMap().createTransformer(context, params).getScale());
+            }
+            result = context.getGlobalParams().optString(key);
         }
-
-        String result = context.getGlobalParams().optString(key);
         if (result == null) {
             result = params.getString(key);
         }

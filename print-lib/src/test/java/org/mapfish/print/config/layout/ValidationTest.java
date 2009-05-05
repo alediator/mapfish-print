@@ -92,17 +92,28 @@ public class ValidationTest extends PrintTestCase {
 
     public void testMapPartialAbsolute() {
         MapBlock map = new MapBlock();
-        map.validate();
 
-        map.setAbsoluteX(100);
+        try {
+            map.validate();
+            fail("must throw an InvalidValueException for width and height");
+        } catch (InvalidValueException ex) {
+            //expected
+            map.setWidth("100");
+            map.setHeight("100");
+        }
+
+        map.validate();
+        
+        map.setAbsoluteX("100");
         try {
             map.validate();
             fail("must throw an InvalidValueException");
         } catch (InvalidValueException ex) {
             //expected
+            map.setAbsoluteY("100");
         }
 
-        map.setAbsoluteY(100);
+
         map.validate();
     }
 }

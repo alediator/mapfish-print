@@ -36,10 +36,10 @@ import org.mapfish.print.utils.PJsonObject;
  * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Mapblock
  */
 public class MapBlock extends Block {
-    private int height = 453;
-    private int width = 340;
-    private int absoluteX = Integer.MIN_VALUE;
-    private int absoluteY = Integer.MIN_VALUE;
+    private String height = null;
+    private String width = null;
+    private String absoluteX = null;
+    private String absoluteY = null;
     private double overviewMap = Double.NaN;
 
     /**
@@ -48,14 +48,17 @@ public class MapBlock extends Block {
     private String name = null;
 
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {
-        Transformer transformer = createTransformer(context, params);
+        final Transformer transformer = createTransformer(context, params);
 
         final MapChunkDrawer drawer = new MapChunkDrawer(context.getCustomBlocks(), transformer, overviewMap, params, context, getBackgroundColorVal(context, params), name);
 
         if (isAbsolute()) {
+            final int absX = getAbsoluteX(context, params);
+            final int absY =  getAbsoluteY(context, params);
             context.getCustomBlocks().addAbsoluteDrawer(new PDFCustomBlocks.AbsoluteDrawer() {
                 public void render(PdfContentByte dc) {
-                    final Rectangle rectangle = new Rectangle(absoluteX, absoluteY - height, absoluteX + width, absoluteY);
+                    final Rectangle rectangle = new Rectangle(absX, absY - transformer.getPaperH(), 
+                        absX + transformer.getPaperW(), absY);
                     drawer.render(rectangle, dc);
                 }
             });
@@ -108,37 +111,55 @@ public class MapBlock extends Block {
             centerX = (minX + maxX) / 2.0F;
             centerY = (minY + maxY) / 2.0F;
             scale = context.getConfig().getBestScale(Math.max(
-                    (maxX - minX) / (DistanceUnit.PT.convertTo(width, unitEnum)),
-                    (maxY - minY) / (DistanceUnit.PT.convertTo(height, unitEnum))));
+                    (maxX - minX) / (DistanceUnit.PT.convertTo(getWidth(context, params), unitEnum)),
+                    (maxY - minY) / (DistanceUnit.PT.convertTo(getHeight(context, params), unitEnum))));
         }
 
         if (!context.getConfig().isScalePresent(scale)) {
             throw new InvalidJsonValueException(params, "scale", scale);
         }
 
-        return new Transformer(centerX, centerY, width, height,
+        return new Transformer(centerX, centerY, getWidth(context, params), getHeight(context, params),
                 scale, dpi, unitEnum, params.optFloat("rotation", 0.0F) * Math.PI / 180.0);
     }
 
-    public void setHeight(int height) {
+    public void setHeight(String height) {
+        //this.height = Integer.toString(height);a
         this.height = height;
     }
 
-    public void setWidth(int width) {
+    public int getHeight(RenderingContext context, PJsonObject params) {
+        return Integer.parseInt(PDFUtils.evalString(context, params, height));
+    }
+
+    public void setWidth(String width) {
+        //this.width = Integer.toString(width);
         this.width = width;
     }
 
-    public boolean isAbsolute() {
-        return absoluteX != Integer.MIN_VALUE &&
-                absoluteY != Integer.MIN_VALUE;
+    public int getWidth(RenderingContext context, PJsonObject params) {
+        return Integer.parseInt(PDFUtils.evalString(context, params, width));
     }
 
-    public void setAbsoluteX(int absoluteX) {
+    public boolean isAbsolute() {
+        return absoluteX != null&&
+                absoluteY != null;
+    }
+
+    public void setAbsoluteX(String absoluteX) {
         this.absoluteX = absoluteX;
     }
 
-    public void setAbsoluteY(int absoluteY) {
+    public int getAbsoluteX(RenderingContext context, PJsonObject params) {
+        return Integer.parseInt(PDFUtils.evalString(context, params, absoluteX));
+    }
+
+    public void setAbsoluteY(String absoluteY) {
         this.absoluteY = absoluteY;
+    }
+
+    public int getAbsoluteY(RenderingContext context, PJsonObject params) {
+        return Integer.parseInt(PDFUtils.evalString(context, params, absoluteY));
     }
 
     public MapBlock getMap() {
@@ -147,8 +168,15 @@ public class MapBlock extends Block {
 
     public void printClientConfig(JSONWriter json) throws JSONException {
         json.object();
-        json.key("width").value(width);
-        json.key("height").value(height);
+        int w,h;
+        try {
+            w = Integer.parseInt(width);
+            h = Integer.parseInt(height);
+        } catch(NumberFormatException e) {
+            w=h=0;
+        }
+        json.key("width").value(w);
+        json.key("height").value(h);
         json.endObject();
     }
 
@@ -162,21 +190,20 @@ public class MapBlock extends Block {
 
     public void validate() {
         super.validate();
-        if (absoluteX != Integer.MIN_VALUE ^
-                absoluteY != Integer.MIN_VALUE) {
-            if (absoluteX == Integer.MIN_VALUE) {
+        if (absoluteX != null ^ absoluteY != null) {
+            if (absoluteX == null) {
                 throw new InvalidValueException("absoluteX", "null");
             } else {
                 throw new InvalidValueException("absoluteY", "null");
             }
         }
 
-        if (width <= 0) {
-            throw new InvalidValueException("width", width);
+        if (width == null) {
+            throw new InvalidValueException("width", null);
         }
 
-        if (height <= 0) {
-            throw new InvalidValueException("width", height);
+        if (height == null) {
+            throw new InvalidValueException("width", null);
         }
     }
 }

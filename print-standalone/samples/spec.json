@@ -2,6 +2,7 @@
     layout: 'A4 portrait',
     title: 'A simple example',
     srs: 'EPSG:4326',
+    dpi: 190,
     units: 'degrees',
     layers: [
         {
@@ -21,7 +22,6 @@
         {
             center: [6, 45.5],
             scale: 4000000,
-            dpi: 190,
             mapTitle: "First map",
             comment: "This is the first page selected by the user.",
             rotation: 0,

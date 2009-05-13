@@ -78,7 +78,7 @@ public class VectorMapReader extends MapReader {
             public void renderOnPdf(PdfContentByte dc) throws DocumentException {
                 dc.transform(transformer.getGeoTransform(false));
                 float styleFactor = context.getStyleFactor();
-                context.setStyleFactor(styleFactor * transformer.getGeoW() / transformer.getPaperW());
+                context.setStyleFactor(styleFactor * transformer.getGeoW() / transformer.getPaperW());  //protected by the PDFLock acquired in the caller (ParallelMapTileLoader.handle)
                 FeaturesRenderer.render(context, dc, geo);
                 context.setStyleFactor(styleFactor);
             }

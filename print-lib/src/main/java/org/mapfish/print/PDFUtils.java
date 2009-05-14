@@ -84,7 +84,7 @@ public class PDFUtils {
         }
 
         final Image result = Image.getInstance(template);
-        result.scaleAbsolute(w, h);
+        result.scaleToFit(w, h);
         return result;
     }
 

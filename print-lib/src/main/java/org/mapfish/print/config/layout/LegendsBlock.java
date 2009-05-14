@@ -40,16 +40,16 @@ import java.net.URI;
  * See http://trac.mapfish.org/trac/mapfish/wiki/PrintModuleServer#Legendsblock
  */
 public class LegendsBlock extends Block {
-    private double maxIconWidth = 8f;
-    private double maxIconHeight = 8f;
-    private double classIndentation = 20f;
-    private double layerSpace = 5f;
-    private double classSpace = 2f;
+    private double maxIconWidth = 0;
+    private double maxIconHeight = 8;
+    private double classIndentation = 20;
+    private double layerSpace = 5;
+    private double classSpace = 2;
 
     private String layerFont = "Helvetica";
-    protected double layerFontSize = 10f;
+    protected double layerFontSize = 10;
     private String classFont = "Helvetica";
-    protected double classFontSize = 8f;
+    protected double classFontSize = 8;
     private String fontEncoding = BaseFont.WINANSI;
 
     public void render(PJsonObject params, PdfElement target, RenderingContext context) throws DocumentException {

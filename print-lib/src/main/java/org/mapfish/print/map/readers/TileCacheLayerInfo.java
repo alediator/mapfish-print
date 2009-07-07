@@ -33,19 +33,19 @@ public class TileCacheLayerInfo {
     /**
      * Tolerance we accept when trying to determine the nearest resolution.
      */
-    private static final double RESOLUTION_TOLERANCE = 1.05;
+    protected static final double RESOLUTION_TOLERANCE = 1.05;
 
-    private static final Pattern FORMAT_REGEXP = Pattern.compile("^[^/]+/([^/]+)$");
-    private static final Pattern RESOLUTIONS_REGEXP = Pattern.compile("\\s+");
+    protected static final Pattern FORMAT_REGEXP = Pattern.compile("^[^/]+/([^/]+)$");
+    protected static final Pattern RESOLUTIONS_REGEXP = Pattern.compile("\\s+");
 
-    private final int width;
-    private final int height;
-    private final float[] resolutions;
-    private final float minX;
-    private final float minY;
-    private final float maxX;
-    private final float maxY;
-    private String extension;
+    protected final int width;
+    protected final int height;
+    protected final float[] resolutions;
+    protected final float minX;
+    protected final float minY;
+    protected final float maxX;
+    protected final float maxY;
+    protected String extension;
 
     public TileCacheLayerInfo(String resolutions, int width, int height, float minX, float minY, float maxX, float maxY, String format) {
         String[] resolutionsTxt = RESOLUTIONS_REGEXP.split(resolutions);
@@ -158,6 +158,10 @@ public class TileCacheLayerInfo {
 
     public float getMinY() {
         return minY;
+    }
+
+    public float getMaxY() {
+        return maxY;
     }
 
     public String toString() {

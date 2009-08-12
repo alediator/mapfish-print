@@ -91,7 +91,7 @@ public class PDFUtils {
     /**
      * Gets an iText image. Avoids doing the query twice.
      */
-    protected static Image getImageDirect(RenderingContext context, URI uri) throws IOException, BadElementException {
+    protected static Image getImageDirect(RenderingContext context, URI uri) throws IOException, BadElementException, DocumentException {
         if (!uri.isAbsolute()) {
             //non-absolute URI are local, so we can use the normal iText method
             return Image.getInstance(uri.toString());
@@ -111,6 +111,20 @@ public class PDFUtils {
                     if (LOGGER.isDebugEnabled()) LOGGER.debug("Server returned an error for " + uri + ": " + method.getResponseBodyAsString());
                     if (code < 200 || code >= 300) {
                         throw new IOException("Error (status=" + code + ") while reading the image from " + uri + ": " + method.getStatusText());
+                    } else if (code == 204) {
+                        // returns a transparent image
+                        try { 
+                            byte maskr[] = {(byte)255};
+                            Image mask = Image.getInstance(1,1,1,1,maskr);
+                            mask.makeMask();
+                            byte data[] = new byte[1*1*3];
+                            Image image = Image.getInstance(1, 1, 3, 8, data);
+                            image.setImageMask(mask);
+                            return image;
+                        } catch (DocumentException e) {
+                            LOGGER.warn("Couldn't generate a transparent image");
+                            throw e;
+                        }
                     } else {
                         throw new IOException("Didn't receive an image while reading: " + uri);
                     }

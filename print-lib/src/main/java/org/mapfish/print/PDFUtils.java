@@ -91,7 +91,7 @@ public class PDFUtils {
     /**
      * Gets an iText image. Avoids doing the query twice.
      */
-    protected static Image getImageDirect(RenderingContext context, URI uri) throws IOException, BadElementException, DocumentException {
+    protected static Image getImageDirect(RenderingContext context, URI uri) throws IOException, DocumentException {
         if (!uri.isAbsolute()) {
             //non-absolute URI are local, so we can use the normal iText method
             return Image.getInstance(uri.toString());

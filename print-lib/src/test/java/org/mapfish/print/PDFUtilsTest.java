@@ -19,7 +19,7 @@
 
 package org.mapfish.print;
 
-import com.lowagie.text.BadElementException;
+import com.lowagie.text.DocumentException;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -57,7 +57,7 @@ public class PDFUtilsTest extends PdfTestCase {
         super.tearDown();
     }
 
-    public void testGetImageDirectWMSError() throws URISyntaxException, IOException, BadElementException {
+    public void testGetImageDirectWMSError() throws URISyntaxException, IOException, DocumentException {
         URI uri = new URI("http://localhost:" + PORT + "/notImage");
         try {
             doc.newPage();
@@ -69,7 +69,7 @@ public class PDFUtilsTest extends PdfTestCase {
         }
     }
 
-    public void testGetImageDirectHTTPError() throws URISyntaxException, IOException, BadElementException {
+    public void testGetImageDirectHTTPError() throws URISyntaxException, IOException, DocumentException {
         URI uri = new URI("http://localhost:" + PORT + "/500");
         try {
             doc.newPage();

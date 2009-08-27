@@ -109,7 +109,7 @@ public class WMSServerInfo {
             method.setRequestHeader("Referer", context.getReferer());
         }
         try {
-            context.getConfig().getHttpClient().executeMethod(method);
+            context.getConfig().getHttpClient(baseUrl).executeMethod(method);
             int code = method.getStatusCode();
             if (code < 200 || code >= 300) {
                 throw new IOException("Error " + code + " while reading the Capabilities from " + url + ": " + method.getStatusText());
@@ -178,6 +178,7 @@ public class WMSServerInfo {
         return tileCacheLayers != null ? tileCacheLayers.get(layerName) : null;
     }
 
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("WMSServerInfo");

@@ -39,7 +39,10 @@ import org.pvalsecc.concurrent.OrderedResultsExecutor;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
+import java.net.ProxySelector;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -83,13 +86,6 @@ public class Config {
      * chunks
      */
     private OrderedResultsExecutor<MapTileTask> mapRenderingExecutor = null;
-
-    /**
-     * If you wonder why I've put volatile here:
-     * http://www.cs.umd.edu/~pugh/java/memoryModel/DoubleCheckedLocking.html
-     * See section "Under the new Java Memory Model"
-     */
-    private volatile HttpClient httpClient;
 
     public Config() {
         hosts.add(new LocalHostMatcher());
@@ -269,9 +265,8 @@ public class Config {
         if (mapRenderingExecutor != null) {
             mapRenderingExecutor.stop();
         }
-        if (httpClient != null) {
-            httpClient.getHttpConnectionManager().closeIdleConnections(0);
-        }
+
+        MultiThreadedHttpConnectionManager.shutdownAll();
     }
 
     public void setGlobalParallelFetches(int globalParallelFetches) {
@@ -286,26 +281,39 @@ public class Config {
     /**
      * Get or create the http client to be used to fetch all the map data.
      */
-    public HttpClient getHttpClient() {
-        if (httpClient == null) {
-            synchronized (this) {
-                if (httpClient == null) {
-                    MultiThreadedHttpConnectionManager connectionManager =
-                            new MultiThreadedHttpConnectionManager();
-                    final HttpConnectionManagerParams params = connectionManager.getParams();
-                    params.setDefaultMaxConnectionsPerHost(perHostParallelFetches);
-                    params.setMaxTotalConnections(globalParallelFetches);
-                    params.setSoTimeout(socketTimeout);
-                    params.setConnectionTimeout(connectionTimeout);
-                    httpClient = new HttpClient(connectionManager);
+    public HttpClient getHttpClient(URI uri) {
+        MultiThreadedHttpConnectionManager connectionManager = getConnectionManager();
+        HttpClient httpClient = new HttpClient(connectionManager);
 
-                    //httpclient is a bit pesky about loading everything in memory...
-                    //disabling the warnings.
-                    Logger.getLogger(HttpMethodBase.class).setLevel(Level.ERROR);
-                }
-            }
+        // httpclient is a bit pesky about loading everything in memory...
+        // disabling the warnings.
+        Logger.getLogger(HttpMethodBase.class).setLevel(Level.ERROR);
+
+        // configure proxies for URI
+        ProxySelector selector = ProxySelector.getDefault();
+
+        List<Proxy> proxyList = selector.select(uri);
+        Proxy proxy = proxyList.get(0);
+
+        if (!proxy.equals(Proxy.NO_PROXY)) {
+            InetSocketAddress socketAddress = (InetSocketAddress) proxy.address();
+            String hostName = socketAddress.getHostName();
+            int port = socketAddress.getPort();
+
+            httpClient.getHostConfiguration().setProxy(hostName, port);
         }
+
         return httpClient;
+    }
+
+    private synchronized MultiThreadedHttpConnectionManager getConnectionManager() {
+        MultiThreadedHttpConnectionManager connectionManager = new MultiThreadedHttpConnectionManager();
+        final HttpConnectionManagerParams params = connectionManager.getParams();
+        params.setDefaultMaxConnectionsPerHost(perHostParallelFetches);
+        params.setMaxTotalConnections(globalParallelFetches);
+        params.setSoTimeout(socketTimeout);
+        params.setConnectionTimeout(connectionTimeout);
+        return connectionManager;
     }
 
     public void setTilecacheMerging(boolean tilecacheMerging) {

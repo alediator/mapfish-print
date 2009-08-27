@@ -104,7 +104,7 @@ public class PDFUtils {
                     method.setRequestHeader("Referer", context.getReferer());
                 }
                 if (LOGGER.isDebugEnabled()) LOGGER.debug("loading image: "+uri);
-                context.getConfig().getHttpClient().executeMethod(method);
+                context.getConfig().getHttpClient(uri).executeMethod(method);
                 int code = method.getStatusCode();
                 final String contentType = method.getResponseHeader("Content-Type").getValue();
                 if (code < 200 || code >= 300 || contentType.startsWith("text/") || contentType.equals("application/vnd.ogc.se_xml")) {
@@ -113,7 +113,7 @@ public class PDFUtils {
                         throw new IOException("Error (status=" + code + ") while reading the image from " + uri + ": " + method.getStatusText());
                     } else if (code == 204) {
                         // returns a transparent image
-                        try { 
+                        try {
                             byte maskr[] = {(byte)255};
                             Image mask = Image.getInstance(1,1,1,1,maskr);
                             mask.makeMask();

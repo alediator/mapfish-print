@@ -26,6 +26,7 @@ import org.ho.yaml.wrapper.DefaultMapWrapper;
 import org.ho.yaml.wrapper.DefaultSimpleTypeWrapper;
 import org.ho.yaml.wrapper.EnumWrapper;
 import org.ho.yaml.wrapper.ObjectWrapper;
+import org.mapfish.print.config.AcceptAllHostMatcher;
 import org.mapfish.print.config.AddressHostMatcher;
 import org.mapfish.print.config.ColorWrapper;
 import org.mapfish.print.config.CustomEnumWrapper;
@@ -75,6 +76,7 @@ public class CustomYamlConfig extends YamlConfig {
         transfers.put("localMatch", LocalHostMatcher.class.getName());
         transfers.put("ipMatch", AddressHostMatcher.class.getName());
         transfers.put("dnsMatch", DnsHostMatcher.class.getName());
+        transfers.put("acceptAll", AcceptAllHostMatcher.class.getName());
 
         transfers.put("key", Key.class.getName());
 

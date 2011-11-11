@@ -48,7 +48,7 @@ public abstract class MapReader {
         // TODO add plugin architecture.  considering looking at OSGI
         if ("WMS".equalsIgnoreCase(type)) {
             WMSMapReader.create(target, context, params);
-        } if ("WMS_C".equalsIgnoreCase(type)) {
+        }else if ("WMS_C".equalsIgnoreCase(type)) {
             WMSMapReader.create(target, context, params);
         } else if ("MapServer".equalsIgnoreCase(type)) {
             MapServerMapReader.create(target, context, params);

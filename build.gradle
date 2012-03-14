@@ -2,7 +2,7 @@ import com.camptocamp.gradle.plugin.*
 import com.camptocamp.gradle.*
 
 group = 'org.mapfish.print'
-version = '1.2.1'
+version = '1.2.2'
 
 apply plugin: 'java'
 apply plugin: 'war'
@@ -43,8 +43,8 @@ dependencies {
 
 manifest.mainAttributes('Main-Class':'org.mapfish.print.ShellMapPrinter', 'Build-Time': new Date().getDateTimeString())
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.5
+targetCompatibility = 1.5
 
 jar {
   enabled = true
